@@ -12,6 +12,7 @@ import Qsm from './pages/Qsm'
 import { useNavigate } from 'react-router-dom';
 import './App.css';
 import 'antd/dist/antd.css';
+import React from "react";
 
 const { Header, Content, Footer } = Layout;
 

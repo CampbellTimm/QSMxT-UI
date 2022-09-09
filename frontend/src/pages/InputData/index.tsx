@@ -9,13 +9,10 @@ const axios = require('axios').default;
 
 export default () => {
 
-  const [data, setData] = useState(null);
+  const [data, setData]: [any, any] = useState(null);
 
   useEffect(() => {
     // document.title = `You clicked ${count} times`;
-
-
-
     const fetchData = async () => {
         const data = (await axios({
           method: 'get',
@@ -28,7 +25,7 @@ export default () => {
 
   console.log(data);
 
-  let displayData = null;
+  let displayData: JSX.Element = <div />;
   if (data && Object.keys(data).length) {
 
     displayData = <Collapse defaultActiveKey={[]}>
@@ -52,7 +49,7 @@ export default () => {
                           </Descriptions>
                         </Panel>
                         <Panel header="Image" key={section.id + section.section + 'image'}>
-                          <NiiVue imageUrl={`http://127.0.0.1:4000/qsmxt/bids/${section.id}/ses-1/anat/${section.id}_ses-1_run-1_${section.section}.nii`}> </NiiVue>
+                          <NiiVue imageUrl={`http://127.0.0.1:4000/qsmxt/bids/${section.id}/ses-1/anat/${section.id}_ses-1_run-1_${section.section}.nii`} />
                         </Panel>
                       </Collapse>
                     </Panel>

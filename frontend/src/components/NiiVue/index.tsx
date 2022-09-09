@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react'
 import { Niivue } from '@niivue/niivue'
+import React from "react";
 
 const NiiVue = ({ imageUrl }) => {
   const canvas = useRef()
@@ -15,7 +16,7 @@ const NiiVue = ({ imageUrl }) => {
   }, [imageUrl])
 
   return (
-    <canvas ref={canvas} height={480} width={640} />
+    <canvas ref={canvas as any} height={480} width={640} />
   )
 }
 
