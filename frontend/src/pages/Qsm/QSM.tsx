@@ -2,7 +2,7 @@ import { UploadOutlined } from '@ant-design/icons';
 import { Button, Upload, Collapse, Table, Descriptions } from 'antd';
 import React, { useEffect, useState } from 'react';
 import NiiVue
-from '../../components/NiiVue';
+from '../../components/NiiVue/NiiVue';
 const { Panel } = Collapse;
 const axios = require('axios').default;
 

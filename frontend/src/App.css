@@ -1,7 +1,8 @@
 .site-layout-content {
-  min-height: calc(100vh - 188px);
+  min-height: calc(100vh - 166px);
   padding: 24px;
   background: #fff;
+  width: 100%;
 }
 #components-layout-demo-top .logo {
   float: left;
