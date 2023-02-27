@@ -15,11 +15,11 @@ export const setupListeners = (child: ChildProcessWithoutNullStreams, reject: (r
   child.removeAllListeners();
   child.stderr.on('data', (data) => {
     console.error(`stderr: ${data}`);
-    reject(data)
+    // reject(data)
   });
   child.on('error', (error) => {
     console.error(`error: ${error.message}`);
-    reject(error.message)
+    // reject(error.message)
   });
   
   child.on('close', (code) => {
@@ -29,7 +29,9 @@ export const setupListeners = (child: ChildProcessWithoutNullStreams, reject: (r
 
 export const createChild = async () => {
   console.log('Booting')
-  const child = spawn('/neurocommand/local/fetch_and_run.sh', ['qsmxt',  '1.1.10' , '20220302']);
+  const child = spawn('/neurocommand/local/fetch_and_run.sh', ['qsmxt',  '1.3.3' , '20230216']);
+
+  console.log("Booted")
 
   await new Promise((resolve, reject) => {
     setupListeners(child, reject);

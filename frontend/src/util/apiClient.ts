@@ -1,31 +1,49 @@
 import axios from "axios";
 import { reduceEachTrailingCommentRange } from "typescript";
-import { Cohorts, Subjects } from "./types";
+import { Cohorts, QueueJob, SubjectsTree } from "./types";
 
 const API_URL = 'http://127.0.0.1:4000'
 
 export const getCohorts = async (): Promise<Cohorts> => {
   const getCohortPath = API_URL + '/cohorts';
-  const response = await axios.get(getCohortPath);
-  const { data } = response;
-  return data;
+  const response = await fetch(getCohortPath, {
+    headers: {
+      "Access-Control-Request-Private-Network": "true"
+    }
+  });
+  const data: any = await response.json();
+  return data as Cohorts;
 }
 
 export const postCohorts = async (cohorts: Cohorts): Promise<void> => {
   const getCohortPath = API_URL + '/cohorts';
+  // await axios.post(getCohortPath, cohorts);
   await axios.post(getCohortPath, cohorts);
 }
 
-export const getSubjects = async (): Promise<Subjects> => {
+export const getSubjects = async (): Promise<SubjectsTree> => {
   const getSubjectsPath = API_URL + '/subjects';
-  const response = await axios.get(getSubjectsPath);
-  const { data } = response;
-  return data as Subjects;
+  const response = await fetch(getSubjectsPath, {
+    headers: {
+      "Access-Control-Request-Private-Network": "true"
+    }
+  });
+  const data: any = await response.json();
+  return data as SubjectsTree;
 }
 
-export const runQsmPipeline = async (params: any): Promise<Subjects> => {
+export const getRuns = async (): Promise<QueueJob[]> => {
+  const getRunsPath = API_URL + '/runs';
+  const response = await fetch(getRunsPath, {
+    headers: {
+      "Access-Control-Request-Private-Network": "true"
+    }
+  });
+  const data: any = await response.json();
+  return data as QueueJob[];
+}
+
+export const runQsmPipeline = async (params: any): Promise<void> => {
   const runQsmPath = API_URL + '/qsm/run';
-  const response = await axios.post(runQsmPath, params);
-  const { data } = response;
-  return data as Subjects;
+  await axios.post(runQsmPath, params);
 }

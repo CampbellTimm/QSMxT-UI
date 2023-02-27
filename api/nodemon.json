@@ -1,0 +1,6 @@
+{
+  "igonore": [
+    "public/**"
+  ],
+  "ext": "ts"
+}

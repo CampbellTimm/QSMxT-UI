@@ -3,14 +3,14 @@ import { Express, Request, Response } from "express";
 import { v4 as uuidv4 } from 'uuid';
 import { createChild } from "../util";
 
-type Job = {
+type QueueJob = {
   id: string,
   startTime: string,
   description: string,
   execute: any
 }
 
-const jobQueue: Job[] = [];
+const jobQueue: QueueJob[] = [];
 
 
 export const runJobs = async () => {
@@ -18,12 +18,13 @@ export const runJobs = async () => {
     const job = jobQueue[0];
 
     await job.execute();
+    jobQueue.shift();
 
   }
-  jobQueue.shift();
 }
 
 export const addToQueue = (description: string, execute: () => void): string => {
+
   const id = uuidv4();
   const startTime = new Date().toISOString();
 
@@ -48,5 +49,5 @@ const getQueue = async (request: Request, response: Response) => {
 }
 
 export const setupQueueEndpoints = (app: Express) => {
-  app.get('/queue', getQueue)
+  app.get('/runs', getQueue)
 }

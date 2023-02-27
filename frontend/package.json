@@ -9,6 +9,7 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^0.27.2",
     "jszip": "^3.10.1",
+    "node-fetch": "^3.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.3.0",
@@ -19,6 +20,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "deploy": "npm run build && aws s3 rm s3://form-ui --recursive && aws s3 sync ./build s3://form-ui",
+    "deployDemo": "npm run build && aws s3 rm s3://qsmxt-ui --recursive && aws s3 sync ./build s3://qsmxt-ui",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

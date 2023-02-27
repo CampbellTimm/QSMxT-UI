@@ -1,11 +1,11 @@
 import { Select, Input } from 'antd';
 import React, { useEffect, useState } from 'react';
-import { Cohorts, Subjects } from '../../../util/types';
+import { Cohorts, SubjectsTree } from '../../../util/types';
 
 interface Props {
   selectedCohort: string,
   cohorts: Cohorts,
-  subjects: Subjects,
+  subjects: SubjectsTree,
   setCohorts: any
 }
 const { Search } = Input;
@@ -26,16 +26,17 @@ export default ({selectedCohort, subjects, cohorts, setCohorts}: Props) => {
   console.log(subjects);
   console.log(cohorts);
 
+
+
+  let cohortsData: JSX.Element;
   if (!subjects && !cohorts) {
-    return <div />
-  }
-
-  const options = Object.keys(subjects).map(subjectName => ({
-    label: subjectName,
-    value: subjectName,
-  }))
-
-  const cohortsData: JSX.Element = !selectedCohort
+    cohortsData = <div />
+  } else {
+    const options = Object.keys(subjects).map(subjectName => ({
+      label: subjectName,
+      value: subjectName,
+    }))
+    cohortsData= !selectedCohort
     ? <div>
         Select a Cohort to view their details or create new cohord...
         <Search
@@ -56,6 +57,9 @@ export default ({selectedCohort, subjects, cohorts, setCohorts}: Props) => {
           options={options}
         />
       </div>
+  }
+
+ 
 
   return(
     <div style={{ width: '500px', marginLeft: 10  }}>

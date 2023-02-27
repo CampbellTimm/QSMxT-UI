@@ -1,5 +1,5 @@
 
-import { Layout, Menu } from 'antd';
+import { Layout, Menu, message } from 'antd';
 import {
   Routes,
   Route,
@@ -16,10 +16,11 @@ import React, { useEffect, useState } from "react";
 import SubjectTree from './components/SubjectTree/SubjectTree';
 import CohortTree from './components/CohortTree/CohortTree';
 import axios from 'axios';
-import { getCohorts, getSubjects, postCohorts } from './util/apiClient';
+import { getCohorts, getRuns, getSubjects, postCohorts } from './util/apiClient';
 import { Cohorts } from './util/types';
 
 const { Header, Content, Footer } = Layout;
+
 
 export default () => {
 
@@ -27,6 +28,7 @@ export default () => {
   const [subjects, setSubjects]: [any, any] = useState(null);
   const [selectedSubject, setSelectedSubject]: [any, any] = useState(null);
   const [selectedCohort, setSelectedCohort]: [any, any] = useState(null);
+  const [ongoingRuns, setOngoingRuns]: [any, any] = useState([]);
 
   const updateCohorts = (newCohorts: Cohorts) => {
     postCohorts(newCohorts);
@@ -35,12 +37,27 @@ export default () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      console.log("Fetching cohort and subject data")
       const promises = await Promise.all([getCohorts(), getSubjects()])
-
       setCohortsState(promises[0]);
       setSubjects(promises[1]);
     }
+    const fetchRuns = async () => {
+      console.log("Fetching runs");
+      const newRunsList = await getRuns();
+
+      ongoingRuns.forEach(prevRun => {
+        if (!newRunsList.find(newRun => newRun.id === prevRun.id)) {
+          message.success(`${prevRun.description} completed`);
+        }
+      })
+
+      setOngoingRuns(newRunsList);
+    }
     fetchData();
+    fetchRuns();
+    const interval = setInterval(fetchRuns, 5000);
+    return () => clearInterval(interval);
   },[]);
 
   const selectedKey = window.location.pathname.split('/')[window.location.pathname.split('/').length - 1] || 'home'
@@ -90,10 +107,9 @@ export default () => {
       <br />
       <div className="site-layout-content">
         <div style={{ display: 'flex', flexDirection: 'row' }}>
-          <div style={{ width: '300px', height: '100%'}}>
-            <div style={{ minHeight: '50%' }}>
+          <div style={{ width: '300px',  height: 'calc(100vh - 200px)' }}>
+            <div style={{ minHeight: '50%', height: '50%' }}>
               <h2>Cohorts</h2>
-              
               <CohortTree cohorts={cohorts} clickCohort={clickCohort} selectedCohort={selectedCohort} />
             </div>
             <div style={{ minHeight: '50%' }}>
@@ -102,14 +118,19 @@ export default () => {
                 subjects={subjects}
                 clickSubject={clickSubject}
               />
-
             </div>
-           
           </div>
           <div style={{ padding: 12}}>
           <Routes>
             <Route path="/home" element={<Home />} />
-            <Route path="/run" element={<Run />} />
+            <Route path="/run" element={
+              <Run 
+                ongoingRuns={ongoingRuns}
+                cohorts={cohorts}
+                subjects={subjects}
+              />
+              } 
+            />
             <Route path="/inputData" element={
                 <InputData 
                   cohorts={cohorts}
