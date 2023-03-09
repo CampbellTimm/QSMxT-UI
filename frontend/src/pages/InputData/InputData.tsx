@@ -1,8 +1,6 @@
 import { UploadOutlined } from '@ant-design/icons';
 import { Button, Upload, Collapse, Table, Descriptions, Select, UploadProps, message, Input } from 'antd';
 import React, { useEffect, useRef, useState } from 'react';
-import NiiVue
- from '../../components/NiiVue/NiiVue';
 import { InboxOutlined } from '@ant-design/icons';
 import CohortView from './components/CohortView';
 import { Cohorts, SubjectsTree } from '../../util/types';

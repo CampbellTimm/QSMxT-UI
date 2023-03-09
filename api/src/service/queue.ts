@@ -12,7 +12,6 @@ type QueueJob = {
 
 const jobQueue: QueueJob[] = [];
 
-
 export const runJobs = async () => {
   while (jobQueue.length) {
     const job = jobQueue[0];

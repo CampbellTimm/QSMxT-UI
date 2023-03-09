@@ -1,8 +1,8 @@
 import { UploadOutlined } from '@ant-design/icons';
 import { Button, Upload, Collapse, Table, Descriptions, Select, UploadProps, message } from 'antd';
 import React, { useEffect, useState } from 'react';
+import NiiVue from '../../../components/NiiVue/NiiVue';
 import { SubjectsTree } from '../../../util/types';
-import { Niivue } from '@niivue/niivue'
 
 const { Panel } = Collapse;
 
@@ -43,9 +43,9 @@ export default ({selectedSubject, subjects}: Props) => {
                 })}
               </Descriptions>
             </Panel>
-            {/* <Panel header="Magnitude Image" key={'2'}>
-              <Niivue imageUrl={magnitudeUrl} />
-            </Panel> */}
+            <Panel header="Magnitude Image" key={'2'}>
+              <NiiVue imageUrl={magnitudeUrl} />
+            </Panel>
             {phaseMetadata && 
               <Panel header="Phase Data" key="3">
                 <Descriptions size='small' title="Phase" bordered layout="vertical">

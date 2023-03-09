@@ -1,20 +1,23 @@
 # QSMxT-UI
 
-Prerequisites -> Install node ()
+Prerequisites -> Install node (v 10.19.0)
 
 Frontend End
 
-`cd frontend`
+<del>`cd frontend`
 
-`npm install`
+<del> `npm install`
 
-`npm i -g http-server`
+<del> `npm i -g http-server`
 
-`npm run build`
+<del> `npm run build`
 
-`cd build`
+<del> `cd build`
 
-To Run: `http-server`
+<del> To Run: `http-server`
+
+Temporary Solution - http://qsmxt-ui.s3-website-ap-southeast-2.amazonaws.com/home
+
 
 API
 
