@@ -37,13 +37,13 @@ export default () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      console.log("Fetching cohort and subject data")
+      // console.log("Fetching cohort and subject data")
       const promises = await Promise.all([getCohorts(), getSubjects()])
       setCohortsState(promises[0]);
       setSubjects(promises[1]);
     }
     const fetchRuns = async () => {
-      console.log("Fetching runs");
+      // console.log("Fetching runs");
       const newRunsList = await getRuns();
 
       ongoingRuns.forEach(prevRun => {

@@ -1,8 +1,6 @@
 import {Express, Request, Response} from "express";
 import fs from "fs";
-import path from "path";
-
-const COHORTS_FILE_PATH = path.join(__dirname, "../public/qsmxt/cohorts.json");
+import { COHORTS_FILE_PATH } from "../core/constants";
 
 const getCohorts = async (request: Request, response: Response) => {
   const cohorts = JSON.parse(fs.readFileSync(COHORTS_FILE_PATH, { encoding: 'utf-8' }));

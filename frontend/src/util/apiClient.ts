@@ -47,3 +47,14 @@ export const runQsmPipeline = async (params: any): Promise<void> => {
   const runQsmPath = API_URL + '/qsm/run';
   await axios.post(runQsmPath, params);
 }
+
+export const getQsmResults = async () => {
+  const getQsmResultsUrl = API_URL + '/qsm/results';
+  const response = await fetch(getQsmResultsUrl, {
+    headers: {
+      "Access-Control-Request-Private-Network": "true"
+    }
+  });
+  const data: any = await response.json();
+  return data as any;
+}

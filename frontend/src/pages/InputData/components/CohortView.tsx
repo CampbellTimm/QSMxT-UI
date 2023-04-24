@@ -13,18 +13,18 @@ const { Search } = Input;
 export default ({selectedCohort, subjects, cohorts, setCohorts}: Props) => {
 
   const updateInput = (cohortName: string) => {
-    console.log(cohortName);
+    // console.log(cohortName);
     setCohorts(Object.assign({}, cohorts, {[cohortName]: []}));
   }
 
   const handleChange = (subjects) => {
-    console.log(subjects);
+    // console.log(subjects);
     cohorts[selectedCohort] = subjects;
     setCohorts(Object.assign({}, cohorts));
   }
 
-  console.log(subjects);
-  console.log(cohorts);
+  // console.log(subjects);
+  // console.log(cohorts);
 
 
 

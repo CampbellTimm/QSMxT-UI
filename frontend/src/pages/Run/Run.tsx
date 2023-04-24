@@ -6,7 +6,7 @@ const axios = require('axios').default;
 const { Title, Paragraph, Text, Link } = Typography;
 
 const renderOngoingRuns = (ongoingRuns: QueueJob[]) => {
-  console.log(ongoingRuns)
+  // console.log(ongoingRuns)
 
   if (!ongoingRuns?.length) {
     return <div>
@@ -28,6 +28,16 @@ const renderOngoingRuns = (ongoingRuns: QueueJob[]) => {
   )
 }
 
+const configurations = [
+  "default",
+  "gre",
+  "epi",
+  "bet",
+  "fast",
+  "body",
+  "nextqsm"
+]
+
 interface Props {
   ongoingRuns: QueueJob[],
   subjects: SubjectsTree,
@@ -37,8 +47,9 @@ interface Props {
 const { Option } = Select;
 export default ({ ongoingRuns, subjects, cohorts }: Props) => {
 
-  const [params, setParams]: [any, any] = useState({});
-
+  const [params, setParams]: [any, any] = useState({
+    premade: 'default'
+  });
 
   const changeParam = (field: string) => (e: any) => {
     console.log(e);
@@ -52,6 +63,8 @@ export default ({ ongoingRuns, subjects, cohorts }: Props) => {
     message.success("Running QSM Pipeline")
     await runQsmPipeline(params);
   }
+
+  console.log(params);
 
   return (
     <div style={{ display: 'flex', 'flexDirection': 'row'}}> 
@@ -88,32 +101,25 @@ export default ({ ongoingRuns, subjects, cohorts }: Props) => {
               placeholder="Please select"
               defaultValue={[]}
               // value={sessions}
-              // onChange={() -> {}}
+              onChange={changeParam('subjects')}
             >
               {(subjects ? Object.keys(subjects) : []).map(x => <Option key={x}>{x}</Option>)}
               
             </Select>
             <br />
             <br />
-
-            <h2>QSM Iterations</h2>
-            <InputNumber 
-              size="large"
-              min={1} 
-              max={100000} 
-              defaultValue={1000}
-            //  onChange={onChange} 
-            />
-            <br />
-            <br />
-
-            <h2>Threshold</h2>
-            <InputNumber 
-              size="large" 
-              min={1} max={100} 
-              defaultValue={30}
-              //  onChange={onChange} 
-            />
+            <h2>Pipeline Configurations</h2>
+            <Select
+              // mode="single"
+              allowClear
+              style={{ width: '100%' }}
+              placeholder="Please select"
+              // defaultValue={'default'}
+              value={params.premade}
+              onChange={changeParam('premade')}
+            >
+              {configurations.map(name => <Option key={name}>{name}</Option>)}
+            </Select>
 
             <br />
             <br />

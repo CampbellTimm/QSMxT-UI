@@ -34,8 +34,6 @@ export default ({selectedSubject, selectedCohort, cohorts, subjects, setCohorts}
     })
   }
 
-  
-
   const handleFileReader = async (event) => {
     console.log(event.target.files)
     var file = event.target.files[0]
@@ -89,7 +87,7 @@ export default ({selectedSubject, selectedCohort, cohorts, subjects, setCohorts}
   }
 
   const updateInput  = async (event) => {
-    console.log(event);
+    // console.log(event);
     const y = await axios({
       method: "post",
       url: "http://127.0.0.1:4000/dicoms/copy",
@@ -99,7 +97,7 @@ export default ({selectedSubject, selectedCohort, cohorts, subjects, setCohorts}
       headers: { "Content-Type": "multipart/form-data" },
     });
 
-    console.log(y);
+    // console.log(y);
   }
 
   return <div>

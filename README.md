@@ -2,24 +2,9 @@
 
 Prerequisites -> Install node (v 10.19.0)
 
-Frontend End
+# API
 
-<del>`cd frontend`
-
-<del> `npm install`
-
-<del> `npm i -g http-server`
-
-<del> `npm run build`
-
-<del> `cd build`
-
-<del> To Run: `http-server`
-
-Temporary Solution - http://qsmxt-ui.s3-website-ap-southeast-2.amazonaws.com/home
-
-
-API
+Attach visual studio to docker instance and forward port 4000 to the instance
 
 `cd api`
 
@@ -28,4 +13,15 @@ API
 `npm i -g ts-node`
 
 To Run: `ts-node index.ts`
+
+# Frontend
+
+`cd frontend`
+
+`npm install`
+
+To Run: `npm start`
+
+
+
 
