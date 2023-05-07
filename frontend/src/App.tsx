@@ -1,4 +1,3 @@
-
 import { Layout, Menu, message } from 'antd';
 import {
   Routes,
@@ -7,10 +6,9 @@ import {
 } from "react-router-dom";
 import Home from './pages/Home/Home'
 import InputData from './pages/InputData/InputData'
-import Run from './pages/Run/Run'
+import Run from './pages/RunPage/RunPage'
 import Qsm from './pages/Qsm/QSM'
 import { useNavigate } from 'react-router-dom';
-import './App.css';
 import 'antd/dist/antd.css';
 import React, { useEffect, useState } from "react";
 import SubjectTree from './components/SubjectTree/SubjectTree';
@@ -18,8 +16,52 @@ import CohortTree from './components/CohortTree/CohortTree';
 import axios from 'axios';
 import { getCohorts, getRuns, getSubjects, postCohorts } from './util/apiClient';
 import { Cohorts } from './util/types';
+import { SiteContext, context } from './util/context';
 
 const { Header, Content, Footer } = Layout;
+
+const menuItems = [
+  {
+    key: 'home',
+    label: 'Home'
+  },
+  {
+    key: 'inputData',
+    label: 'Data'
+  },
+  {
+    key: 'run',
+    label: 'Run'
+  },
+  {
+    key: 'output',
+    label: 'Results'
+  },
+];
+
+const styles = {
+  content: { 
+    minHeight: 'calc(100vh - 125px)',  
+    maxHeight: 'calc(100vh - 125px)',  
+    padding: '24px', 
+    background:'#fff',
+    width: 'calc(100% - 30px)', 
+    marginTop: 15, marginLeft: 15, 
+    marginRight: 15, 
+  },
+  contentBody: { 
+    display: 'flex', 
+    flexDirection: 'row' as 'row', 
+    width: '100%', 
+    minHeight: 'calc(100vh - 173px)',
+    maxHeight: 'calc(100vh - 173px)' 
+  },
+  subjectSelector: { 
+    width: '300px',  
+    minHeight: '100%', 
+    border: 2 
+  }
+}
 
 
 export default () => {
@@ -28,12 +70,14 @@ export default () => {
   const [subjects, setSubjects]: [any, any] = useState(null);
   const [selectedSubject, setSelectedSubject]: [any, any] = useState(null);
   const [selectedCohort, setSelectedCohort]: [any, any] = useState(null);
-  const [ongoingRuns, setOngoingRuns]: [any, any] = useState([]);
+  const [ongoingRuns, setOngoingRuns]: [any, any] = useState(null);
 
   const updateCohorts = (newCohorts: Cohorts) => {
     postCohorts(newCohorts);
     setCohortsState(newCohorts);
   }
+
+  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,13 +86,17 @@ export default () => {
       setCohortsState(promises[0]);
       setSubjects(promises[1]);
     }
+    const fetchHistory = async () => {
+
+    }
     const fetchRuns = async () => {
       // console.log("Fetching runs");
       const newRunsList = await getRuns();
 
-      ongoingRuns.forEach(prevRun => {
+      ongoingRuns && ongoingRuns.forEach(prevRun => {
         if (!newRunsList.find(newRun => newRun.id === prevRun.id)) {
           message.success(`${prevRun.description} completed`);
+          // TODO - refresh history
         }
       })
 
@@ -72,90 +120,72 @@ export default () => {
     setSelectedCohort(e)
   }
 
+  const contextValue = {
+    cohorts,
+    subjects,
+    selectedSubject,
+    selectedCohort,
+    ongoingRuns
+  }
+
   return (
-    <Layout className="layout">
-    <Header>
-      <div className="logo" />
-      <Menu
-        theme="dark"
-        mode="horizontal"
-        onClick={({ item, key, keyPath, domEvent }) => {
-          navigate(`/${key}`)
-        }}
-        selectedKeys={[selectedKey]}
-        items={[
-          {
-            key: 'home',
-            label: 'Home'
-          },
-          {
-            key: 'inputData',
-            label: 'Data'
-          },
-          {
-            key: 'run',
-            label: 'Run'
-          },
-          {
-            key: 'output',
-            label: 'Results'
-          },
-        ]}
-      />
-    </Header>
-    <Content style={{ padding: '0 50px' }}>
-      <br />
-      <div className="site-layout-content">
-        <div style={{ display: 'flex', flexDirection: 'row' }}>
-          <div style={{ width: '300px',  height: 'calc(100vh - 200px)' }}>
-            <div style={{ minHeight: '50%', height: '50%' }}>
-              <h2>Cohorts</h2>
-              <CohortTree cohorts={cohorts} clickCohort={clickCohort} selectedCohort={selectedCohort} />
-            </div>
-            <div style={{ minHeight: '50%' }}>
-              <h2>Subjects</h2>
-              <SubjectTree 
-                subjects={subjects}
-                clickSubject={clickSubject}
-              />
-            </div>
-          </div>
-          <div style={{ padding: 12}}>
-          <Routes>
-            <Route path="/home" element={<Home />} />
-            <Route path="/run" element={
-              <Run 
-                ongoingRuns={ongoingRuns}
-                cohorts={cohorts}
-                subjects={subjects}
-              />
-              } 
-            />
-            <Route path="/inputData" element={
-                <InputData 
-                  cohorts={cohorts}
+    <Layout>
+      <Header>
+        <Menu
+          theme="dark"
+          mode="horizontal"
+          onClick={({ item, key, keyPath, domEvent }) => {
+            navigate(`/${key}`)
+          }}
+          selectedKeys={[selectedKey]}
+          items={menuItems}
+        />
+      </Header>
+      <Content style={styles.content}>
+        <context.Provider value={contextValue}>
+          <div style={styles.contentBody}>
+            <div style={styles.subjectSelector}>
+              <div style={{ minHeight: '50%', height: '50%' }}>
+                <h2>Cohorts</h2>
+                <CohortTree cohorts={cohorts} clickCohort={clickCohort} selectedCohort={selectedCohort} />
+              </div>
+              <div style={{ minHeight: '50%' }}>
+                <h2>Subjects</h2>
+                <SubjectTree 
                   subjects={subjects}
-                  selectedCohort={selectedCohort} 
-                  selectedSubject={selectedSubject}
-                  setCohorts={updateCohorts}
+                  clickSubject={clickSubject}
                 />
-              } 
-            />
-            <Route path="/output" element={<Qsm />} />
-            <Route
-              path="/"
-              element={ <Navigate to="/home" /> }
-            />
-          </Routes>  
-
+              </div>
+            </div>
+            <div style={{ padding: 12}}>
+            <Routes>
+              <Route path="/home" element={<Home />} />
+              <Route path="/run" element={<Run />} />
+              <Route path="/inputData" element={
+                  <InputData 
+                    cohorts={cohorts}
+                    subjects={subjects}
+                    selectedCohort={selectedCohort} 
+                    selectedSubject={selectedSubject}
+                    setCohorts={updateCohorts}
+                  />
+                } 
+              />
+              <Route path="/output" element={<Qsm />} />
+              <Route
+                path="/"
+                element={ <Navigate to="/home" /> }
+              />
+              <Route
+                path="/"
+                element={ <Navigate to="/home" /> }
+              />
+            </Routes>  
+            </div>
           </div>
-
-        </div>
-
-      </div>
-      
-    </Content>
-    <Footer style={{ textAlign: 'center' }}>Created for ENGG4812 ©2022 Created by Campbell Timm</Footer>
-  </Layout>
+        </context.Provider>
+      </Content>
+      <Footer style={{ textAlign: 'center', padding: 12 }}>Created for ENGG4812 ©2022 Created by Campbell Timm</Footer>
+    </Layout>
   )
 };

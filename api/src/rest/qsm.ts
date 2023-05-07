@@ -28,6 +28,7 @@ import path from "path";
 //   res.status(200).send();
 // }
 
+
 const copyDicoms = async (request: Request, response: Response) => {
   logGreen("Received request to copy dicoms at " + new Date().toISOString());
   const copyPath = request.body.path;
@@ -66,12 +67,11 @@ const getQSM = async (request: Request, response: Response) => {
 
     resultTree[subject] = {};
     const subjectResultFolder = path.join(QSM_FOLDER, subject);
-    // console.log(subjectResultFolder);
 
     const subjectRuns = fs.readdirSync(subjectResultFolder);
     subjectRuns.forEach(runId => {
       resultTree[subject][runId] = [];
-      const resultsFilesPath = path.join(subjectResultFolder, runId, "qsm_final/_qsmjl_rts0");
+      const resultsFilesPath = path.join(subjectResultFolder, runId, "qsm_final/_qsmjl_rts0"); // FINE FOLDER DYNAMICALLY
       const nifitis = fs.readdirSync(resultsFilesPath).filter(fileName => fileName.includes(".nii"));
 
 
@@ -81,11 +81,7 @@ const getQSM = async (request: Request, response: Response) => {
 
   })
 
-  console.log(resultTree);
-
   response.status(200).send(resultTree);
-
-
 
   // logYellow(qsmResultSubjects);
 }

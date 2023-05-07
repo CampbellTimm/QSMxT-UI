@@ -3,7 +3,7 @@ import { Image, Typography, Divider } from 'antd';
 
 const { Title, Paragraph, Text, Link } = Typography;
 
-export default () => {
+const Home = () => {
   return (
     <div style={{ paddingLeft: 30 }}>
       <div style={{ display: 'flex', flexDirection: 'row'}}>
@@ -42,3 +42,5 @@ export default () => {
     </div>
   )
 }
+
+export default Home;

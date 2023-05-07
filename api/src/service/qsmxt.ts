@@ -80,7 +80,7 @@ const getQsmCmdLineOptions = (subject: string, premade: string = "fast") => {
 
 const runQsm = async (subject: string, premade: string) => {
   // allSubjects.forEach(subject => {
-    console.log(`Running QSM Pipeline on ${subject}`);
+    logGreen(`Running QSM Pipeline on ${subject}`);
     const id= uuidv4();
     // FIX
     const subjectsFolder = path.join(process.cwd(), `./public/qsmxt/qsm/${subject}`);
@@ -95,7 +95,7 @@ const runQsm = async (subject: string, premade: string) => {
     const completionString = 'INFO: Finished';
     await runQsmxtCommand(qsmxtCmmand, completionString);
 
-    console.log(`Finished running QSM Pipeline on ${subject}`);
+    logGreen(`Finished running QSM Pipeline on ${subject}`);
 }
 
 export default {
