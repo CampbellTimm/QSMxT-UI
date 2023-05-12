@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Card, RadioChangeEvent, Skeleton, Space, Spin, Typography } from 'antd';
 import { Radio, Tabs } from 'antd';
-import { QueueJob } from '../../../util/types';
-import { context } from '../../../util/context';
+import { QueueJob } from '../../../../util/types';
+import { context } from '../../../../util/context';
 // @ts-ignore
 import { UpOutlined, DownOutlined, DeleteOutlined } from '@ant-design/icons';
 import Queue from './Queue';
@@ -69,7 +69,7 @@ const ViewRuns = () => {
     // <div style={{ paddingRight: 50, display: 'flex', flexDirection: 'column'}}>
       // <Title level={2}>View Runs</Title>
       <Card 
-        title={<Title level={2}>View Runs</Title>}
+        title={<Title level={3}>View Runs</Title>}
         // style={{ minHeight: '100% '}}
       >
       {/* <Card title={<Title level={2}>View Runs</Title>}> */}

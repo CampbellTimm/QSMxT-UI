@@ -2,27 +2,30 @@ import { Tree } from 'antd';
 import type { DataNode, DirectoryTreeProps } from 'antd/es/tree';
 import { Key } from 'antd/lib/table/interface';
 import React from 'react';
-import { Cohorts } from '../../util/types';
+import { Cohorts } from '../../../util/types';
+import { context } from '../../../util/context';
 
 const { DirectoryTree } = Tree;
 
 interface Props {
-  cohorts: Cohorts,
-  clickCohort: any,
-  selectedCohort: string
+  // cohorts: Cohorts,
+  // setSelectedCohort: any,
+  // selectedCohort: string
 }
 
-const selectTreeNode = (selectedCohort, clickCohort) => (keys: Key[], info: any) => {
+const selectTreeNode = (selectedCohort, setSelectedCohort) => (keys: Key[], info: any) => {
   if (info.node.key !== selectedCohort) {
-    clickCohort(info.node.key)
+    setSelectedCohort(info.node.key)
   } else {
-    clickCohort(null);
+    setSelectedCohort(null);
   }
 }
 
-const CohortTree: React.FC<Props> = ({ cohorts, clickCohort, selectedCohort }: Props) => {
-  const onSelect: DirectoryTreeProps['onSelect'] = selectTreeNode(selectedCohort, clickCohort);
-  const onExpand: DirectoryTreeProps['onSelect'] = selectTreeNode(selectedCohort, clickCohort);
+const CohortTree: React.FC<Props> = () => {
+  const { cohorts, selectedCohort, setSelectedCohort } = React.useContext(context);
+
+  const onSelect: DirectoryTreeProps['onSelect'] = selectTreeNode(selectedCohort, setSelectedCohort);
+  const onExpand: DirectoryTreeProps['onSelect'] = selectTreeNode(selectedCohort, setSelectedCohort);
 
   if (!cohorts) {
     return <div />
@@ -32,6 +35,7 @@ const CohortTree: React.FC<Props> = ({ cohorts, clickCohort, selectedCohort }: P
     return {
       title: cohortName,
       key: cohortName,
+      // @ts-ignore
       children: cohorts[cohortName].map(subjectName => {
         return {
           title: subjectName,

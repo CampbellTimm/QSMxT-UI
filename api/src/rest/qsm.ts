@@ -30,11 +30,43 @@ import path from "path";
 
 
 const copyDicoms = async (request: Request, response: Response) => {
-  logGreen("Received request to copy dicoms at " + new Date().toISOString());
-  const copyPath = request.body.path;
-  addToQueue("Dicom Sort", async () => qsmxt.sortDicoms(copyPath));
-  addToQueue("Dicom Convert", async () => qsmxt.convertDicoms())
-  response.status(200).send();
+  try {
+    logGreen("Received request to copy dicoms at " + new Date().toISOString());
+    const body = request.body;
+    const {
+      copyPath,
+      usePatientNames,
+      useSessionDates,
+      checkAllFiles,
+      t2starwProtocolPatterns,
+      t1wProtocolPatterns
+    } = body; 
+  
+    console.log(body);
+  
+    const fixedCopyPath = copyPath.includes(":\\")
+      ? `/neurodesktop-storage${copyPath.split('neurodesktop-storage')[1].replace(/\\/g, "/")}`
+      : copyPath;
+  
+    console.log(fixedCopyPath);
+  
+    addToQueue(
+      "Dicom Sort", 
+      async () => qsmxt.sortDicoms(
+        fixedCopyPath, 
+        usePatientNames === 'true', 
+        useSessionDates === 'true', 
+        checkAllFiles === 'true'
+      )
+    );
+    addToQueue("Dicom Convert", async () => qsmxt.convertDicoms(JSON.parse(t2starwProtocolPatterns), JSON.parse(t1wProtocolPatterns)))
+    response.statusMessage = "Successfully copied DICOMs. Starting sort and conversion jobs."
+    response.status(200).send();
+  } catch (err) {
+    console.log(err);
+    response.statusMessage = "Unknown error occured. Failed to copy DICOMs"
+    response.status(500).send();
+  }
 }
 
 const runQsm = async (request: Request, response: Response) => {

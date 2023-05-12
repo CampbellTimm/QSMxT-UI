@@ -2,25 +2,19 @@ import { UploadOutlined } from '@ant-design/icons';
 import { Button, Upload, Collapse, Table, Descriptions, Select, UploadProps, message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import NiiVue from '../../../components/NiiVue/NiiVue';
-import { SubjectsTree } from '../../../util/types';
+import { context } from '../../../util/context';
+import { SubjectsTree } from '../../../core/types';
 
 const { Panel } = Collapse;
 
-interface Props {
-  selectedSubject: string,
-  subjects: SubjectsTree,
-}
+const SubjectView = () => {
+  const  {selectedSubject, subjects} = React.useContext(context);
+  if (!subjects || !selectedSubject) return <div />;
 
-export default ({selectedSubject, subjects}: Props) => {
-
-  if (!subjects) {
-    return <div />
-  }
-
-  const renderRunDetail = () => {
+  const renderRunDetail = (subjects: SubjectsTree, selectedSubject: string) => {
     const keys = selectedSubject.split("&");
     if (keys.length === 3) {
-      const subject = keys[0];
+      const subject: string = keys[0];
       const session = keys[1];
       const run = keys[2];
       const magnitudeMetadata = subjects[subject].sessions[session].runs[run].echos['01'].magnitude; // TOOD - Add other echos
@@ -70,14 +64,14 @@ export default ({selectedSubject, subjects}: Props) => {
     }
   }
 
-  const renderSubjectDetail = (): JSX.Element => {
+  const renderSubjectDetail = (selectedSubject: string): JSX.Element => {
     const keys = selectedSubject && selectedSubject.split("&");
-    return !!selectedSubject
+    return keys
       ? <div>
           Selected Subject <i>{keys[0]}</i>
           <br />
           <br />
-          {renderRunDetail()}
+          {renderRunDetail(subjects, selectedSubject)}
         </div>
     : <div>Select a Subject to view their details</div>
   }
@@ -85,7 +79,10 @@ export default ({selectedSubject, subjects}: Props) => {
   return (
     <div>
       <h1>Subject View</h1>
-      {renderSubjectDetail()}
+      {renderSubjectDetail(selectedSubject)}
     </div>
   )
 }
+
+
+export default SubjectView;

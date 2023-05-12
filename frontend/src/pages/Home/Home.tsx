@@ -3,15 +3,17 @@ import { Image, Typography, Divider } from 'antd';
 
 const { Title, Paragraph, Text, Link } = Typography;
 
+// TODO - add loading for the image
 const Home = () => {
   return (
     <div style={{ paddingLeft: 30 }}>
       <div style={{ display: 'flex', flexDirection: 'row'}}>
         <Image
-          width={200}
+          // width={200}
+          height={200}
           src="http://localhost:4000/logo.png"
         />
-        <Title style={{ fontSize: 100, paddingTop: 25, paddingLeft: 20 }}>QSMxT</Title>
+        <Title style={{ fontSize: 100, paddingTop: 25, paddingLeft: 20, marginTop: 20 }}>QSMxT</Title>
      
       </div>
       <Divider />
@@ -39,6 +41,59 @@ const Home = () => {
           In the <Link href="/output">Results Page</Link>, view the resulting Niftii images and analysis results from the QSM pipeline
         </Text>
       </Paragraph>
+
+       {/* <br />
+       A
+       <br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A<br />
+       A */}
     </div>
   )
 }

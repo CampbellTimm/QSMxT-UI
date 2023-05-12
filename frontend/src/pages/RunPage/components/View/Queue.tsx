@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Card, RadioChangeEvent, Space, Spin, Typography } from 'antd';
 import { Radio, Tabs } from 'antd';
-import { QueueJob } from '../../../util/types';
-import { context } from '../../../util/context';
+import { QueueJob } from '../../../../util/types';
+import { context } from '../../../../util/context';
 // @ts-ignore
 import { UpOutlined, DownOutlined, DeleteOutlined } from '@ant-design/icons';
 import moment from 'moment';

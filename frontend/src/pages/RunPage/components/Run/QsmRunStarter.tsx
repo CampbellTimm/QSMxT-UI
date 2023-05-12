@@ -1,7 +1,7 @@
 import { Button, Select, Tabs, Typography, message } from 'antd';
 import React, { useState } from 'react';
-import { runQsmPipeline } from '../../../util/apiClient';
-import { context } from '../../../util/context';
+import { runQsmPipeline } from '../../../../util/apiClient';
+import { context } from '../../../../util/context';
 
 const { Title, Paragraph, Text, Link } = Typography;
 const { Option } = Select;

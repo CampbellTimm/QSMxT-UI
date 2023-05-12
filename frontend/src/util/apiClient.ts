@@ -1,27 +1,46 @@
 import axios from "axios";
-import { reduceEachTrailingCommentRange } from "typescript";
-import { Cohorts, QueueJob, SubjectsTree } from "./types";
+import { Cohorts, QueueJob, SubjectsTree } from "../core/types";
+import { message } from "antd";
+import { API_URL } from "../core/constants";
 
-const API_URL = 'http://127.0.0.1:4000'
-
-export const getCohorts = async (): Promise<Cohorts> => {
+const getCohorts = async (): Promise<Cohorts> => {
   const getCohortPath = API_URL + '/cohorts';
-  const response = await fetch(getCohortPath, {
-    headers: {
-      "Access-Control-Request-Private-Network": "true"
-    }
-  });
-  const data: any = await response.json();
-  return data as Cohorts;
+  const response = await axios.get(getCohortPath);
+  return response.data as Cohorts;
 }
 
 export const postCohorts = async (cohorts: Cohorts): Promise<void> => {
   const getCohortPath = API_URL + '/cohorts';
-  // await axios.post(getCohortPath, cohorts);
   await axios.post(getCohortPath, cohorts);
 }
 
-export const getSubjects = async (): Promise<SubjectsTree> => {
+const createCohort = async (cohort: string): Promise<boolean> => {
+  let created = false;
+  const getCohortPath = API_URL + `/cohorts/${cohort}`;
+  try {
+    const response = await axios.post(getCohortPath);
+    message.success(response.statusText);
+    created = true;
+  } catch (err) {
+    message.error(err.message)
+  }
+  return created;
+}
+
+const deleteCohort = async (cohort: string): Promise<boolean> => {
+  let deleted = false;
+  const getCohortPath = API_URL + `/cohorts/${cohort}`;
+  try {
+    const response = await axios.delete(getCohortPath);
+    message.success(response.statusText);
+    deleted = true;
+  } catch (err) {
+    message.error(err.message)
+  }
+  return deleted;
+}
+
+const getSubjects = async (): Promise<SubjectsTree> => {
   const getSubjectsPath = API_URL + '/subjects';
   const response = await fetch(getSubjectsPath, {
     headers: {
@@ -57,4 +76,39 @@ export const getQsmResults = async () => {
   });
   const data: any = await response.json();
   return data as any;
+}
+
+export const copyDicoms = async (copyPath: string, usePatientNames: boolean, useSessionDates: boolean, 
+    checkAllFiles: boolean, t2starwProtocolPatterns: string[], t1wProtocolPatterns: string[]) => {
+  const uploadDicomsUrl = API_URL + '/dicoms/copy';
+
+  try {
+    const response = await axios({
+      method: "post",
+      url: uploadDicomsUrl,
+      data: {
+        copyPath,
+        usePatientNames,
+        useSessionDates,
+        checkAllFiles,
+        t2starwProtocolPatterns: JSON.stringify(t2starwProtocolPatterns),
+        t1wProtocolPatterns: JSON.stringify(t1wProtocolPatterns)
+      },
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    message.success(response.statusText);
+  } catch (err) {
+    message.error(err.message);
+  }
+}
+
+export default {
+  copyDicoms,
+  createCohort,
+  getCohorts,
+  deleteCohort,
+
+  getSubjects,
+
+  getRuns
 }
