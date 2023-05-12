@@ -1,35 +1,35 @@
 import { Tree } from 'antd';
 import type { DirectoryTreeProps } from 'antd/es/tree';
 import React from 'react';
-import { SubjectsTree } from '../../util/types';
+import { SubjectsTree } from '../../../util/types';
+import { context } from '../../../util/context';
 
 const { DirectoryTree } = Tree;
 
-interface Props {
-  subjects: SubjectsTree,
-  clickSubject: any,
-}
+const SubjectTree: React.FC = () => {
+  const { subjects, setSelectedSubject } = React.useContext(context);
 
-const SubjectTree: React.FC<Props> = ({ subjects, clickSubject }: Props) => {
   const onSelect: DirectoryTreeProps['onSelect'] = (keys, info) => {
-    clickSubject(info.node.key)
+    setSelectedSubject(info.node.key as string)
   };
 
   const onExpand: DirectoryTreeProps['onExpand'] = (keys, info) => {
   };
 
+  console.log(subjects);
+
   if (!subjects) {
       return <div />
   }
 
-  const data = Object.keys(subjects).map((subjectName: string) => {
+  const data = Object.keys(subjects as SubjectsTree).map((subjectName: string) => {
     return  {
       title: subjectName,
-      key: subjectName,
+      key: subjectName, // @ts-ignore
       children: Object.keys(subjects[subjectName].sessions).map((sessionName => {
         return {
           title: sessionName,
-          key: subjectName + '&' + sessionName,
+          key: subjectName + '&' + sessionName,  // @ts-ignore
           children: Object.keys(subjects[subjectName].sessions[sessionName].runs).map((run) => {
             return  { 
               title: 'run-' + run, 

@@ -23,7 +23,8 @@ export const setupListeners = (child: ChildProcessWithoutNullStreams, reject: (r
 
 export const createQsmxtInstance = async () => {
   logGreen('Creating QSMxT instance')
-  const qsmxt = spawn('/neurocommand/local/fetch_and_run.sh', ['qsmxt',  'v2.0.0' , '20230414']);
+  const qsmxt = spawn('/neurocommand/local/fetch_and_run.sh', ['qsmxt',  '2.0.0' , '20230503']);
+  // const qsmxt = spawn('/neurocommand/local/fetch_and_run.sh', ['qsmxt',  'v2.1.0' , '20230509']);
   await new Promise((resolve, reject) => {
     setupListeners(qsmxt, reject);
     qsmxt.stdout.on('data', (data) => {
@@ -58,17 +59,36 @@ const runQsmxtCommand = async (command: string, completionString: string) => {
   });
 } 
 
-const sortDicoms = async (inputPath: string) => {
+const booleanToString = (field: boolean) => field.toString().charAt(0).toUpperCase() + field.toString().slice(1)
+
+// DELETE ORIGINALS PARAMETER???
+const sortDicoms = async (copyPath: string, usePatientNames: boolean, useSessionDates: boolean, checkAllFiles: boolean) => {
   logGreen("Starting dicom sort");
-  const sortDicomCommand = `run_0_dicomSort.py ${inputPath} ${DICOMS_FOLDER}`;
+  let sortDicomCommand = `run_0_dicomSort.py` 
+  if (usePatientNames) {
+    sortDicomCommand += ` --use_patient_names`;
+  }
+  if (useSessionDates) {
+    sortDicomCommand += ` --use_session_dates`;
+  }
+  if (checkAllFiles) {
+    sortDicomCommand += ` --check_all_files`;
+  }
+  sortDicomCommand += ` ${copyPath} ${DICOMS_FOLDER}`;
   const completionString = 'INFO: Finished';
   await runQsmxtCommand(sortDicomCommand, completionString);
   logGreen("Finished sorting dicoms");
 }
 
-const convertDicoms = async () => {
+const convertDicoms = async (t2starwProtocolPatterns: string[], t1wProtocolPatterns: string[]) => {
   logGreen("Starting dicom convert");
-  const convertDicomCommand = `run_1_dicomConvert.py ${DICOMS_FOLDER} ${BIDS_FOLDER}`;
+  let convertDicomCommand = `run_1_dicomConvert.py ${DICOMS_FOLDER} ${BIDS_FOLDER}`;
+  t2starwProtocolPatterns.forEach(pattern => {
+    convertDicomCommand += ` --t2starw_protocol_patterns ${pattern}`;
+  })
+  t1wProtocolPatterns.forEach(pattern => {
+    convertDicomCommand += ` --t1w_protocol_patterns ${pattern}`;
+  })
   const completionString = 'INFO: Finished';
   await runQsmxtCommand(convertDicomCommand, completionString);
   logGreen("Finished converting dicoms");
