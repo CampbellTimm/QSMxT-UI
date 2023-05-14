@@ -1,42 +1,44 @@
 # QSMxT-UI
 
-Prerequisites -> Install node (v 10.19.0)
+Prerequisites -> Install node v12.13
 
-`cd /home/user/neurodesktop-storage/`
+```bash
+mkdir nodejs12
+cd nodejs12/
+wget https://nodejs.org/dist/v12.13.0/node-v12.13.0-linux-x64.tar.xz
+tar xf node-v12.13.0-linux-x64.tar.xz
+rm node-v12.13.0-linux-x64.tar.xz
+echo "export PATH=`pwd`/node-v12.13.0-linux-x64/bin:${PATH}" >> ~/.bashrc
+source ~/.bashrc
+```
 
-`mkdir nodejs12`
-
-`cd nodejs12/`
-
-`wget https://nodejs.org/dist/v12.13.0/node-v12.13.0-linux-x64.tar.xz`
-
-`tar xf node-v12.13.0-linux-x64.tar.xz
-rm node-v12.13.0-linux-x64.tar.xz`
-
-`export PATH=`pwd`/node-v12.13.0-linux-x64/bin:$PATH1`
+```bash
+$ node --version
+v12.13.0
+$ npm --version
+6.12.0
+```
 
 # API
 
 Attach visual studio to docker instance and forward port 4000 to the instance
 
-`cd api`
+```bash
+cd api/
+npm install
+npm i -g ts-node
+```
 
-`npm install`
-
-`npm i -g ts-node`
-
-To Run: `ts-node index.ts`
+To run: `ts-node index.ts`
 
 # Frontend
 
 Install node node on local machine
 
-`cd frontend`
+```bash
+cd frontend
+npm install
+```
 
-`npm install`
-
-To Run: `npm start`
-
-
-
+To run: `npm start`
 
