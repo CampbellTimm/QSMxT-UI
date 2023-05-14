@@ -1,6 +1,9 @@
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import logger from "../core/logger";
-import { QSMXT_DATE, QSMXT_VERSION } from "../core/constants";
+import { QSMXT_DATE, QSMXT_VERSION } from "../constants";
+import convertDicoms from "./convertDicoms";
+import sortDicoms from "./sortDicoms";
+import runQsmPipeline from "./runQsmPipeline";
 
 let qsmxtInstance: ChildProcessWithoutNullStreams;
 
@@ -21,11 +24,13 @@ export const setupListeners = (child: ChildProcessWithoutNullStreams, reject: (r
 export const createQsmxtInstance = async () => {
   logger.green('Creating QSMxT instance')
   const qsmxt: any = spawn('/neurocommand/local/fetch_and_run.sh', ['qsmxt', QSMXT_VERSION, QSMXT_DATE ]);
+
+
+
   await new Promise((resolve, reject) => {
     setupListeners(qsmxt, () => {});
     // setupListeners(qsmxt, reject);
     qsmxt.stdout.on('data', (data: any) => {
-      console.log(data.toString());
       if (data.includes('----------------------------------')) {
         resolve(null);
       }
@@ -41,9 +46,43 @@ export const getQsmxtInstance = async () => {
   return qsmxtInstance
 }
 
+
+
+// TODO - add timeout paramater ??
+export const runQsmxtCommand = async (command: string, completionString: string, errorString: string = 'ERROR:') => {
+  const qsmxt = await getQsmxtInstance();
+  await new Promise((resolve, reject) => {
+    setupListeners(qsmxt, reject);
+    qsmxt.stdout.on('data', (data) => { 
+      const stringData = data.toString();
+      stringData.split('\n').forEach((line: string) => {
+        if (line.includes('ERROR:')) {
+          logger.red(line);
+        } else {
+          // logger.blue(line)
+        }
+        if (line.includes(completionString)) {
+          resolve(null);
+        }
+        if (line.includes(errorString)) {
+          reject(line);
+        }
+      })
+    });
+    logger.yellow(`Running: "${command}"`);
+    qsmxt.stdin.write(command + "\n");
+  });
+} 
+
 export const killChildProcess = () => {
   if (qsmxtInstance) {
-    console.log('Killing child');
+    logger.green('Killing child');
     qsmxtInstance.kill();
   }
+}
+
+export default {
+  convertDicoms,
+  sortDicoms,
+  runQsmPipeline
 }

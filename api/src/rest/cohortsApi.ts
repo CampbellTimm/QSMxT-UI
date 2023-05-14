@@ -1,23 +1,24 @@
 import { Express, Request, Response } from "express";
-import database from '../core/database';
+import database from '../database';
 import logger from "../core/logger";
-import { unknownErrorHandler } from "./util";
+import { unknownErrorHandler } from ".";
 
 const getCohorts = async (request: Request, response: Response) => {
-  const cohorts = database.getAllCohorts();
+  const cohorts = await database.cohorts.get.all();
   response.status(200).send(cohorts);
 }
 
 const createCohort = async (request: Request, response: Response) => {  
   try {
     const { cohortName } = request.params;
-    const cohorts = database.getAllCohorts();
-    if (cohortName in cohorts) {
+    const { cohortDescription } = request.body;
+    const alreadyExists = await database.cohorts.exists(cohortName);
+    if (alreadyExists) {
       response.statusMessage = "Cohort with that name already exists";
       response.status(400).send();
       return;
     }
-    database.createCohort(cohortName);
+    await database.cohorts.save(cohortName, cohortDescription);
     response.statusMessage = "Successfully created cohort";
     response.status(200).send();
   } catch (err: any) {
@@ -33,7 +34,7 @@ const deleteCohort = async (request: Request, response: Response) => {
   if (!cohortName) {
     
   }
-  database.deleteCohort(cohortName);
+  // await database.deleteCohort(cohortName);
   response.statusMessage = "Successfully deleted cohort";
   response.status(200).send();
 
@@ -44,9 +45,9 @@ const updateCohort = async (request: Request, response: Response) => {
 }
 
 
-export const setupCohortsEndpoints = (app: Express) => {
-  app.get('/cohorts', unknownErrorHandler(getCohorts))
-  app.post('/cohorts/:cohortName', unknownErrorHandler(createCohort))
-  app.delete('/cohorts/:cohortName', unknownErrorHandler(deleteCohort))
-  app.patch('/cohorts/:cohortName', unknownErrorHandler(updateCohort))
+export default {
+  get: getCohorts,
+  create: createCohort,
+  delete: deleteCohort,
+  update: updateCohort
 }

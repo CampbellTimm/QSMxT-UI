@@ -20,10 +20,15 @@ const magenta = (text: string) => {
   logger.color('magenta').log(text);
 }
 
+const blue = (text: string) => {
+  logger.color('blue').log(text);
+}
+
 export default {
   red,
   green,
   yellow,
   white,
-  magenta
+  magenta,
+  blue
 }

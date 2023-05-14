@@ -2,15 +2,12 @@ import express from "express";
 import path from "path";
 import cors from "cors";
 import fileUpload from "express-fileupload";
-import { setupCohortsEndpoints } from "../rest/cohorts";
-import { setupSubjectsEndpoints } from "../rest/subjects";
-import { setupQsmEndpoints } from "../rest/qsm";
-import { setuJobsEndpoints } from "../rest/jobs";
-import { BIDS_FOLDER, DICOMS_FOLDER, QSM_FOLDER, SERVER_PORT, TEMP_FILE_DIRECTORY } from "./constants";
+import { BIDS_FOLDER, DICOMS_FOLDER, QSM_FOLDER, SERVER_PORT, TEMP_FILE_DIRECTORY } from "../constants";
 import http from "http";
 import logger from "./logger";
 import fs from "fs";
-import sockets from "../service/sockets";
+import sockets from "./sockets";
+import { setupRestApiEndpoint } from "../rest";
 
 const wipeLogFiles = (folder: string) => {
   const files = fs.readdirSync(folder);
@@ -21,12 +18,8 @@ const wipeLogFiles = (folder: string) => {
   })
 }
 
-const setup = () => {
-  [QSM_FOLDER, BIDS_FOLDER, DICOMS_FOLDER].forEach(wipeLogFiles)
-}
-
 export const createServer = async () => {
-  setup();
+  [QSM_FOLDER, BIDS_FOLDER, DICOMS_FOLDER].forEach(wipeLogFiles);
   const app = express();
   app.use(express.json());
   app.use(cors())
@@ -37,10 +30,7 @@ export const createServer = async () => {
       tempFileDir: TEMP_FILE_DIRECTORY
     })
   );
-  setupCohortsEndpoints(app);
-  setupSubjectsEndpoints(app);
-  setupQsmEndpoints(app);
-  setuJobsEndpoints(app);
+  setupRestApiEndpoint(app);
   const server = http.createServer(app);
   await sockets.setup(server);
   server.listen(SERVER_PORT, () => {

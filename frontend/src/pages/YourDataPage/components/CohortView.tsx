@@ -1,8 +1,9 @@
-import { Select, Input, Card, Typography, Divider, Button, Popconfirm, Popover } from 'antd';
-import React from 'react';
+import { Select, Input, Card, Typography, Divider, Button, Popconfirm, Popover, Form } from 'antd';
+import React, { useState } from 'react';
 import {  QuestionCircleOutlined } from '@ant-design/icons';
 import { context } from '../../../util/context';
 import apiClient from '../../../util/apiClient';
+import { Cohorts } from '../../../core/types';
 
 const { Title, Paragraph, Text, Link } = Typography;
 
@@ -21,6 +22,10 @@ const cohortHelperText = () => <Text>
 
 const CohortView: React.FC = () => {
   const { selectedCohort, subjects, cohorts, setSelectedCohort, fetchCohortData } = React.useContext(context);
+
+  // const [cohortName, setCohortName] = useState('');
+  // const [cohortDescription, setCohortDescription] = useState('');
+
   if (!cohorts) return <div />;
 
   const deleteCohort = (selectedCohort: string) => async () => {
@@ -31,8 +36,10 @@ const CohortView: React.FC = () => {
     }
   }
   
-  const createCohort = async (cohortName: string) => {
-    const created = await apiClient.createCohort(cohortName);
+  const createCohort = async (cohortName: string, cohortDescription: string) => {
+    console.log(cohortName);
+    console.log(cohortDescription);
+    const created = await apiClient.createCohort(cohortName, cohortDescription);
     if (created) {
       await fetchCohortData();
       setSelectedCohort(cohortName);
@@ -54,7 +61,7 @@ const CohortView: React.FC = () => {
     console.log(e);
   }
 
-  const renderSelectedCohortView= (cohorts, selectedCohort: string) => {
+  const renderSelectedCohortView= (cohorts: Cohorts, selectedCohort: string) => {
     const options = Object.keys(subjects as any).map(subjectName => ({
       label: subjectName,
       value: subjectName,
@@ -83,7 +90,7 @@ const CohortView: React.FC = () => {
           allowClear
           style={{ width: '100%' }}
           placeholder="Please select"
-          value={cohorts[selectedCohort]}
+          value={cohorts[selectedCohort].subjects}
           onChange={x}
           options={options}
         />
@@ -99,12 +106,36 @@ const CohortView: React.FC = () => {
   const renderNotSelectedCohortView = () => {
     return <>
       <Title level={5}>Create A New Cohort</Title>
-      Cohort Name
-      <Search
-        placeholder="Enter a cohord name..."
-        onSearch={createCohort}
-        enterButton="Create"
-      />
+      <Form
+        name="cohortCreation"
+        style={{ maxWidth: 400 }}
+        onFinish={({cohortName, cohortDescription}) => createCohort(cohortName, cohortDescription)}
+        autoComplete="off"
+      >
+        Cohort Name
+        <Form.Item
+          name="cohortName"
+          rules={[{ required: true, message: 'Please input the cohortname' }]}
+        >
+          <Input
+            placeholder="Enter a cohort name..."
+          />
+        </Form.Item>
+        Description
+        <Form.Item
+          name="cohortDescription"
+          rules={[{ required: true, message: 'Please input the description for the cohort' }]}
+        >
+          <Input
+            placeholder="Enter a cohort description..."
+          />
+        </Form.Item>
+        <Form.Item >
+          <Button type="primary" htmlType="submit">
+            Create
+          </Button>
+        </Form.Item>
+      </Form>
     </>
   }
 

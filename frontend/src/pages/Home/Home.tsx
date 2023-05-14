@@ -10,8 +10,9 @@ const Home = () => {
       <div style={{ display: 'flex', flexDirection: 'row'}}>
         <Image
           // width={200}
+          preview={false}
           height={200}
-          src="http://localhost:4000/logo.png"
+          src="https://qsmxt-ui-images.s3.ap-southeast-2.amazonaws.com/logo.PNG"
         />
         <Title style={{ fontSize: 100, paddingTop: 25, paddingLeft: 20, marginTop: 20 }}>QSMxT</Title>
      

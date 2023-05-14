@@ -1,12 +1,21 @@
 import { v4 as uuidv4 } from 'uuid';
-import { DicomConvertParameters, DicomSortParameters, Job, JobParameters, JobStatus, JobType, QsmParameters } from "../core/types";
-import { BIDS_FOLDER, DICOMS_FOLDER, QSM_FOLDER } from "../core/constants";
-import database from "../core/database";
-import qsmxt from "./qsmxt";
+import { DicomConvertParameters, DicomSortParameters, Job, JobParameters, JobStatus, JobType, QsmParameters } from "../types";
+import { BIDS_FOLDER, DICOMS_FOLDER, QSM_FOLDER } from "../constants";
+import qsmxt from "../qsmxt";
 import path from "path";
 import fs from "fs";
 import sockets, { getQueueSocket } from "./sockets";
-import logger from '../core/logger';
+import logger from './logger';
+import database from '../database';
+
+let jobQueue: Job[] | null;
+
+export const getJobQueue = async () => {
+  if (!jobQueue) {
+    jobQueue = await database.jobs.get.incomplete();
+  }
+  return jobQueue;
+}
 
 const getJobResultsFolder = (jobType: JobType, subject: string, id: string) =>  {
   if (jobType === JobType.DICOM_SORT) {
@@ -19,15 +28,6 @@ const getJobResultsFolder = (jobType: JobType, subject: string, id: string) =>  
     return path.join(QSM_FOLDER, subject, id);
   }
   return '';
-}
-
-let jobQueue: Job[] | null;
-
-export const getJobQueue = () => {
-  if (!jobQueue) {
-    jobQueue = database.getIncompleteJobs();
-  }
-  return jobQueue;
 }
 
 const getLogFile = async (jobType: JobType, subject: string, id: string): Promise<string> => {
@@ -44,14 +44,13 @@ const getLogFile = async (jobType: JobType, subject: string, id: string): Promis
   return path.join(rootFolder, logFile);
 }
 
-const getJobById = (jobId: string): Job => {
-  return getJobQueue().find(job => job.id === jobId) as Job;
+const getJobById = async (jobId: string): Promise<Job> => {
+  return (await getJobQueue()).find(job => job.id === jobId) as Job;
 }
 
-const updateJob = (job: Job) => {
-  database.updateJob(job);
-  jobQueue = database.getIncompleteJobs();
-  // send over socket
+const updateJob = async (job: Job) => {
+  await database.jobs.update(job);
+  jobQueue = await database.jobs.get.incomplete();
   const queueSocket = getQueueSocket();
   if (queueSocket) {
     queueSocket.emit("data", JSON.stringify(jobQueue));
@@ -59,44 +58,42 @@ const updateJob = (job: Job) => {
 }
 
 // TODO - SAVE LOGS
-const setJobToComplete = (jobId: string, status: JobStatus, error: string | null = null) => {
+const setJobToComplete = async (jobId: string, status: JobStatus, error: string | null = null) => {
   const job: Job = {
-    ...getJobById(jobId),
+    ...(await getJobById(jobId)),
     status,
     finishedAt: new Date().toISOString()
   }
   if (error) {
     job.error = error
   }
-  updateJob(job);
-  if (getJobQueue().length) {
-    runJob(getJobQueue()[0].id);
+  await updateJob(job);
+  if ((jobQueue as Job[]).length) {
+    runJob((jobQueue as Job[])[0].id);
   }
 }
 
-const setJobToInProgress = (jobId: string) => {
+const setJobToInProgress = async (jobId: string) => {
   const job: Job = {
-    ...getJobById(jobId),
+    ...(await getJobById(jobId)),
     status: JobStatus.IN_PROGRESS,
     startedAt: new Date().toISOString()
   }
-  updateJob(job)
+  await updateJob(job)
 }
 
-// TODO - save error status
 const runJob = async (jobId: string) => {
-  const { id, type, parameters } = getJobById(jobId);
+  const { id, type, parameters } = await getJobById(jobId);
   try {
     setJobToInProgress(jobId);
     let jobPromise;
     let resultFolder;
     if (type === JobType.DICOM_SORT) {
-      const { copyPath, usePatientNames, useSessionDates, checkAllFiles } = parameters as DicomSortParameters;
-      jobPromise = qsmxt.sortDicoms(copyPath, usePatientNames, useSessionDates, checkAllFiles);
+      // const { copyPath, usePatientNames, useSessionDates, checkAllFiles } = parameters as DicomSortParameters;
+      jobPromise = qsmxt.sortDicoms(parameters as DicomSortParameters);
       resultFolder = DICOMS_FOLDER;
     } else if (type === JobType.DICOM_CONVERT) {
-      const { t2starwProtocolPatterns, t1wProtocolPatterns } = parameters as DicomConvertParameters;
-      jobPromise = qsmxt.convertDicoms(t2starwProtocolPatterns, t1wProtocolPatterns);
+      jobPromise = qsmxt.convertDicoms(parameters as DicomConvertParameters);
       resultFolder = BIDS_FOLDER;
     } else if (type === JobType.QSM) {
       const { subject, premade } = parameters as QsmParameters;
@@ -108,13 +105,9 @@ const runJob = async (jobId: string) => {
       try {
         fs.mkdirSync(resultFolder);
       } catch (err) {}
-      jobPromise = qsmxt.runQsm(id, subject, premade);
+      jobPromise = qsmxt.runQsmPipeline(id, subject, premade);
     }
-    const subject =  'subject' in parameters 
-      ? parameters.subject 
-      : '';
-    const logFilePath = await getLogFile(type, subject, id);
-    console.log(logFilePath);
+    const logFilePath = await getLogFile(type, (parameters as QsmParameters).subject || '', id);
     sockets.createInProgressSocket(logFilePath);
     await jobPromise;
     setJobToComplete(id, JobStatus.COMPLETE)
@@ -122,7 +115,6 @@ const runJob = async (jobId: string) => {
     let errorMessage: any;
     if ((err as Error).message) {
       errorMessage = (err as Error).message
-      logger.red(err as any)
     } else {
       errorMessage = err;
     }
@@ -132,7 +124,8 @@ const runJob = async (jobId: string) => {
 }
 
 // TODO - FIX, doesnt work if there is jobs in queue on boot
-export const addJobToQueue = (type: JobType, parameters: JobParameters): string => {
+// TODO - add the cohort to job
+export const addJobToQueue = async (type: JobType, parameters: JobParameters): Promise<string> => {
   const id = uuidv4();
   const createdAt = new Date().toISOString();
   const job: Job = {
@@ -144,8 +137,14 @@ export const addJobToQueue = (type: JobType, parameters: JobParameters): string 
     finishedAt: null,
     parameters
   }
-  database.addJob(job);
-  jobQueue = database.getIncompleteJobs();
+  if ((parameters as QsmParameters).subject) {
+    job.subject = (parameters as QsmParameters).subject;
+  }
+  // if (parameters.cohort) {
+
+  // }
+  await database.jobs.save(job);
+  jobQueue = await database.jobs.get.incomplete();
   const queueSocket = getQueueSocket();
   if (queueSocket) {
     queueSocket.emit("data", JSON.stringify(jobQueue));

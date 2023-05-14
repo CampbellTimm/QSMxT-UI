@@ -1,11 +1,11 @@
-import { createServer } from "./src/core/createServer";
-import database from "./src/core/database";
+import { createServer } from "./src/core/server";
+import database from "./src/database";
 import logger from "./src/core/logger";
-import { killChildProcess } from "./src/service/childProcess";
+import { killChildProcess } from "./src/qsmxt";
 
 if (process.env.DEBUG === 'true') {
   logger.yellow("Debug Mode: wiping queue")
-  database.deleteIncompleteJobs();
+  database.jobs.delete.incomplete().then();
 }
 
 createServer();

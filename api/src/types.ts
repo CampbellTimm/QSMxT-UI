@@ -1,30 +1,41 @@
-export type Echos = {
+export type SubjectEchos = {
   [echoNumber: string]: {
     magnitude: any,
     phase: any,
   }
 }
 
-export type Run = {
-  echos: Echos
+// export type SubjectRun = {
+//   echos: SubjectEchos
+// }
+
+export type SubjectRun = {
+  echos: string[]
 }
 
-export type Runs = {
-  [runNumber: string]: Run
+export type SubjectRuns = {
+  [runNumber: string]: SubjectRun
 }
 
-export type Session = {
-  runs: Runs
+export type SubjectSession = {
+  runs: SubjectRuns
 }
 
-export type Sessions =  {
-  [sessionNumber: string]: Session
+export type SubjectSessions =  {
+  [sessionNumber: string]: SubjectSession
 }
 
 export type SubjectsTree = {
   [subject: string]: { 
-    sessions: Sessions 
+    sessions: SubjectSessions 
   }
+}
+
+export type Subject = {
+  subject: string, 
+  uploadFormat: SubjectUploadFormat, 
+  parameters: DicomConvertParameters, 
+  dataTree: SubjectSession
 }
 
 export enum JobStatus {
@@ -50,6 +61,9 @@ export type DicomSortParameters = {
 export type DicomConvertParameters = {
   t2starwProtocolPatterns: string[],
   t1wProtocolPatterns: string[],
+  usePatientNames: boolean,
+  useSessionDates: boolean,
+  checkAllFiles: boolean
 }
 
 export type QsmParameters = {
@@ -61,6 +75,8 @@ export type JobParameters = DicomSortParameters | DicomConvertParameters | QsmPa
 
 export type Job = {
   id: string,
+  subject?: string,
+  cohort?: string,
   type: JobType,
   status: JobStatus,
   createdAt: string,
@@ -68,4 +84,13 @@ export type Job = {
   finishedAt: string | null,
   parameters: JobParameters,
   error?: string
+}
+
+export type Cohorts = {[cohort: string]: {
+  description: string,
+  subjects: string[]
+}}
+
+export enum SubjectUploadFormat {
+  DICOM = 'DICOM'
 }

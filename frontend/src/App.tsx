@@ -1,4 +1,4 @@
-import { Layout, Menu, message } from 'antd';
+import { Layout, Menu, message, Image } from 'antd';
 import { Routes, Route, Navigate } from "react-router-dom";
 import Home from './pages/Home/Home'
 import YourDataPage from './pages/YourDataPage/YourDataPage'
@@ -11,25 +11,31 @@ import { context } from './util/context';
 import SelectorTree from './components/SelectorTree/SelectorTree';
 import io from 'socket.io-client';
 import { API_URL } from './core/constants';
+import LoadingPage from './pages/LoadingPage/LoadingPage';
+import { FolderOpenOutlined, HomeOutlined, InsertRowLeftOutlined, PlaySquareOutlined } from '@ant-design/icons';
 
 const { Header, Content, Footer } = Layout;
 
 const menuItems = [
   {
     key: 'home',
-    label: 'Home'
+    label: 'Home',
+    icon: <HomeOutlined />
   },
   {
     key: 'yourData',
-    label: 'Your Data'
+    label: 'Your Data',
+    icon: <FolderOpenOutlined />
   },
   {
     key: 'run',
-    label: 'Run'
+    label: 'Run',
+    icon: <PlaySquareOutlined />
   },
   {
     key: 'output',
-    label: 'Results'
+    label: 'Results',
+    icon: <InsertRowLeftOutlined />
   },
 ];
 
@@ -48,6 +54,11 @@ const styles = {
     width: '100%', 
     minHeight: 'calc(100vh - 154px)',
     maxHeight: 'calc(100vh - 154px)',
+  },
+  flexBoxRow: {
+    display: 'flex',
+    flexDirection: 'row' as 'row',
+
   }
 }
 
@@ -57,6 +68,7 @@ export default () => {
   const [selectedSubject, setSelectedSubject]: [any, any] = useState(null);
   const [selectedCohort, setSelectedCohort]: [any, any] = useState(null);
   const [queue, setQueue]: [any, any] = useState(null);
+  const [loading, setLoading]: [boolean, any] = useState(true);
 
   const fetchSubjectData = async () => {
     const subjects = await apiClient.getSubjects()
@@ -106,40 +118,63 @@ export default () => {
     setSelectedCohort,
     setSelectedSubject,
     fetchSubjectData,
-    fetchCohortData
+    fetchCohortData,
+    navigate
     // setCohorts: updateCohorts
   }
 
   return (
     <Layout>
-      <Header>
-        <Menu
-          theme="dark"
-          mode="horizontal"
-          onClick={({ key }) => {
-            navigate(`/${key}`)
-          }}
-          selectedKeys={[selectedKey]}
-          items={menuItems}
-        />
-      </Header>
+      <div style={styles.flexBoxRow}>
+        <Header style={{ width: 'calc(100% - 350px)' }}>
+          <Menu
+            theme="dark"
+            mode="horizontal"
+            onClick={({ key }) => {
+              navigate(`/${key}`)
+            }}
+            selectedKeys={[selectedKey]}
+            items={loading ? [] : menuItems}
+          />
+        </Header>
+        <div style={{  display: 'flex', flexDirection: 'row', background: '#001529', color: 'rgb(255, 255, 255)'}}>
+          <b style={{ fontSize: 32, lineHeight: '64px', minHeight: '64px',  }}>
+            QSMxT v2.1.0
+          </b>
+          <div style={{ width: 112  }}>
+            <Image
+              preview={false}
+              width={90}
+              style={{ marginTop: 11, marginRight: 11, marginLeft: 11 }}
+              height={42}
+              src={`https://qsmxt-ui-images.s3.ap-southeast-2.amazonaws.com/menuBar.PNG`}
+            />
+          </div>
+        </div> 
+      </div>
       <Content style={styles.content}>
         <context.Provider value={contextValue as any}>
           <div style={styles.contentBody}>
-            <SelectorTree />
-            <div style={{ overflowY: 'scroll', width: '100%', paddingRight: 14 }}>
-              <Routes>
-                <Route path="/home" element={<Home />} />
-                <Route path="/run" element={<Run />} />
-                <Route path="/yourData" element={<YourDataPage />} />
-                <Route path="/output" element={<Qsm />} />
-                <Route path="/" element={ <Navigate to="/home" /> }/>
-                <Route path="/" element={ <Navigate to="/home" /> } />
-              </Routes>  
-            </div>
+            {loading
+              ? <LoadingPage setLoading={setLoading} />
+              : <>
+                <SelectorTree />
+                <div style={{ overflowY: 'scroll', width: '100%', paddingRight: 14 }}>
+                  <Routes>
+                    <Route path="/home" element={<Home />} />
+                    <Route path="/run" element={<Run />} />
+                    <Route path="/yourData" element={<YourDataPage />} />
+                    <Route path="/output" element={<Qsm />} />
+                    <Route path="/" element={ <Navigate to="/home" /> }/>
+                    <Route path="/" element={ <Navigate to="/home" /> } />
+                  </Routes>  
+                </div>
+              </>
+            }
           </div>
         </context.Provider>
       </Content>
+
     </Layout>
   )
 };

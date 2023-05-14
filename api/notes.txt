@@ -7,7 +7,12 @@ sudo service postgresql start
 sudo service postgresql status # checks if online
 
 Creating User: (\q to exit)
-sudo -u postgres psql # starts postgresql with defauly user
+sudo -i -u postgres
+createuser --interactive
+psql
 
+# set password for user
+sudo -u postgres psql
+\password postgres
 
 need to create "user" user

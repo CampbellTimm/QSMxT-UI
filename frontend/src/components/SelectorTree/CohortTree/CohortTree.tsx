@@ -1,11 +1,12 @@
-import { Tree } from 'antd';
+import { Tree, Typography } from 'antd';
 import type { DataNode, DirectoryTreeProps } from 'antd/es/tree';
 import { Key } from 'antd/lib/table/interface';
 import React from 'react';
-import { Cohorts } from '../../../util/types';
 import { context } from '../../../util/context';
+import { Cohorts } from '../../../core/types';
 
 const { DirectoryTree } = Tree;
+const { Text } = Typography;
 
 interface Props {
   // cohorts: Cohorts,
@@ -22,13 +23,22 @@ const selectTreeNode = (selectedCohort, setSelectedCohort) => (keys: Key[], info
 }
 
 const CohortTree: React.FC<Props> = () => {
-  const { cohorts, selectedCohort, setSelectedCohort } = React.useContext(context);
+  const { cohorts, selectedCohort, setSelectedCohort, navigate } = React.useContext(context);
 
   const onSelect: DirectoryTreeProps['onSelect'] = selectTreeNode(selectedCohort, setSelectedCohort);
   const onExpand: DirectoryTreeProps['onSelect'] = selectTreeNode(selectedCohort, setSelectedCohort);
 
   if (!cohorts) {
-    return <div />
+    return <div style={{ minHeight: 250 }}/>
+  }
+
+  if (!Object.keys(cohorts as Cohorts).length) {
+    return <div  style={{ minHeight: 250 }}>
+      <div>
+        You currently have no saved Cohorts.<br />
+        Go to <a onClick={() => navigate('/yourData')}>Your Data </a>page to create them and link subjects.
+      </div>
+    </div>
   }
 
   const treeData = Object.keys(cohorts).map(cohortName => {
@@ -36,7 +46,7 @@ const CohortTree: React.FC<Props> = () => {
       title: cohortName,
       key: cohortName,
       // @ts-ignore
-      children: cohorts[cohortName].map(subjectName => {
+      children: cohorts[cohortName].subjects.map(subjectName => {
         return {
           title: subjectName,
           key: subjectName,

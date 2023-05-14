@@ -24,15 +24,18 @@ const updateCohort = async (cohort: string, subjects: string[]): Promise<boolean
   return updated;
 }
 
-const createCohort = async (cohort: string): Promise<boolean> => {
+const createCohort = async (cohort: string, cohortDescription: string): Promise<boolean> => {
   let created = false;
   const getCohortPath = API_URL + `/cohorts/${cohort}`;
   try {
-    const response = await axios.post(getCohortPath);
+    const response = await axios.post(getCohortPath, {
+      cohortDescription
+    });
     message.success(response.statusText);
     created = true;
   } catch (err) {
-    message.error(err.message)
+    message.error(err.message);
+    created = false;
   }
   return created;
 }
@@ -88,9 +91,15 @@ export const getQsmResults = async () => {
   return data as any;
 }
 
+export const getStatus = async () => {
+  const getQsmResultsUrl = API_URL + '/status';
+  const response = await axios.get(getQsmResultsUrl);
+  return response.data as any;
+}
+
 export const copyDicoms = async (copyPath: string, usePatientNames: boolean, useSessionDates: boolean, 
     checkAllFiles: boolean, t2starwProtocolPatterns: string[], t1wProtocolPatterns: string[]) => {
-  const uploadDicomsUrl = API_URL + '/dicoms/copy';
+  const uploadDicomsUrl = API_URL + '/subjects/dicom';
 
   try {
     const response = await axios({
@@ -113,6 +122,8 @@ export const copyDicoms = async (copyPath: string, usePatientNames: boolean, use
 }
 
 export default {
+  getStatus,
+  
   createCohort,
   updateCohort,
   getCohorts,

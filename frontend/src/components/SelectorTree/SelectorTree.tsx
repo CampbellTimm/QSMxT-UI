@@ -20,17 +20,19 @@ const YourData = () => {
       style={{ marginRight: 14, minHeight:'100%' }}
       title={null}>
       <div style={styles.subjectSelector}>
-        <div style={{ minHeight: '50%', height: '50%' }}>
-          <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Title style={{marginTop: 0}} level={4}>Cohorts</Title>
-            <QuestionCircleOutlined style={{ color: '#1677ff' }} />
-          </div>
-          <CohortTree  />
-        </div>
-        <div style={{ minHeight: '50%' }}>
+      <div style={{ minHeight: '50%' }}>
         <Title style={{marginTop: 9}} level={4}>Subjects</Title>
           <SubjectTree />
         </div>
+        <div style={{ minHeight: '50%', height: '50%' }}>
+          {/* <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+           
+            <QuestionCircleOutlined style={{ color: '#1677ff' }} />
+          </div> */}
+           <Title style={{marginTop: 0}} level={4}>Cohorts</Title>
+          <CohortTree  />
+        </div>
+       
       </div>
     </Card>
   )

@@ -1,8 +1,9 @@
 import React from 'react';
-import { Cohorts, Job, SubjectsTree } from '../core/types';
+import { Cohorts, Job, Subject, SubjectsTree } from '../core/types';
+import { NavigateFunction } from 'react-router-dom';
 
 export interface SiteContext {
-  subjects: SubjectsTree | null,
+  subjects: Subject[] | null,
   cohorts: Cohorts | null,
   queue: Job[] | null,
 
@@ -14,6 +15,7 @@ export interface SiteContext {
 
   fetchSubjectData: () => Promise<void>
   fetchCohortData: () => Promise<void>
+  navigate: NavigateFunction
 }
 
 const defaultContext = {
@@ -29,6 +31,8 @@ const defaultContext = {
 
   fetchSubjectData: async () => {},
   fetchCohortData: async () => {},
+  navigate: (path: string) => {}
+
 }
 
 export const context = React.createContext(defaultContext);

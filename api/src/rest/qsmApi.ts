@@ -1,13 +1,13 @@
 import { Express, Request, Response } from "express";
 import fs from "fs-extra";
-import { addJobToQueue } from "../service/jobHandler";
-import qsmxt from "../service/qsmxt";
+import { addJobToQueue } from "../core/jobHandler";
+import qsmxt from "../qsmxt/runQsmPipeline";
 import logger from "../core/logger";
-import { COHORTS_TREE_PATH, QSM_FOLDER } from "../core/constants";
+import { COHORTS_TREE_PATH, QSM_FOLDER } from "../constants";
 import path from "path";
-import { DicomConvertParameters, DicomSortParameters, JobType, QsmParameters } from "../core/types";
-import { unknownErrorHandler } from "./util";
-import { queueSocket } from "../service/sockets";
+import { DicomConvertParameters, DicomSortParameters, JobType, QsmParameters } from "../types";
+import { unknownErrorHandler } from ".";
+import { queueSocket } from "../core/sockets";
 
 // TODO - add back later
 // const uploadDicoms = async (req: any, res: any) => {
@@ -33,34 +33,9 @@ import { queueSocket } from "../service/sockets";
 
 
 // TODO - Copy to 'unsorted' before adding to queue
-const copyDicoms = async (request: Request, response: Response) => {
-  logger.green("Received request to copy dicoms at " + new Date().toISOString());
-  const body = request.body;
-  const { copyPath, usePatientNames, useSessionDates, checkAllFiles, t2starwProtocolPatterns, t1wProtocolPatterns } = body; 
 
-  const fixedCopyPath = copyPath.includes(":\\")
-    ? `/neurodesktop-storage${copyPath.split('neurodesktop-storage')[1].replace(/\\/g, "/")}`
-    : copyPath;
 
-  const dicomSortParameters: DicomSortParameters = {
-    copyPath: fixedCopyPath,
-    usePatientNames: usePatientNames === 'true',
-    useSessionDates: useSessionDates  === 'true',
-    checkAllFiles: checkAllFiles  === 'true'
-  }
-  addJobToQueue(JobType.DICOM_SORT, dicomSortParameters);
-
-  const dicomConvertParameters: DicomConvertParameters = {
-    t2starwProtocolPatterns: JSON.parse(t2starwProtocolPatterns),
-    t1wProtocolPatterns: JSON.parse(t1wProtocolPatterns)
-  }
-  addJobToQueue(JobType.DICOM_CONVERT, dicomConvertParameters);
-  
-  response.statusMessage = "Successfully copied DICOMs. Starting sort and conversion jobs."
-  response.status(200).send();
-}
-
-const runQsm = async (request: Request, response: Response) => {
+const runQsmPipeline = async (request: Request, response: Response) => {
   logger.green("Received request to run QSM at " + new Date().toISOString());
   const { cohorts, subjects, premade } = request.body;
   const cohortsTree = JSON.parse(fs.readFileSync(COHORTS_TREE_PATH, { encoding: 'utf-8'}));
@@ -68,11 +43,13 @@ const runQsm = async (request: Request, response: Response) => {
   (cohorts || []).forEach((cohort: any) => {
     subjectsToRun.push(...cohortsTree[cohort])
   });
+  // switch to for loop
   subjectsToRun.forEach(subject => {
     const qsmParameters: QsmParameters = {
       subject,
       premade
     }
+    // await 
     addJobToQueue(JobType.QSM, qsmParameters);
   })
   response.status(200).send();
@@ -82,7 +59,7 @@ const runSegmentation = () => {
 
 }
 
-const getQSM = async (request: Request, response: Response) => {
+const getQsmResults = async (request: Request, response: Response) => {
   // console.log(queueSocket);
   // // @ts-ignore
   // queueSocket.emit("any", "test2");
@@ -118,9 +95,7 @@ const getQSM = async (request: Request, response: Response) => {
   // logYellow(qsmResultSubjects);
 }
 
-export const setupQsmEndpoints = (app: Express) => {
-  app.post('/dicoms/copy', unknownErrorHandler(copyDicoms));
-  app.post('/qsm/run', unknownErrorHandler(runQsm));
-  app.get('/qsm/results', unknownErrorHandler(getQSM));
-  // app.post('/dicoms/upload', uploadDicoms)
+export default {
+  run: runQsmPipeline,
+  get: getQsmResults
 }

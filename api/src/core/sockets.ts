@@ -1,7 +1,7 @@
 import { Server, Socket } from "socket.io";
 import http from "http";
 import { Tail } from 'tail';
-import logger from "../core/logger";
+import logger from "./logger";
 import { getJobQueue } from "./jobHandler";
 
 let io: Server | null = null;
@@ -14,24 +14,32 @@ export const getQueueSocket = (): Socket | null => {
 
 const createInProgressSocket = (logFilePath: string) => {
   const inProgressNamespace = (io as Server).of("/inProgress");
-  
   inProgressNamespace.on("connection", (socket) => {
     inProgressSocket = socket;
-    const tail = new Tail(logFilePath);
-    tail.on("line", function(data: any) {
-      logger.magenta(data);
-      socket.emit("data", data);
-    });
-    
-    tail.on("error", function(error: any) {
-      logger.red('ERROR: ' +  error);
-    });
-
   });
-  
+  inProgressNamespace.on("ds", (socket) => {
+    inProgressSocket = socket;
+    socket.on('disconnect', () => {
+      inProgressSocket = null;
+    });
+  });
+  const tail = new Tail(logFilePath);
+  tail.on("line", (data: any) => {
+    logger.magenta(data);
+    if (inProgressSocket) {
+      inProgressSocket.emit("data", data);
+    }
+  });
+  tail.on("error", (error: any) => {
+    logger.red('ERROR: ' +  error);
+    if (inProgressSocket) {
+      inProgressSocket.emit("data", error);
+    }
+  });
 }
 
 const setupQueueSocket = () => {
+  return;
   const queueNamespace = (io as Server).of("/queue");
 
   queueNamespace.on("connection", (socket) => {
