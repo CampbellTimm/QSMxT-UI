@@ -1,10 +1,13 @@
 import { Express, Request, Response } from "express";
 import fs from "fs-extra";
-import { addToQueue } from "../service/queue";
+import { addJobToQueue } from "../service/jobHandler";
 import qsmxt from "../service/qsmxt";
-import { logGreen, logYellow } from "../util/logger";
+import logger from "../core/logger";
 import { COHORTS_TREE_PATH, QSM_FOLDER } from "../core/constants";
 import path from "path";
+import { DicomConvertParameters, DicomSortParameters, JobType, QsmParameters } from "../core/types";
+import { unknownErrorHandler } from "./util";
+import { queueSocket } from "../service/sockets";
 
 // TODO - add back later
 // const uploadDicoms = async (req: any, res: any) => {
@@ -29,60 +32,49 @@ import path from "path";
 // }
 
 
+// TODO - Copy to 'unsorted' before adding to queue
 const copyDicoms = async (request: Request, response: Response) => {
-  try {
-    logGreen("Received request to copy dicoms at " + new Date().toISOString());
-    const body = request.body;
-    const {
-      copyPath,
-      usePatientNames,
-      useSessionDates,
-      checkAllFiles,
-      t2starwProtocolPatterns,
-      t1wProtocolPatterns
-    } = body; 
-  
-    console.log(body);
-  
-    const fixedCopyPath = copyPath.includes(":\\")
-      ? `/neurodesktop-storage${copyPath.split('neurodesktop-storage')[1].replace(/\\/g, "/")}`
-      : copyPath;
-  
-    console.log(fixedCopyPath);
-  
-    addToQueue(
-      "Dicom Sort", 
-      async () => qsmxt.sortDicoms(
-        fixedCopyPath, 
-        usePatientNames === 'true', 
-        useSessionDates === 'true', 
-        checkAllFiles === 'true'
-      )
-    );
-    addToQueue("Dicom Convert", async () => qsmxt.convertDicoms(JSON.parse(t2starwProtocolPatterns), JSON.parse(t1wProtocolPatterns)))
-    response.statusMessage = "Successfully copied DICOMs. Starting sort and conversion jobs."
-    response.status(200).send();
-  } catch (err) {
-    console.log(err);
-    response.statusMessage = "Unknown error occured. Failed to copy DICOMs"
-    response.status(500).send();
+  logger.green("Received request to copy dicoms at " + new Date().toISOString());
+  const body = request.body;
+  const { copyPath, usePatientNames, useSessionDates, checkAllFiles, t2starwProtocolPatterns, t1wProtocolPatterns } = body; 
+
+  const fixedCopyPath = copyPath.includes(":\\")
+    ? `/neurodesktop-storage${copyPath.split('neurodesktop-storage')[1].replace(/\\/g, "/")}`
+    : copyPath;
+
+  const dicomSortParameters: DicomSortParameters = {
+    copyPath: fixedCopyPath,
+    usePatientNames: usePatientNames === 'true',
+    useSessionDates: useSessionDates  === 'true',
+    checkAllFiles: checkAllFiles  === 'true'
   }
+  addJobToQueue(JobType.DICOM_SORT, dicomSortParameters);
+
+  const dicomConvertParameters: DicomConvertParameters = {
+    t2starwProtocolPatterns: JSON.parse(t2starwProtocolPatterns),
+    t1wProtocolPatterns: JSON.parse(t1wProtocolPatterns)
+  }
+  addJobToQueue(JobType.DICOM_CONVERT, dicomConvertParameters);
+  
+  response.statusMessage = "Successfully copied DICOMs. Starting sort and conversion jobs."
+  response.status(200).send();
 }
 
 const runQsm = async (request: Request, response: Response) => {
-  logGreen("Received request to run QSM at " + new Date().toISOString());
+  logger.green("Received request to run QSM at " + new Date().toISOString());
   const { cohorts, subjects, premade } = request.body;
   const cohortsTree = JSON.parse(fs.readFileSync(COHORTS_TREE_PATH, { encoding: 'utf-8'}));
-
   const subjectsToRun = [...(subjects || [])];
   (cohorts || []).forEach((cohort: any) => {
     subjectsToRun.push(...cohortsTree[cohort])
   });
-
   subjectsToRun.forEach(subject => {
-    addToQueue("QSM Pipeline", async () => qsmxt.runQsm(subject, premade));
+    const qsmParameters: QsmParameters = {
+      subject,
+      premade
+    }
+    addJobToQueue(JobType.QSM, qsmParameters);
   })
-
   response.status(200).send();
 }
 
@@ -91,6 +83,14 @@ const runSegmentation = () => {
 }
 
 const getQSM = async (request: Request, response: Response) => {
+  // console.log(queueSocket);
+  // // @ts-ignore
+  // queueSocket.emit("any", "test2");
+
+  // response.status(200).send({});
+  // return;
+
+
   const qsmResultSubjects: string[] = fs.readdirSync(QSM_FOLDER);
 
   const resultTree: any = {};
@@ -103,7 +103,7 @@ const getQSM = async (request: Request, response: Response) => {
     const subjectRuns = fs.readdirSync(subjectResultFolder);
     subjectRuns.forEach(runId => {
       resultTree[subject][runId] = [];
-      const resultsFilesPath = path.join(subjectResultFolder, runId, "qsm_final/_qsmjl_rts0"); // FINE FOLDER DYNAMICALLY
+      const resultsFilesPath = path.join(subjectResultFolder, runId, "qsm_final/_qsmjl_rts0"); // FIND FOLDER DYNAMICALLY
       const nifitis = fs.readdirSync(resultsFilesPath).filter(fileName => fileName.includes(".nii"));
 
 
@@ -119,9 +119,8 @@ const getQSM = async (request: Request, response: Response) => {
 }
 
 export const setupQsmEndpoints = (app: Express) => {
-  app.post('/dicoms/copy', copyDicoms);
-  app.post('/qsm/run', runQsm);
-  app.get('/qsm/results', getQSM);
+  app.post('/dicoms/copy', unknownErrorHandler(copyDicoms));
+  app.post('/qsm/run', unknownErrorHandler(runQsm));
+  app.get('/qsm/results', unknownErrorHandler(getQSM));
   // app.post('/dicoms/upload', uploadDicoms)
-
 }

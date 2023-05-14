@@ -1,9 +1,5 @@
 import { Layout, Menu, message } from 'antd';
-import {
-  Routes,
-  Route,
-  Navigate 
-} from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Home from './pages/Home/Home'
 import YourDataPage from './pages/YourDataPage/YourDataPage'
 import Run from './pages/RunPage/RunPage'
@@ -13,6 +9,8 @@ import React, { useEffect, useState } from "react";
 import apiClient from './util/apiClient';
 import { context } from './util/context';
 import SelectorTree from './components/SelectorTree/SelectorTree';
+import io from 'socket.io-client';
+import { API_URL } from './core/constants';
 
 const { Header, Content, Footer } = Layout;
 
@@ -58,7 +56,7 @@ export default () => {
   const [subjects, setSubjects]: [any, any] = useState(null);
   const [selectedSubject, setSelectedSubject]: [any, any] = useState(null);
   const [selectedCohort, setSelectedCohort]: [any, any] = useState(null);
-  const [ongoingRuns, setOngoingRuns]: [any, any] = useState(null);
+  const [queue, setQueue]: [any, any] = useState(null);
 
   const fetchSubjectData = async () => {
     const subjects = await apiClient.getSubjects()
@@ -70,29 +68,29 @@ export default () => {
     setCohorts(cohorts);
   }
 
-  const fetchHistory = async () => {
-      // TODO
-  }
+  const setupQueueSocket = async () => {
+    const socket = io(`${API_URL}/queue`);
+    socket.on('data', (data) => {
+      console.log('Received message:', data);
+      const newQueue = JSON.parse(data);
 
-  useEffect(() => {
-    const fetchRuns = async () => {
-      // console.log("Fetching runs");
-      const newRunsList = await apiClient.getRuns();
 
-      ongoingRuns && ongoingRuns.forEach(prevRun => {
-        if (!newRunsList.find(newRun => newRun.id === prevRun.id)) {
-          message.success(`${prevRun.description} completed`);
-          // TODO - refresh history
+      queue && queue.forEach(prevRun => {
+        if (!newQueue.find(newRun => newRun.id === prevRun.id)) {
+          message.success(`${prevRun.type} completed`);
         }
       })
 
-      setOngoingRuns(newRunsList);
-    }
+
+      setQueue(newQueue);
+
+    });
+  }
+
+  useEffect(() => {
     fetchSubjectData();
     fetchCohortData();
-    fetchRuns();
-    const interval = setInterval(fetchRuns, 5000); // TODO - socket???
-    return () => clearInterval(interval);
+    setupQueueSocket();
   },[]);
 
   const selectedKey = window.location.pathname.split('/')[window.location.pathname.split('/').length - 1] || 'home'
@@ -104,7 +102,7 @@ export default () => {
     subjects,
     selectedSubject,
     selectedCohort,
-    ongoingRuns,
+    queue,
     setSelectedCohort,
     setSelectedSubject,
     fetchSubjectData,

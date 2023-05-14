@@ -83,6 +83,11 @@ typings/
 .nuxt
 dist
 
+/api/public/qsmxt/bids/*
+/api/public/qsmxt/dicoms/*
+/api/public/qsmxt/qsm/*
+/api/public/qsmxt/logs/*
+
 # Gatsby files
 .cache/
 # Comment in the public line in if your project uses Gatsby and *not* Next.js

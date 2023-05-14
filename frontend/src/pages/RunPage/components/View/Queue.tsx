@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Card, RadioChangeEvent, Space, Spin, Typography } from 'antd';
 import { Radio, Tabs } from 'antd';
-import { QueueJob } from '../../../../util/types';
 import { context } from '../../../../util/context';
 // @ts-ignore
 import { UpOutlined, DownOutlined, DeleteOutlined } from '@ant-design/icons';
 import moment from 'moment';
+import { Job } from '../../../../core/types';
 
 const { Title, Paragraph, Text, Link } = Typography;
 
@@ -14,15 +14,15 @@ const styles = {
 
 
 const Queue = () => {
-  const { ongoingRuns } = React.useContext(context);
+  const { queue } = React.useContext(context);
 
-  if (!ongoingRuns) {
+  if (!queue) {
     return <div />
   }
 
-  const queue = (ongoingRuns as QueueJob[]).slice(1);
+  const queuedJobs = (queue as Job[]).slice(1);
 
-  if (!queue.length) {
+  if (!queuedJobs.length) {
     return <div>
       No additional runs are in the queue
     </div>
@@ -36,11 +36,11 @@ const Queue = () => {
     <Space direction="vertical" size={16}>
     
       {
-        (queue as QueueJob[]).map(run => {
+        (queuedJobs as Job[]).map(run => {
           return (
             <Card 
               size="small" 
-              title={run.description} 
+              title={run.type} 
               style={{ width: 300 }}
               actions={[
                 <UpOutlined />,
@@ -48,7 +48,7 @@ const Queue = () => {
                 <DeleteOutlined />
               ]}
               >
-              Started At: {run.startTime}
+              Started At: {run.startedAt}
             </Card>
           )
         })

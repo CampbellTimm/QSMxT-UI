@@ -1,8 +1,8 @@
 import { Tree } from 'antd';
 import type { DirectoryTreeProps } from 'antd/es/tree';
 import React from 'react';
-import { SubjectsTree } from '../../../util/types';
 import { context } from '../../../util/context';
+import { SubjectsTree } from '../../../core/types';
 
 const { DirectoryTree } = Tree;
 
@@ -15,8 +15,6 @@ const SubjectTree: React.FC = () => {
 
   const onExpand: DirectoryTreeProps['onExpand'] = (keys, info) => {
   };
-
-  console.log(subjects);
 
   if (!subjects) {
       return <div />

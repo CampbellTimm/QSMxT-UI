@@ -1,7 +1,21 @@
-import { SERVER_PORT } from "./src/core/constants";
 import { createServer } from "./src/core/createServer";
-import { logGreen } from "./src/util/logger";
+import database from "./src/core/database";
+import logger from "./src/core/logger";
+import { killChildProcess } from "./src/service/childProcess";
+
+if (process.env.DEBUG === 'true') {
+  logger.yellow("Debug Mode: wiping queue")
+  database.deleteIncompleteJobs();
+}
 
 createServer();
 
-logGreen(`Server started on port ${SERVER_PORT}`);
+const cleanup = () => {
+  killChildProcess();
+  console.log('Exiting Program');
+  process.exit();
+}
+
+process.on('exit', () => cleanup);
+process.on('SIGINT', cleanup);
+process.on('SIGUSR2', cleanup);

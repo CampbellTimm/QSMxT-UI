@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Cohorts, QueueJob, SubjectsTree } from "../core/types";
+import { Cohorts, Job, SubjectsTree } from "../core/types";
 import { message } from "antd";
 import { API_URL } from "../core/constants";
 
@@ -9,9 +9,19 @@ const getCohorts = async (): Promise<Cohorts> => {
   return response.data as Cohorts;
 }
 
-export const postCohorts = async (cohorts: Cohorts): Promise<void> => {
-  const getCohortPath = API_URL + '/cohorts';
-  await axios.post(getCohortPath, cohorts);
+const updateCohort = async (cohort: string, subjects: string[]): Promise<boolean> => {
+  const updateCohortsPath = API_URL + `/cohorts/${cohort}`;
+  let updated = false;
+  try {
+    const response = await axios.patch(updateCohortsPath, {
+      subjects
+    });
+    message.success(response.statusText);
+    updated = true;
+  } catch (err) {
+    message.error(err.message)
+  }
+  return updated;
 }
 
 const createCohort = async (cohort: string): Promise<boolean> => {
@@ -51,15 +61,15 @@ const getSubjects = async (): Promise<SubjectsTree> => {
   return data as SubjectsTree;
 }
 
-export const getRuns = async (): Promise<QueueJob[]> => {
-  const getRunsPath = API_URL + '/runs';
+export const getJobsQueue = async (): Promise<Job[]> => {
+  const getRunsPath = API_URL + '/jobs/queue';
   const response = await fetch(getRunsPath, {
     headers: {
       "Access-Control-Request-Private-Network": "true"
     }
   });
   const data: any = await response.json();
-  return data as QueueJob[];
+  return data as Job[];
 }
 
 export const runQsmPipeline = async (params: any): Promise<void> => {
@@ -103,12 +113,14 @@ export const copyDicoms = async (copyPath: string, usePatientNames: boolean, use
 }
 
 export default {
-  copyDicoms,
   createCohort,
+  updateCohort,
   getCohorts,
+
+  copyDicoms,
   deleteCohort,
 
   getSubjects,
 
-  getRuns
+  getRuns: getJobsQueue
 }

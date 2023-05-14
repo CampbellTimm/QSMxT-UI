@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import { BIDS_FOLDER } from "../core/constants";
 import { Echos, Runs, Sessions, SubjectsTree } from "../core/types";
+import { unknownErrorHandler } from "./util";
 
 const getRunNumbersForSession = (sessionFiles: string[]): string[] => {
   const runNumbers: Set<string> = new Set();
@@ -93,5 +94,5 @@ const getSubjectsTree = async (request: Request, response: Response) => {
 }
 
 export const setupSubjectsEndpoints = (app: Express) => {
-  app.get('/subjects', getSubjectsTree)
+  app.get('/subjects', unknownErrorHandler((getSubjectsTree)))
 }

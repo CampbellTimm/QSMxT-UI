@@ -39,6 +39,12 @@ const CohortView: React.FC = () => {
     }
   }
 
+  const updateCohort = async (cohortName: string) => {
+    const subjects = [];
+    await apiClient.updateCohort(cohortName, subjects);
+    
+  }
+
   
   const subjectTagRender = () => {
   

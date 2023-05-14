@@ -1,10 +1,10 @@
 import React from 'react';
-import { Cohorts, QueueJob, SubjectsTree } from '../core/types';
+import { Cohorts, Job, SubjectsTree } from '../core/types';
 
 export interface SiteContext {
   subjects: SubjectsTree | null,
   cohorts: Cohorts | null,
-  ongoingRuns: QueueJob[] | null,
+  queue: Job[] | null,
 
   selectedSubject: string | null,
   selectedCohort: string,
@@ -19,7 +19,7 @@ export interface SiteContext {
 const defaultContext = {
   cohorts: null,
   subjects: null,
-  ongoingRuns: null,
+  queue: null,
   
   selectedSubject: null,
   selectedCohort: null,

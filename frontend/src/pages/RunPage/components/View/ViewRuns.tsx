@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { Card, RadioChangeEvent, Skeleton, Space, Spin, Typography } from 'antd';
+import { Card, Drawer, RadioChangeEvent, Skeleton, Space, Spin, Typography } from 'antd';
 import { Radio, Tabs } from 'antd';
-import { QueueJob } from '../../../../util/types';
 import { context } from '../../../../util/context';
 // @ts-ignore
 import { UpOutlined, DownOutlined, DeleteOutlined } from '@ant-design/icons';
 import Queue from './Queue';
 import RunHistory from './RunHistory';
 import moment from 'moment';
+import { Job, JobStatus } from '../../../../core/types';
+import OngoingRunLogs from './OngoingRunLogs';
 
 const { Title, Paragraph, Text, Link } = Typography;
 
@@ -15,44 +16,10 @@ const styles = {
   radioButton: { width: 150, textAlign: 'center' as 'center' }
 }
 
-const renderOngoingRun = (ongoingRuns: QueueJob[] | null) => {
-  if (!ongoingRuns) {
-    return <Skeleton />
-  }
-
-  if (!(ongoingRuns as QueueJob[]).length) {
-    return <div>
-      There is no currently no run that is in progress
-    </div>
-  }
-
-  const runningTask = ongoingRuns[0] as QueueJob;
-
-
-  return (
-    <div>
-      {/* <Title style={{ textAlign: 'center'}} level={5}>Running Task:</Title> */}
-      <Card 
-        size="small" 
-        title={<div>{runningTask.description} <Spin style={{ marginLeft: 4 }} /></div>} 
-        extra={<a href="#">View Output</a>} 
-        style={{ width: 300 }}
-        >
-        {}
-        Started {moment(runningTask.startTime).fromNow()}
-        <br />
-        {/* <div style={{ textAlign: 'center' }}>
-        Executing
-
-        </div> */}
-      </Card>
-    </div>
-  )
-}
-
 const ViewRuns = () => {
-  const { ongoingRuns } = React.useContext(context);
+  const { queue } = React.useContext(context);
   const [view, setView]: [string, (view: string) => void] = useState(localStorage.getItem("runView") || 'queue');
+  const [openOngoingLog, setOpenOngoingLog]: [any, any] = useState(false);
 
   const handleModeChange = (e: RadioChangeEvent) => {
     const view = e.target.value;
@@ -60,20 +27,47 @@ const ViewRuns = () => {
     setView(view);
   };
   
-
-
-  // const queueDisabled = (ongoingRuns || []).length <= 1;
-
+  const renderOngoingRun = (queue: Job[] | null) => {
+    if (!queue) {
+      return <Skeleton />
+    }
+    const runningTask = queue.find(job => job.status === JobStatus.IN_PROGRESS);
+    if (!runningTask) {
+      return <div>
+        There is no currently no job that is in progress
+      </div>
+    }
+    return (
+      <div>
+        {/* <Title style={{ textAlign: 'center'}} level={5}>Running Task:</Title> */}
+        <Card 
+          size="small" 
+          title={<div>{runningTask.type} <Spin style={{ marginLeft: 4 }} /></div>} 
+          extra={<a href="#" onClick={() => setOpenOngoingLog(true)}>View Output</a>} 
+          style={{ width: 300 }}
+          >
+          {}
+          Started {moment(runningTask.startedAt).fromNow()}
+          <br />
+          {/* <div style={{ textAlign: 'center' }}>
+          Executing
+  
+          </div> */}
+        </Card>
+        <OngoingRunLogs
+          openOngoingLog={openOngoingLog}
+          setOpenOngoingLog={setOpenOngoingLog}
+        />
+      </div>
+    )
+  }
 
   return (
-    // <div style={{ paddingRight: 50, display: 'flex', flexDirection: 'column'}}>
-      // <Title level={2}>View Runs</Title>
       <Card 
-        title={<Title level={3}>View Runs</Title>}
+        title={<Title level={3}>Job Queue</Title>}
         // style={{ minHeight: '100% '}}
       >
-      {/* <Card title={<Title level={2}>View Runs</Title>}> */}
-      {renderOngoingRun(ongoingRuns)}
+      {renderOngoingRun(queue)}
       <br />
 
       <Radio.Group 
