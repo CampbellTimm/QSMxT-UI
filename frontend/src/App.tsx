@@ -1,9 +1,9 @@
-import { Layout, Menu, message, Image } from 'antd';
+import { Layout, Menu, Image } from 'antd';
 import { Routes, Route, Navigate } from "react-router-dom";
 import Home from './pages/Home/Home'
 import YourDataPage from './pages/YourDataPage/YourDataPage'
 import Run from './pages/RunPage/RunPage'
-import Qsm from './pages/Qsm/QSM'
+import Qsm from './pages/Results/Results'
 import { useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from "react";
 import apiClient from './util/apiClient';
@@ -14,7 +14,7 @@ import { API_URL } from './core/constants';
 import LoadingPage from './pages/LoadingPage/LoadingPage';
 import { FolderOpenOutlined, HomeOutlined, InsertRowLeftOutlined, PlaySquareOutlined } from '@ant-design/icons';
 
-const { Header, Content, Footer } = Layout;
+const { Header, Content } = Layout;
 
 const menuItems = [
   {
@@ -62,7 +62,8 @@ const styles = {
   }
 }
 
-export default () => {
+
+const App = () => {
   const [cohorts, setCohorts]: [any, any] = useState(null);
   const [subjects, setSubjects]: [any, any] = useState(null);
   const [selectedSubject, setSelectedSubject]: [any, any] = useState(null);
@@ -89,11 +90,11 @@ export default () => {
       const newQueue = JSON.parse(data);
 
 
-      queue && queue.forEach(prevRun => {
-        if (!newQueue.find(newRun => newRun.id === prevRun.id)) {
-          message.success(`${prevRun.type} completed`);
-        }
-      })
+      // queue && queue.forEach(prevRun => {
+      //   if (!newQueue.find(newRun => newRun.id === prevRun.id)) {
+      //     message.success(`${prevRun.type} completed`);
+      //   }
+      // })
 
 
       setQueue(newQueue);
@@ -179,3 +180,5 @@ export default () => {
     </Layout>
   )
 };
+
+export default App;

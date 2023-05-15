@@ -1,8 +1,8 @@
 import { Button, Card, Select, Tabs, Typography, message } from 'antd';
 import React, { useState } from 'react';
 import { runQsmPipeline } from '../../../../util/apiClient';
-import { Cohorts, SubjectsTree } from '../../../../util/types';
 import QsmRunStarter from './QsmRunStarter';
+import { Cohorts, SubjectsTree } from '../../../../types';
 
 const { Title, Paragraph, Text, Link } = Typography;
 const { TabPane } = Tabs;

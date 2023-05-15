@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Cohorts, Job, SubjectsTree } from "../core/types";
+import { Cohorts, Job, SubjectsTree } from "../types";
 import { message } from "antd";
 import { API_URL } from "../core/constants";
 
@@ -19,7 +19,7 @@ const updateCohort = async (cohort: string, subjects: string[]): Promise<boolean
     message.success(response.statusText);
     updated = true;
   } catch (err) {
-    message.error(err.message)
+    message.error((err as any).message)
   }
   return updated;
 }
@@ -34,7 +34,7 @@ const createCohort = async (cohort: string, cohortDescription: string): Promise<
     message.success(response.statusText);
     created = true;
   } catch (err) {
-    message.error(err.message);
+    message.error((err as any).message);
     created = false;
   }
   return created;
@@ -48,7 +48,7 @@ const deleteCohort = async (cohort: string): Promise<boolean> => {
     message.success(response.statusText);
     deleted = true;
   } catch (err) {
-    message.error(err.message)
+    message.error((err as any).message)
   }
   return deleted;
 }
@@ -122,7 +122,7 @@ export const copyDicoms = async (copyPath: string, usePatientNames: boolean, use
     });
     message.success(response.statusText);
   } catch (err) {
-    message.error(err.message);
+    message.error((err as any).message);
   }
 }
 

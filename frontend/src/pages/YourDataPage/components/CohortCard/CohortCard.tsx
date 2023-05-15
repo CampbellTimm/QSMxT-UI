@@ -3,7 +3,7 @@ import React, { ReactElement, useState } from 'react';
 import {  QuestionCircleOutlined } from '@ant-design/icons';
 import { context } from '../../../../util/context';
 import apiClient from '../../../../util/apiClient';
-import { Cohorts, Subject } from '../../../../core/types';
+import { Cohorts, Subject } from '../../../../types';
 import ViewCohort from './ViewCohort';
 import CreateCohort from './CreateCohort';
 

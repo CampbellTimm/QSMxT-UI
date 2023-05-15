@@ -5,7 +5,7 @@ import { context } from '../../../../util/context';
 // @ts-ignore
 import { UpOutlined, DownOutlined, DeleteOutlined } from '@ant-design/icons';
 import moment from 'moment';
-import { Job } from '../../../../core/types';
+import { Job } from '../../../../types';
 
 const { Title, Paragraph, Text, Link } = Typography;
 

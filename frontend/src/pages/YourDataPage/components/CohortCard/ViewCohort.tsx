@@ -3,7 +3,7 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import {  QuestionCircleOutlined } from '@ant-design/icons';
 import { context } from '../../../../util/context';
 import apiClient from '../../../../util/apiClient';
-import { Cohorts, Subject } from '../../../../core/types';
+import { Cohorts, Subject } from '../../../../types';
 
 const { Title, Text } = Typography;
 
@@ -40,8 +40,8 @@ const ViewCohort: React.FC<Props> = ({ cohorts, subjects, selectedCohort }) => {
     setLinkedSubjects(linkedSubjects);
   }
 
-  const tagRender = ({ value }) => {
-    const color = cohort.subjects.find(subject => subject == value)
+  const tagRender = (e: any) => {
+    const color = cohort.subjects.find(subject => subject == e.value)
       ? 'blue'
       : 'cyan';
     return (
@@ -52,10 +52,10 @@ const ViewCohort: React.FC<Props> = ({ cohorts, subjects, selectedCohort }) => {
           e.preventDefault();
         }}
         closable={true}
-        onClose={onRemoveLinkedTag(value)}
+        onClose={onRemoveLinkedTag(e.value)}
         style={{ marginRight: 3 }}
       >
-        {value}
+        {e.value}
       </Tag>
     )
   }

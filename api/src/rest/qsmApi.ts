@@ -1,13 +1,11 @@
-import { Express, Request, Response } from "express";
+import { Request, Response } from "express";
 import fs from "fs-extra";
 import { addJobToQueue } from "../core/jobHandler";
-import qsmxt from "../qsmxt/runQsmPipeline";
 import logger from "../core/logger";
-import { COHORTS_TREE_PATH, QSM_FOLDER } from "../constants";
+import { QSM_FOLDER } from "../constants";
 import path from "path";
-import { DicomConvertParameters, DicomSortParameters, JobType, QsmParameters } from "../types";
-import { unknownErrorHandler } from ".";
-import { queueSocket } from "../core/sockets";
+import { Cohort, Cohorts, DicomConvertParameters, DicomSortParameters, JobType, QsmParameters } from "../types";
+import database from "../database";
 
 // TODO - add back later
 // const uploadDicoms = async (req: any, res: any) => {
@@ -38,10 +36,14 @@ import { queueSocket } from "../core/sockets";
 const runQsmPipeline = async (request: Request, response: Response) => {
   logger.green("Received request to run QSM at " + new Date().toISOString());
   const { cohorts, subjects, premade } = request.body;
-  const cohortsTree = JSON.parse(fs.readFileSync(COHORTS_TREE_PATH, { encoding: 'utf-8'}));
+
+  const subjectsFromCohort: Cohort[] = await Promise.all((cohorts || [])
+    .map(database.cohorts.get.byName)
+  );
+
   const subjectsToRun = [...(subjects || [])];
-  (cohorts || []).forEach((cohort: any) => {
-    subjectsToRun.push(...cohortsTree[cohort])
+  (subjectsFromCohort).forEach((cohort: Cohort) => {
+    subjectsToRun.push(...cohort.subjects);
   });
   // switch to for loop
   subjectsToRun.forEach(subject => {

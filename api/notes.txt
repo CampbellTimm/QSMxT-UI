@@ -1,18 +1,19 @@
-
-
-Datbase setup:
+Install Database:
 sudo apt-get update
 sudo apt-get install postgresql postgresql-contrib
 sudo service postgresql start
 sudo service postgresql status # checks if online
 
 Creating User: (\q to exit)
-sudo -i -u postgres
-createuser --interactive
-psql
+sudo -u postgres createuser --interactive
+qsmxt
+y
 
 # set password for user
 sudo -u postgres psql
 \password postgres
+
+# create database
+
 
 need to create "user" user

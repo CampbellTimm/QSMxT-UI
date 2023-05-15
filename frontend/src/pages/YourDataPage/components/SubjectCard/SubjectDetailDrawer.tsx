@@ -3,7 +3,7 @@ import { Button, Upload, Collapse, Table, Descriptions, Select, UploadProps, mes
 import React, { useEffect, useState } from 'react';
 import NiiVue from '../../../../components/NiiVue/NiiVue';
 import { context } from '../../../../util/context';
-import { Subject, SubjectsTree } from '../../../../core/types';
+import { Subject, SubjectsTree } from '../../../../types';
 import { API_URL } from '../../../../core/constants';
 import axios from 'axios';
 
@@ -45,11 +45,11 @@ const SubjectDetailDrawer: React.FC<Props> = ({ subject, run, open, setOpen, ses
     }
   }, [open, imageType, selectedEcho])
 
-  const onChangeEcho = (e) => {
+  const onChangeEcho = (e: any) => {
     setSelectedEcho(e);
   }
 
-  const onChangeImageType = (e) => {
+  const onChangeImageType = (e: any) => {
     setImageType(e);
   }
 

@@ -7,7 +7,7 @@ import { UpOutlined, DownOutlined, DeleteOutlined } from '@ant-design/icons';
 import Queue from './Queue';
 import RunHistory from './RunHistory';
 import moment from 'moment';
-import { Job, JobStatus } from '../../../../core/types';
+import { Job, JobStatus } from '../../../../types';
 import OngoingRunLogs from './OngoingRunLogs';
 
 const { Title, Paragraph, Text, Link } = Typography;

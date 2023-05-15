@@ -9,7 +9,7 @@ interface Props {
 const LoadingPage: React.FC<Props> = ({ setLoading }) => {
   const [status, setStatus]: [any, any] = useState(null);
   
-  let interval;
+  let interval: any;
   useEffect(() => {
     const fetchStatus = async () => {
       const { status } = await apiClient.getStatus();

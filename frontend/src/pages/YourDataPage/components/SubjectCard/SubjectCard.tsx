@@ -3,7 +3,7 @@ import { Button, Upload, Collapse, Table, Descriptions, Select, UploadProps, mes
 import React, { useEffect, useState } from 'react';
 import NiiVue from '../../../../components/NiiVue/NiiVue';
 import { context } from '../../../../util/context';
-import { Subject, SubjectsTree } from '../../../../core/types';
+import { Subject, SubjectsTree } from '../../../../types';
 import SubjectDetailDrawer from './SubjectDetailDrawer';
 import apiClient from '../../../../util/apiClient';
 

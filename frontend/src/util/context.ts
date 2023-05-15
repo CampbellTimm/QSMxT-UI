@@ -1,5 +1,5 @@
 import React from 'react';
-import { Cohorts, Job, Subject, SubjectsTree } from '../core/types';
+import { Cohorts, Job, Subject, SubjectsTree } from '../types';
 import { NavigateFunction } from 'react-router-dom';
 
 export interface SiteContext {

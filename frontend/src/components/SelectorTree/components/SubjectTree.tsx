@@ -2,7 +2,7 @@ import { Tree } from 'antd';
 import type { DirectoryTreeProps } from 'antd/es/tree';
 import React, { useContext } from 'react';
 import { context } from '../../../util/context';
-import { Subject, SubjectsTree } from '../../../core/types';
+import { Subject, SubjectsTree } from '../../../types';
 
 const { DirectoryTree } = Tree;
 

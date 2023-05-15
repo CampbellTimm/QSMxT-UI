@@ -1,20 +1,36 @@
 import { createServer } from "./src/core/server";
-import database from "./src/database";
+import database, { setupDatabase } from "./src/database";
 import logger from "./src/core/logger";
 import { killChildProcess } from "./src/qsmxt";
+import { BIDS_FOLDER, DICOMS_FOLDER, QSM_FOLDER } from "./src/constants";
+import fs from "fs";
 
-if (process.env.DEBUG === 'true') {
-  logger.yellow("Debug Mode: wiping queue")
-  database.jobs.delete.incomplete().then();
+const setup = async () => {
+  if (process.env.DEBUG === 'true') {
+    logger.yellow("Debug Mode: wiping queue")
+    database.jobs.delete.incomplete().then();
+  }
+
+  [DICOMS_FOLDER, BIDS_FOLDER, QSM_FOLDER].forEach((folder: string) => {
+    if (!fs.existsSync(folder)) {
+      fs.mkdirSync(folder);
+    }
+  });  
+  
+  await setupDatabase();
+  await createServer();
+
+  logger.green("Done Setup");
 }
 
-createServer();
 
 const cleanup = () => {
   killChildProcess();
   console.log('Exiting Program');
   process.exit();
 }
+
+setup();
 
 process.on('exit', () => cleanup);
 process.on('SIGINT', cleanup);

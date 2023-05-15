@@ -1,5 +1,5 @@
 import { runDatabaseQuery } from ".";
-import { COHORTS_FILE_PATH, COHORT_SUBJECTS_TABLE_NAME, COHORT_TABLE_NAME, JOBS_TABLE_NAME } from "../constants";
+import { COHORT_SUBJECTS_TABLE_NAME, COHORT_TABLE_NAME, JOBS_TABLE_NAME } from "../constants";
 import logger from "../core/logger";
 import { Cohort, Cohorts } from "../types";
 

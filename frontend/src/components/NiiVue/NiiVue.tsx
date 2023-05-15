@@ -2,7 +2,11 @@ import { useRef, useEffect } from 'react'
 import { Niivue } from '@niivue/niivue'
 import React from "react";
 
-const NiiVue = ({ imageUrl }) => {
+interface Props {
+  imageUrl: string
+}
+
+const NiiVue: React.FC<Props> = ({ imageUrl }) => {
   const canvas = useRef()
   useEffect(() => {
     const volumeList = [

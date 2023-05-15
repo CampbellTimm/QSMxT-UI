@@ -3,7 +3,7 @@ import type { DataNode, DirectoryTreeProps } from 'antd/es/tree';
 import { Key } from 'antd/lib/table/interface';
 import React from 'react';
 import { context } from '../../../util/context';
-import { Cohorts } from '../../../core/types';
+import { Cohorts } from '../../../types';
 
 const { DirectoryTree } = Tree;
 const { Text } = Typography;
@@ -14,7 +14,7 @@ interface Props {
   // selectedCohort: string
 }
 
-const selectTreeNode = (selectedCohort, setSelectedCohort) => (keys: Key[], info: any) => {
+const selectTreeNode = (selectedCohort: string | null, setSelectedCohort: (cohort: string | null) => void) => (keys: Key[], info: any) => {
   if (info.node.key !== selectedCohort) {
     setSelectedCohort(info.node.key)
   } else {
