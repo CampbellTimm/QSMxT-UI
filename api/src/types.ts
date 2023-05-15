@@ -26,16 +26,16 @@ export type SubjectSessions =  {
 }
 
 export type SubjectsTree = {
-  [subject: string]: { 
+  // [subject: string]: { 
     sessions: SubjectSessions 
-  }
+  // }
 }
 
 export type Subject = {
   subject: string, 
   uploadFormat: SubjectUploadFormat, 
   parameters: DicomConvertParameters, 
-  dataTree: SubjectSession
+  dataTree: SubjectsTree
 }
 
 export enum JobStatus {
@@ -86,10 +86,12 @@ export type Job = {
   error?: string
 }
 
-export type Cohorts = {[cohort: string]: {
+export type Cohort = {
   description: string,
   subjects: string[]
-}}
+}
+
+export type Cohorts = {[cohortName: string]: Cohort}
 
 export enum SubjectUploadFormat {
   DICOM = 'DICOM'

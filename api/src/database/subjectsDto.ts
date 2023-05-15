@@ -1,6 +1,6 @@
 import { runDatabaseQuery } from ".";
 import { SUBJECT_TABLE_NAME } from "../constants";
-import { DicomConvertParameters, Subject, SubjectSessions, SubjectUploadFormat } from "../types";
+import { DicomConvertParameters, Subject, SubjectSessions, SubjectUploadFormat, SubjectsTree } from "../types";
 
 const formatRowsToSubjects = (subjects: any[]): Subject[] => {
   return subjects.map(subject => ({
@@ -27,7 +27,7 @@ const getAllSubjectsNames = async () => {
   return response.rows.map(row => row.subject);
 }
 
-const saveSubject = async (subject: string, uploadFormat: SubjectUploadFormat, parameters: DicomConvertParameters, dataTree: SubjectSessions) => {
+const saveSubject = async (subject: string, uploadFormat: SubjectUploadFormat, parameters: DicomConvertParameters, dataTree: SubjectsTree) => {
   await runDatabaseQuery(`
     INSERT INTO ${SUBJECT_TABLE_NAME} (subject, uploadFormat, parameters, dataTree)
     VALUES ('${subject}', '${uploadFormat}', '${JSON.stringify(parameters)}', '${JSON.stringify(dataTree)}');

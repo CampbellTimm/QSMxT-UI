@@ -64,6 +64,11 @@ const getSubjects = async (): Promise<SubjectsTree> => {
   return data as SubjectsTree;
 }
 
+// TODO - add subject deletion
+const deleteSubject = async (subject: string): Promise<null> => {
+  return null;
+}
+
 export const getJobsQueue = async (): Promise<Job[]> => {
   const getRunsPath = API_URL + '/jobs/queue';
   const response = await fetch(getRunsPath, {
@@ -127,6 +132,7 @@ export default {
   createCohort,
   updateCohort,
   getCohorts,
+  deleteSubject,
 
   copyDicoms,
   deleteCohort,

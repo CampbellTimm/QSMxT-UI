@@ -1,13 +1,13 @@
 import { Tree } from 'antd';
 import type { DirectoryTreeProps } from 'antd/es/tree';
-import React from 'react';
+import React, { useContext } from 'react';
 import { context } from '../../../util/context';
 import { Subject, SubjectsTree } from '../../../core/types';
 
 const { DirectoryTree } = Tree;
 
 const SubjectTree: React.FC = () => {
-  const { subjects, setSelectedSubject, navigate } = React.useContext(context);
+  const { subjects, selectedSubject, setSelectedSubject, navigate } = useContext(context);
 
   const onSelect: DirectoryTreeProps['onSelect'] = (keys, info) => {
     setSelectedSubject(info.node.key as string)
@@ -31,8 +31,6 @@ const SubjectTree: React.FC = () => {
     </div>
   }
 
-  console.log(subjects);
-
   const data = (subjects as Subject[]).map(({ subject, dataTree }) => {
     return  {
       title: subject,
@@ -41,7 +39,7 @@ const SubjectTree: React.FC = () => {
         return {
           title: sessionName,
           key: subject + '&' + sessionName,  // @ts-ignore
-          children: Object.keys(subjects[subjectName].sessions[sessionName].runs).map((run) => {
+          children: Object.keys(dataTree.sessions[sessionName].runs).map((run) => {
             return  { 
               title: 'run-' + run, 
               key: subject + '&' + sessionName + "&" + run,
@@ -57,9 +55,10 @@ const SubjectTree: React.FC = () => {
   return (
     <DirectoryTree
       multiple
-      defaultExpandAll
       onSelect={onSelect}
+      selectedKeys={selectedSubject ? [selectedSubject] : []}
       onExpand={onExpand}
+      defaultExpandedKeys={[]}
       treeData={data}
       style={{ minHeight: 250 }}
     />

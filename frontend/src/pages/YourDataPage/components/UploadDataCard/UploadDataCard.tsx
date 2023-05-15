@@ -1,7 +1,7 @@
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import { Button, Card, Input, Popover, Radio, Select, Steps, Typography } from 'antd';
 import React, { useState } from 'react';
-import apiClient from '../../../util/apiClient';
+import apiClient from '../../../../util/apiClient';
 
 const { Title, Paragraph, Text, Link } = Typography;
 
@@ -57,7 +57,7 @@ const optionPrompt = {
 }
 
 // TODO - Make steps clickable
-const UploadData: React.FC = () => {
+const UploadDataCard: React.FC = () => {
   const [step, setStep] = useState(1);
   const [dataType, setDataType] = useState(SubjectDataType.DICOM);
 
@@ -294,12 +294,14 @@ const UploadData: React.FC = () => {
 
   return (
     <Card
-      style={{ width: '100%', marginTop: 10 }}
+      style={{ width: '100%' }}
       title={
         <div style={{ display: 'flex', flexDirection: 'row'}}>
           <Title style={{ marginTop: 20 }} level={3}>Upload Data</Title>
           <Popover title={null} content={uploadHelperText()} >
-            <QuestionCircleOutlined style={{ color: '#1677ff', marginTop: 24, marginLeft: 5, fontSize: 15  }} />
+            <div style={{ marginTop: 15}}>
+              <QuestionCircleOutlined style={{ color: '#1677ff', marginLeft: 5, fontSize: 15  }} />
+            </div>
           </Popover>
         </div>
       }
@@ -333,4 +335,4 @@ const UploadData: React.FC = () => {
   )
 }
 
-export default UploadData;
+export default UploadDataCard;

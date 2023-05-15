@@ -20,6 +20,7 @@ const LoadingPage: React.FC<Props> = ({ setLoading }) => {
         setLoading(false);
       }
     }
+    fetchStatus();
     interval = setInterval(fetchStatus, 500);
   }, [])
 

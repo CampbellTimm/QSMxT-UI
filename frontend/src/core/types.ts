@@ -1,12 +1,12 @@
-export type SubjectEchos = {
-  [echoNumber: string]: {
-    magnitude: any,
-    phase: any,
-  }
-}
+// export type SubjectEchos = {
+//   [echoNumber: string]: {
+//     magnitude: any,
+//     phase: any,
+//   }
+// }
 
 export type SubjectRun = {
-  echos: SubjectEchos
+  echos: string[]
 }
 
 export type SubjectRuns = {
@@ -22,21 +22,21 @@ export type SubjectSessions =  {
 }
 
 export type SubjectsTree = {
-  [subject: string]: { 
+  // [subject: string]: { 
     sessions: SubjectSessions 
-  }
-}
-
-
-export enum SubjectUploadFormat {
-  DICOM = 'DICOM'
+  // }
 }
 
 export type Subject = {
   subject: string, 
   uploadFormat: SubjectUploadFormat, 
-  params: DicomConvertParameters, 
-  dataTree: SubjectSession
+  parameters: DicomConvertParameters, 
+  dataTree: SubjectsTree
+}
+
+
+export enum SubjectUploadFormat {
+  DICOM = 'DICOM'
 }
 
 export enum JobStatus {

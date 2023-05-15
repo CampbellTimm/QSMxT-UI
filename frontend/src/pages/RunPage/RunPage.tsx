@@ -12,6 +12,12 @@ const RunPage = () => {
         <Title level={1}>Run</Title>
       </div>
       <Divider />
+      {/* <div style={{ minWidth: '100%', textAlign: 'center' }}>
+      <Text >
+        This page is used to 
+      </Text>
+      </div> */}
+     
       <div style={{ display: 'flex', flexDirection: 'row' }}> 
         <div style={{ width: 370, marginRight: 100 }}> 
           <ViewRuns   />

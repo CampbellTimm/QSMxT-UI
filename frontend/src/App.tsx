@@ -33,7 +33,7 @@ const menuItems = [
     icon: <PlaySquareOutlined />
   },
   {
-    key: 'output',
+    key: 'results',
     label: 'Results',
     icon: <InsertRowLeftOutlined />
   },
@@ -69,6 +69,8 @@ export default () => {
   const [selectedCohort, setSelectedCohort]: [any, any] = useState(null);
   const [queue, setQueue]: [any, any] = useState(null);
   const [loading, setLoading]: [boolean, any] = useState(true);
+
+  console.log(selectedSubject);
 
   const fetchSubjectData = async () => {
     const subjects = await apiClient.getSubjects()
@@ -126,7 +128,7 @@ export default () => {
   return (
     <Layout>
       <div style={styles.flexBoxRow}>
-        <Header style={{ width: 'calc(100% - 350px)' }}>
+        <Header style={{ width: 'calc(100% - 320px)' }}>
           <Menu
             theme="dark"
             mode="horizontal"
@@ -165,7 +167,6 @@ export default () => {
                     <Route path="/run" element={<Run />} />
                     <Route path="/yourData" element={<YourDataPage />} />
                     <Route path="/output" element={<Qsm />} />
-                    <Route path="/" element={ <Navigate to="/home" /> }/>
                     <Route path="/" element={ <Navigate to="/home" /> } />
                   </Routes>  
                 </div>

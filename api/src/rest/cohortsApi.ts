@@ -34,6 +34,7 @@ const deleteCohort = async (request: Request, response: Response) => {
   if (!cohortName) {
     
   }
+  await database.cohorts.delete(cohortName);
   // await database.deleteCohort(cohortName);
   response.statusMessage = "Successfully deleted cohort";
   response.status(200).send();
@@ -41,7 +42,33 @@ const deleteCohort = async (request: Request, response: Response) => {
 }
 
 const updateCohort = async (request: Request, response: Response) => {
+  const { cohortName } = request.params;
+  console.log(cohortName);
+  const { subjects } = request.body;
+  if (!cohortName) {
+    
+  }
+  const cohort = await database.cohorts.get.byName(cohortName);
+  console.log(cohort);
+  if (!cohort) {
+    response.statusMessage = "The specified cohort does not exist";
+    response.status(404).send();
+    return;
+  }
+  const removedSubjects = cohort.subjects
+    .filter(savedSubject => !(subjects as string[]).find(subject => subject == savedSubject));
+  const newSubjects = (subjects as string[])
+    .filter(subject => !cohort.subjects.find(savedSubject => savedSubject === subject));
+  console.log(removedSubjects);
+  console.log(newSubjects);
 
+  await Promise.all([
+    database.cohorts.remove.subjects(cohortName, removedSubjects),
+    database.cohorts.add.subjects(cohortName, newSubjects),
+  ])
+
+  response.statusMessage = `Successfully updated cohort ${cohortName}`;
+  response.status(200).send();
 }
 
 

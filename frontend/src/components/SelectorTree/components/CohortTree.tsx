@@ -49,7 +49,7 @@ const CohortTree: React.FC<Props> = () => {
       children: cohorts[cohortName].subjects.map(subjectName => {
         return {
           title: subjectName,
-          key: subjectName,
+          key: cohortName + '&' + subjectName,
           isLeaf: true
         }
       })

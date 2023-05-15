@@ -109,7 +109,7 @@ const convertDicoms = async (parameters: DicomConvertParameters) => {
   });
   console.log(newSubjects);
   await Promise.all(newSubjects.map(async (subject) => {
-    return database.subjects.save(subject, SubjectUploadFormat.DICOM, parameters, getSessionsForSubject(subject));
+    return database.subjects.save(subject, SubjectUploadFormat.DICOM, parameters, { sessions: getSessionsForSubject(subject) });
   }));
   logger.green("Finished converting dicoms");
 }
