@@ -83,10 +83,10 @@ typings/
 .nuxt
 dist
 
-/api/public/qsmxt/bids/*
-/api/public/qsmxt/dicoms/*
-/api/public/qsmxt/qsm/*
-/api/public/qsmxt/logs/*
+/api/public/bids/*
+/api/public/dicoms/*
+/api/public/qsm/*
+/api/public/logs/*
 
 # Gatsby files
 .cache/

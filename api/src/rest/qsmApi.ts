@@ -70,27 +70,30 @@ const getQsmResults = async (request: Request, response: Response) => {
   // return;
 
 
-  const qsmResultSubjects: string[] = fs.readdirSync(QSM_FOLDER);
+  // const qsmResultSubjects: string[] = fs.readdirSync(QSM_FOLDER);
 
   const resultTree: any = {};
 
-  qsmResultSubjects.forEach(subject => {
+  // qsmResultSubjects.forEach(subject => {
 
-    resultTree[subject] = {};
-    const subjectResultFolder = path.join(QSM_FOLDER, subject);
+  //   resultTree[subject] = {};
+  //   const subjectResultFolder = path.join(QSM_FOLDER, subject);
 
-    const subjectRuns = fs.readdirSync(subjectResultFolder);
-    subjectRuns.forEach(runId => {
-      resultTree[subject][runId] = [];
-      const resultsFilesPath = path.join(subjectResultFolder, runId, "qsm_final/_qsmjl_rts0"); // FIND FOLDER DYNAMICALLY
-      const nifitis = fs.readdirSync(resultsFilesPath).filter(fileName => fileName.includes(".nii"));
-
-
-      resultTree[subject][runId] = nifitis;
-    })
+  //   const subjectRuns = fs.readdirSync(subjectResultFolder);
+  //   subjectRuns.forEach(runId => {
+  //     resultTree[subject][runId] = [];
+  //     const resultsFilesPath = path.join(subjectResultFolder, runId, "qsm_final/_qsmjl_rts0"); // FIND FOLDER DYNAMICALLY
+  //     const nifitis = fs.readdirSync(resultsFilesPath).filter(fileName => fileName.includes(".nii"));
 
 
-  })
+  //     resultTree[subject][runId] = nifitis;
+  //   })
+
+
+  // });
+
+
+
 
   response.status(200).send(resultTree);
 

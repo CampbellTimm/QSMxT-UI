@@ -1,5 +1,5 @@
 import { JOBS_TABLE_NAME } from "../constants";
-import { Job, JobStatus } from "../types"
+import { Job, JobStatus, JobType } from "../types"
 import { runDatabaseQuery } from ".";
 
 const formatRowsToJobs = (jobs: any[]): Job[] => {
@@ -68,10 +68,20 @@ const deleteIncompleteJobs = async () => {
   await runDatabaseQuery(query);
 }
 
+const getQsmJobs = async () => {
+  const query = `
+    SELECT * FROM ${JOBS_TABLE_NAME} 
+    WHERE type = '${JobType.QSM}' AND status = '${JobStatus.COMPLETE}'
+  `;
+  const response = await runDatabaseQuery(query);
+  return formatRowsToJobs(response.rows) as Job[];
+}
+
 export default {
   get: {
     incomplete: getIncompleteJobs,
-    complete: getCompleteJobs
+    complete: getCompleteJobs,
+    qsm: getQsmJobs
   },
   update: updateJob,
   save: saveJob,

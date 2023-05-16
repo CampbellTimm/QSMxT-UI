@@ -1,9 +1,11 @@
 import { Pool } from 'pg';
 
 const pool = new Pool({
+  // user: 'user',
   user: 'qsmxt',
   password: 'password',
   host: 'localhost',
+  // database: 'user'
   database: 'qsmxt'
 });
 
@@ -62,6 +64,8 @@ const createCohortSubjectsTable = async () => {
   console.log('Created table cohortSubjects');
 }
 
+
+// make subject not null
 const createJobsTable = async () => {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS jobs (

@@ -16,6 +16,9 @@ const styles = {
 const Queue = () => {
   const { queue } = React.useContext(context);
 
+  console.log(queue);
+
+  
   if (!queue) {
     return <div />
   }
@@ -27,6 +30,7 @@ const Queue = () => {
       No additional runs are in the queue
     </div>
   }
+
 
   return (
     <div style={{ overflowY: 'scroll' }}>
@@ -48,7 +52,7 @@ const Queue = () => {
                 <DeleteOutlined />
               ]}
               >
-              Started At: {run.startedAt}
+              Created {moment(run.createdAt).fromNow()}
             </Card>
           )
         })

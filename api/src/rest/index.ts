@@ -38,6 +38,7 @@ export const setupRestApiEndpoint = (app: Express) => {
 
   app.get('/jobs/queue', unknownErrorHandler(jobsApi.queue.get));
   app.get('/jobs/history', unknownErrorHandler(jobsApi.history.get));
+  app.get('/jobs/qsm', unknownErrorHandler(jobsApi.qsm.get));
 
   app.get('/subjects', unknownErrorHandler((subjectsApi.get)));
   app.post('/subjects/dicom', unknownErrorHandler((subjectsApi.upload.dicom)));

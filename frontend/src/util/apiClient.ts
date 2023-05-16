@@ -86,7 +86,7 @@ export const runQsmPipeline = async (params: any): Promise<void> => {
 }
 
 export const getQsmResults = async () => {
-  const getQsmResultsUrl = API_URL + '/qsm/results';
+  const getQsmResultsUrl = API_URL + '/jobs/qsm';
   const response = await fetch(getQsmResultsUrl, {
     headers: {
       "Access-Control-Request-Private-Network": "true"
@@ -139,5 +139,5 @@ export default {
 
   getSubjects,
 
-  getRuns: getJobsQueue
+  getJobsQueue
 }

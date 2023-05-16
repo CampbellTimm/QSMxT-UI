@@ -3,6 +3,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { DicomSortParameters, Job, JobParameters, JobStatus, JobType } from "../types";
 import { unknownErrorHandler } from ".";
 import database from "../database";
+import { QSM_FOLDER } from "../constants";
+import path from "path";
+import fs from "fs";
 
 const getJobHistory = async (request: Request, response: Response) => {
   const history = await database.jobs.get.complete();
@@ -14,11 +17,35 @@ const getJobQueue = async (request: Request, response: Response) => {
   response.status(200).send(history);
 }
 
+const getQsmJobs = async (request: Request, response: Response) => {
+  const qsmJobs = await database.jobs.get.qsm();
+  console.log(qsmJobs);
+
+  const withExtra = qsmJobs.map(job => {
+    const x = path.join(QSM_FOLDER, job.subject as string, job.id, 'qsm_final');
+    const folders = fs.readdirSync(x)
+    console.log(folders);
+    const folder = folders[0];
+    const images = fs.readdirSync(path.join(x, folder));
+    console.log(images);
+    return {
+      ...job,
+      images: images.map(image => path.join('qsm', job.subject as string, job.id, 'qsm_final', folder, image))
+    }
+  })
+
+
+  response.status(200).send(withExtra);
+}
+
 export default {
   history: {
     get: getJobHistory
   },
   queue: {
     get: getJobQueue
+  },
+  qsm: {
+    get: getQsmJobs
   }
 }

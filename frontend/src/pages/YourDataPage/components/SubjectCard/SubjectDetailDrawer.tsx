@@ -36,7 +36,7 @@ const SubjectDetailDrawer: React.FC<Props> = ({ subject, run, open, setOpen, ses
 
   useEffect(() => {
     const getMetadata = async () => {
-      const metadataUrl = `${API_URL}/qsmxt/bids/${subject.subject}/ses-1/anat/${subject.subject}_${session}_run-${run}_echo-${selectedEcho}_part-${imageType}_MEGRE.json`
+      const metadataUrl = `${API_URL}/bids/${subject.subject}/ses-1/anat/${subject.subject}_${session}_run-${run}_echo-${selectedEcho}_part-${imageType}_MEGRE.json`
       const response = await axios.get(metadataUrl);
       setImageMetadata(response.data)
     }
@@ -54,7 +54,7 @@ const SubjectDetailDrawer: React.FC<Props> = ({ subject, run, open, setOpen, ses
   }
 
   const renderImageAndDescriptions = () => {
-    const imageUrl = `${API_URL}/qsmxt/bids/${subject.subject}/ses-1/anat/${subject.subject}_${session}_run-${run}_echo-${selectedEcho}_part-${imageType}_MEGRE.nii`
+    const imageUrl = `${API_URL}/bids/${subject.subject}/ses-1/anat/${subject.subject}_${session}_run-${run}_echo-${selectedEcho}_part-${imageType}_MEGRE.nii`
     
     const columns = [{
       title: 'Field',

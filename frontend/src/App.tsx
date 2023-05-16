@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Home from './pages/Home/Home'
 import YourDataPage from './pages/YourDataPage/YourDataPage'
 import Run from './pages/RunPage/RunPage'
-import Qsm from './pages/Results/Results'
+import Results from './pages/Results/Results'
 import { useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from "react";
 import apiClient from './util/apiClient';
@@ -71,8 +71,6 @@ const App = () => {
   const [queue, setQueue]: [any, any] = useState(null);
   const [loading, setLoading]: [boolean, any] = useState(true);
 
-  console.log(selectedSubject);
-
   const fetchSubjectData = async () => {
     const subjects = await apiClient.getSubjects()
     setSubjects(subjects);
@@ -83,29 +81,33 @@ const App = () => {
     setCohorts(cohorts);
   }
 
-  const setupQueueSocket = async () => {
-    const socket = io(`${API_URL}/queue`);
-    socket.on('data', (data) => {
-      console.log('Received message:', data);
-      const newQueue = JSON.parse(data);
+      // const socket = io(`${API_URL}/queue`);
+    // socket.on('data', (data) => {
+    //   console.log('Received message:', data);
+    //   const newQueue = JSON.parse(data);
 
 
-      // queue && queue.forEach(prevRun => {
-      //   if (!newQueue.find(newRun => newRun.id === prevRun.id)) {
-      //     message.success(`${prevRun.type} completed`);
-      //   }
-      // })
+    //   // queue && queue.forEach(prevRun => {
+    //   //   if (!newQueue.find(newRun => newRun.id === prevRun.id)) {
+    //   //     message.success(`${prevRun.type} completed`);
+    //   //   }
+    //   // })
 
 
-      setQueue(newQueue);
+    //   setQueue(newQueue);
 
-    });
+    // });
+
+  const fetchQueueData = async () => {
+    const queue = await apiClient.getJobsQueue();
+    setQueue(queue);
   }
+
 
   useEffect(() => {
     fetchSubjectData();
     fetchCohortData();
-    setupQueueSocket();
+    fetchQueueData();
   },[]);
 
   const selectedKey = window.location.pathname.split('/')[window.location.pathname.split('/').length - 1] || 'home'
@@ -167,7 +169,7 @@ const App = () => {
                     <Route path="/home" element={<Home />} />
                     <Route path="/run" element={<Run />} />
                     <Route path="/yourData" element={<YourDataPage />} />
-                    <Route path="/output" element={<Qsm />} />
+                    <Route path="/results" element={<Results />} />
                     <Route path="/" element={ <Navigate to="/home" /> } />
                   </Routes>  
                 </div>

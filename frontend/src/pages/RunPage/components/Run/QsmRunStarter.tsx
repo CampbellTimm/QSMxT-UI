@@ -29,7 +29,7 @@ const QsmRunStarter = () => {
   }
 
   const run = async () => {
-    message.success("Running QSM Pipeline")
+    message.success("Running QSM Pipeline");
     await runQsmPipeline(params);
   }
   
@@ -57,7 +57,7 @@ const QsmRunStarter = () => {
         // value={sessions}
         onChange={changeParam('subjects')}
       >
-        {(subjects ? Object.keys(subjects) : []).map(x => <Option key={x}>{x}</Option>)}
+        {subjects ? (subjects as any).map((x: any) => <Option key={x.subject}>{x.subject}</Option>) : []}
         
       </Select>
       <br />

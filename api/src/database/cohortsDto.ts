@@ -3,7 +3,6 @@ import { COHORT_SUBJECTS_TABLE_NAME, COHORT_TABLE_NAME, JOBS_TABLE_NAME } from "
 import logger from "../core/logger";
 import { Cohort, Cohorts } from "../types";
 
-
 const formatRowToCohort = (row: any) => {
   const subjects = row.subjects 
     ? row.subjects.split(',') 
@@ -27,17 +26,6 @@ const getAllCohorts = async (): Promise<Cohorts> => {
   })
   return cohorts;
 }
-
-// const getCohortByName = async (cohortName: string): Promise<Cohort | null> => {
-//   const response = await runDatabaseQuery(`
-//     SELECT * FROM cohorts 
-//     WHERE cohort = '${cohortName}';
-//   `);
-//   return response.rows.length 
-//     ? response.rows[0]
-//     : null;
-// }
-
 
 const getCohortByName = async (cohortName: string): Promise<Cohort | null> => {
   const response = await runDatabaseQuery(`
