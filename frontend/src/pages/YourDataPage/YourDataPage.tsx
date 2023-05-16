@@ -8,7 +8,13 @@ const { Title } = Typography;
 
 const styles = {
   flexBoxRow: {
-    display: 'flex', flexDirection: 'row' as 'row', width: '100%', gap: 10, maxWidth: `1110`, flexWrap: 'wrap' as 'wrap'
+    display: 'flex', 
+    flexDirection: 'row' as 'row',
+    width: '100%', 
+    gap: 10, 
+    maxWidth: `1110`,
+    flexWrap: 'wrap' as 'wrap',
+    justifyContent: 'center' as 'center'
   }
 }
 
@@ -29,7 +35,7 @@ const YourDataPage: React.FC = () => {
         <div style={{ minWidth: '550px', maxWidth: "550px" }}>
           <SubjectCard />
         </div>
-        <div style={{ minWidth: '100%', maxWidth: '100%'  }}>
+        <div style={{ minWidth: '550px', maxWidth: '550px'  }}>
           <UploadDataCard />
         </div>
       </div>

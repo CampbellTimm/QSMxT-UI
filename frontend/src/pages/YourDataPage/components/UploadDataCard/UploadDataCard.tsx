@@ -225,7 +225,7 @@ const UploadDataCard: React.FC = () => {
       <Select 
         mode="multiple"
         allowClear
-        style={{ width: '600px' }}
+        style={{ width: '100%' }}
         placeholder="Please entere a protocol pattern..."
         value={t2starwProtocolPattern}
         options={t2Options}
@@ -244,7 +244,7 @@ const UploadDataCard: React.FC = () => {
       <Select 
         mode="multiple"
         allowClear
-        style={{ width: '600px' }}
+        style={{ width: '100%' }}
         placeholder="Please entere a protocol pattern..."
         value={t1wProtocolPattern}
         options={t1Options}

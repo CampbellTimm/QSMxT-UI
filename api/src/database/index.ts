@@ -4,6 +4,8 @@ import subjectsDto from './subjectsDto';
 import jobsDto from './jobsDto';
 import cohortsDto from './cohortsDto';
 import logger from "../core/logger";
+import { spawn } from "child_process";
+import { setupListeners } from "../qsmxt";
 
 const databasePool = new Pool({
   user: DATABASE_USER,
@@ -30,7 +32,7 @@ const createSubjectsTable = async () => {
       parameters TEXT
     )
   `);
-  console.log('Created table subjects');
+  logger.green('Created table subjects');
 }
 
 const createCohortsTable = async () => {
@@ -41,7 +43,7 @@ const createCohortsTable = async () => {
       PRIMARY KEY (cohort)
     )
   `)
-  console.log('Created table cohorts');
+  logger.green('Created table cohorts');
 }
 
 const createCohortSubjectsTable = async () => {
@@ -54,7 +56,7 @@ const createCohortSubjectsTable = async () => {
       FOREIGN KEY (cohort) REFERENCES cohorts(cohort)
     )
   `)
-  console.log('Created table cohortSubjects');
+  logger.green('Created table cohortSubjects');
 }
 
 const createJobsTable = async () => {
@@ -72,11 +74,25 @@ const createJobsTable = async () => {
       error TEXT
     )
   `)
-  console.log('Created table jobs');
+  logger.green('Created table jobs');
+}
+
+const startDatabase = async () => {
+  const databaseInitiator: any = spawn('sudo', ['service',  'postgresql', 'start']);
+  await new Promise((resolve, reject) => {
+    setupListeners(databaseInitiator,reject);
+    databaseInitiator.stdout.on('data', (data: any) => {
+      if (data.toString().includes('done')) {
+        resolve(null);
+      }
+    });
+  })
+  databaseInitiator.kill();
+  logger.green('Started database');
 }
 
 export const setupDatabase = async () => {
-  
+  await startDatabase();
   await createSubjectsTable();
   await createCohortsTable();
   await createCohortSubjectsTable();

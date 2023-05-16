@@ -126,7 +126,7 @@ export const copyDicoms = async (copyPath: string, usePatientNames: boolean, use
   }
 }
 
-export default {
+const apiClient = {
   getStatus,
   
   createCohort,
@@ -141,3 +141,6 @@ export default {
 
   getJobsQueue
 }
+
+
+export default apiClient;

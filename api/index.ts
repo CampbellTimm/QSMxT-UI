@@ -6,6 +6,8 @@ import { BIDS_FOLDER, DICOMS_FOLDER, QSM_FOLDER } from "./src/constants";
 import fs from "fs";
 
 const setup = async () => {
+  await setupDatabase();
+
   if (process.env.DEBUG === 'true') {
     logger.yellow("Debug Mode: wiping queue")
     database.jobs.delete.incomplete().then();
@@ -17,7 +19,6 @@ const setup = async () => {
     }
   });  
   
-  await setupDatabase();
   await createServer();
 
   logger.green("Done Setup");
@@ -30,8 +31,8 @@ const cleanup = () => {
   process.exit();
 }
 
-setup();
+setup().then();
 
-process.on('exit', () => cleanup);
-process.on('SIGINT', cleanup);
-process.on('SIGUSR2', cleanup);
+// process.on('exit', () => cleanup);
+// process.on('SIGINT', cleanup);
+// process.on('SIGUSR2', cleanup);
