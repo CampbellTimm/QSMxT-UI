@@ -16,6 +16,9 @@ export const runQsmPipeline = async (id: string, subject: string, premade: strin
     const completionString = 'INFO: Finished';
     await runQsmxtCommand(qsmxtCmmand, completionString);
     logger.green(`Finished running QSM Pipeline on ${subject}`);
+
+
+    // save the configuration JSON used
 }
 
 export default runQsmPipeline;
