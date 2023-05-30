@@ -27,7 +27,7 @@ const getAllSubjectsNames = async () => {
   return response.rows.map(row => row.subject);
 }
 
-const saveSubject = async (subject: string, uploadFormat: SubjectUploadFormat, parameters: DicomConvertParameters, dataTree: SubjectsTree) => {
+const saveSubject = async (subject: string, uploadFormat: SubjectUploadFormat, parameters: DicomConvertParameters | {}, dataTree: SubjectsTree) => {
   await runDatabaseQuery(`
     INSERT INTO ${SUBJECT_TABLE_NAME} (subject, uploadFormat, parameters, dataTree)
     VALUES ('${subject}', '${uploadFormat}', '${JSON.stringify(parameters)}', '${JSON.stringify(dataTree)}');

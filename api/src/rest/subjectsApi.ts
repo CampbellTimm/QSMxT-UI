@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
-import { DicomConvertParameters, DicomSortParameters, JobType, } from "../types";
+import { BIDsCopyParameters, DicomConvertParameters, DicomSortParameters, JobType, SubjectUploadFormat, } from "../types";
 import { unknownErrorHandler } from ".";
-import { addJobToQueue } from "../core/jobHandler";
-import logger from "../core/logger";
+import { addJobToQueue } from "../jobHandler";
+import logger from "../util/logger";
 import database from "../database";
+import fs from "fs";
 
 const uploadSubjectDicomData = async (request: Request, response: Response) => {
   logger.green("Received request to copy dicoms at " + new Date().toISOString());
@@ -35,6 +36,22 @@ const uploadSubjectDicomData = async (request: Request, response: Response) => {
   response.status(200).send();
 }
 
+const uploadSubjectBidsData = async (request: Request, response: Response) => {
+  logger.green("Received request to copy dicoms at " + new Date().toISOString());
+  const { copyPath, uploadingMultipleBIDs } = request.body;
+
+  // check already exists
+
+  const parameters = { 
+    copyPath: copyPath as string, 
+    uploadingMultipleBIDs: uploadingMultipleBIDs as boolean 
+  } as BIDsCopyParameters;
+
+  await addJobToQueue(JobType.BIDS_COPY, parameters);
+
+  response.statusMessage = "Starting copying BIDs data."
+  response.status(200).send();
+}
 
 const getSubjectsTree = async (request: Request, response: Response) => {
   const subjects = await database.subjects.get.all();
@@ -43,7 +60,8 @@ const getSubjectsTree = async (request: Request, response: Response) => {
 
 export default {
   upload: {
-    dicom: uploadSubjectDicomData
+    dicom: uploadSubjectDicomData,
+    bids: uploadSubjectBidsData
   },
   get: getSubjectsTree
 }

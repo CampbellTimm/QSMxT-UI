@@ -1,6 +1,6 @@
 import { Express, Request, Response } from "express";
 import database from '../database';
-import logger from "../core/logger";
+import logger from "../util/logger";
 import { unknownErrorHandler } from ".";
 
 const getCohorts = async (request: Request, response: Response) => {
@@ -43,13 +43,11 @@ const deleteCohort = async (request: Request, response: Response) => {
 
 const updateCohort = async (request: Request, response: Response) => {
   const { cohortName } = request.params;
-  console.log(cohortName);
   const { subjects } = request.body;
   if (!cohortName) {
     
   }
   const cohort = await database.cohorts.get.byName(cohortName);
-  console.log(cohort);
   if (!cohort) {
     response.statusMessage = "The specified cohort does not exist";
     response.status(404).send();
@@ -59,8 +57,6 @@ const updateCohort = async (request: Request, response: Response) => {
     .filter(savedSubject => !(subjects as string[]).find(subject => subject == savedSubject));
   const newSubjects = (subjects as string[])
     .filter(subject => !cohort.subjects.find(savedSubject => savedSubject === subject));
-  console.log(removedSubjects);
-  console.log(newSubjects);
 
   await Promise.all([
     database.cohorts.remove.subjects(cohortName, removedSubjects),

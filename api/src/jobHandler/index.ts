@@ -1,11 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
-import { DicomConvertParameters, DicomSortParameters, Job, JobParameters, JobStatus, JobType, QsmParameters } from "../types";
-import { BIDS_FOLDER, DICOMS_FOLDER, QSM_FOLDER } from "../constants";
+import { BIDsCopyParameters, DicomConvertParameters, DicomSortParameters, Job, JobParameters, JobStatus, JobType, QsmParameters, SegementationParameters } from "../types";
+import { BIDS_FOLDER, DICOMS_FOLDER, LOGS_FOLDER, QSM_FOLDER, SEGMENTATION_FOLDER } from "../constants";
 import qsmxt from "../qsmxt";
 import path from "path";
 import fs from "fs";
-import sockets, { getQueueSocket } from "./sockets";
-import logger from './logger';
+import sockets, { getQueueSocket } from "../util/sockets";
+import logger from '../util/logger';
 import database from '../database';
 
 let jobQueue: Job[] | null;
@@ -17,7 +17,7 @@ export const getJobQueue = async () => {
   return jobQueue;
 }
 
-const getJobResultsFolder = (jobType: JobType, subject: string, id: string) =>  {
+const getJobResultsFolder = (jobType: JobType, id: string, linkedQsmJob: string | undefined) => {
   if (jobType === JobType.DICOM_SORT) {
     return DICOMS_FOLDER;
   }
@@ -25,20 +25,28 @@ const getJobResultsFolder = (jobType: JobType, subject: string, id: string) =>  
     return BIDS_FOLDER;
   }
   if (jobType === JobType.QSM) {
-    return path.join(QSM_FOLDER, subject, id);
+    return path.join(QSM_FOLDER, id);
+  }
+  if (jobType === JobType.BIDS_COPY) {
+    return BIDS_FOLDER;
+  }
+  if (jobType === JobType.SEGMENTATION) {
+    return path.join(SEGMENTATION_FOLDER, linkedQsmJob as string);
   }
   return '';
 }
 
-const getLogFile = async (jobType: JobType, subject: string, id: string): Promise<string> => {
-  const rootFolder: string = getJobResultsFolder(jobType, subject, id);
+const getLogFile = async (jobType: JobType, id: string, linkedQsmJob: string | undefined): Promise<string> => {
+  const rootFolder: string = getJobResultsFolder(jobType, id, linkedQsmJob);
   let logFile = null;
   while (!logFile) {
     await new Promise(resolve => setTimeout(resolve, 300));
-    const dicomFiles = fs.readdirSync(rootFolder);
-    const potentialLogFile = dicomFiles.find(fileName => fileName.includes('log'));
-    if (potentialLogFile) {
-      logFile = potentialLogFile;
+    if (fs.existsSync(rootFolder)) {
+      const dicomFiles = fs.readdirSync(rootFolder);
+      const potentialLogFile = dicomFiles.find(fileName => fileName.includes('log') && fileName !== 'pypeline.log' && fileName !== 'qsmxt_log.log' );
+      if (potentialLogFile) {
+        logFile = potentialLogFile;
+      }
     }
   }
   return path.join(rootFolder, logFile);
@@ -83,35 +91,36 @@ const setJobToInProgress = async (jobId: string) => {
 }
 
 const runJob = async (jobId: string) => {
-  const { id, type, parameters } = await getJobById(jobId);
+  const { id, type, parameters, linkedQsmJob } = await getJobById(jobId);
+  let logFilePath: string = '';
   try {
     setJobToInProgress(jobId);
     let jobPromise;
-    let resultFolder;
     if (type === JobType.DICOM_SORT) {
-      // const { copyPath, usePatientNames, useSessionDates, checkAllFiles } = parameters as DicomSortParameters;
       jobPromise = qsmxt.sortDicoms(parameters as DicomSortParameters);
-      resultFolder = DICOMS_FOLDER;
     } else if (type === JobType.DICOM_CONVERT) {
       jobPromise = qsmxt.convertDicoms(parameters as DicomConvertParameters);
-      resultFolder = BIDS_FOLDER;
     } else if (type === JobType.QSM) {
-      const { subject, premade } = parameters as QsmParameters;
-      const subjectFolder = path.join(QSM_FOLDER, subject);
-      resultFolder = path.join(subjectFolder, id);
+      const { subjects, sessions, runs, pipelineConfig } = parameters as QsmParameters;
       try {
-        fs.mkdirSync(subjectFolder);
+        fs.mkdirSync(path.join(QSM_FOLDER, id));
       } catch (err) {}
-      try {
-        fs.mkdirSync(resultFolder);
-      } catch (err) {}
-      jobPromise = qsmxt.runQsmPipeline(id, subject, premade);
+      jobPromise = qsmxt.runQsmPipeline(id, subjects, sessions, runs, pipelineConfig);
+    } else if (type === JobType.SEGMENTATION) {
+      const { subjects, linkedQsmJob } = parameters as SegementationParameters;
+      jobPromise = qsmxt.runSegmentation(id, subjects, linkedQsmJob);
+    } else if (type === JobType.BIDS_COPY) {
+      const { copyPath, uploadingMultipleBIDs } = parameters as BIDsCopyParameters;
+      jobPromise = qsmxt.copyBids(copyPath, uploadingMultipleBIDs);
     }
-    const logFilePath = await getLogFile(type, (parameters as QsmParameters).subject || '', id);
+    logFilePath = await getLogFile(type, id, linkedQsmJob);
+    console.log(logFilePath);
     sockets.createInProgressSocket(logFilePath);
     await jobPromise;
-    setJobToComplete(id, JobStatus.COMPLETE)
+    setJobToComplete(id, JobStatus.COMPLETE);
+
   } catch (err) {
+    console.log(err);
     let errorMessage: any;
     if ((err as Error).message) {
       errorMessage = (err as Error).message
@@ -121,11 +130,16 @@ const runJob = async (jobId: string) => {
     logger.red(errorMessage)
     setJobToComplete(id, JobStatus.FAILED, errorMessage)
   }
+  if (logFilePath) {
+    const logContents = fs.readFileSync(logFilePath, { encoding: 'utf-8' });
+    fs.writeFileSync(path.join(LOGS_FOLDER, `${id}.log`), logContents, { encoding: 'utf-8' });
+  }
+
 }
 
 // TODO - FIX, doesnt work if there is jobs in queue on boot
 // TODO - add the cohort to job
-export const addJobToQueue = async (type: JobType, parameters: JobParameters): Promise<string> => {
+export const addJobToQueue = async (type: JobType, parameters: JobParameters, linkedQsmJob: string | null = null, description: string | null = null): Promise<string> => {
   const id = uuidv4();
   const createdAt = new Date().toISOString();
   const job: Job = {
@@ -135,14 +149,18 @@ export const addJobToQueue = async (type: JobType, parameters: JobParameters): P
     createdAt,
     startedAt: null,
     finishedAt: null,
-    parameters
+    parameters,
   }
-  if ((parameters as QsmParameters).subject) {
-    job.subject = (parameters as QsmParameters).subject;
+  if (linkedQsmJob) {
+    job.linkedQsmJob = linkedQsmJob;
   }
-  // if (parameters.cohort) {
+  if (description) {
+    job.description = description;
+  }
+  console.log(job);
 
-  // }
+  // TODO - SAVE SUBJECTS LINKED TO JOB
+
   await database.jobs.save(job);
   jobQueue = await database.jobs.get.incomplete();
   const queueSocket = getQueueSocket();

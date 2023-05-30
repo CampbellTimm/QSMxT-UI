@@ -3,7 +3,7 @@ import { DATABASE_HOST, DATABASE_NAME, DATABASE_PASSWORD, DATABASE_USER } from "
 import subjectsDto from './subjectsDto';
 import jobsDto from './jobsDto';
 import cohortsDto from './cohortsDto';
-import logger from "../core/logger";
+import logger from "../util/logger";
 import { spawn } from "child_process";
 import { setupListeners } from "../qsmxt";
 
@@ -93,10 +93,11 @@ const startDatabase = async () => {
 
 export const setupDatabase = async () => {
   await startDatabase();
-  await createSubjectsTable();
-  await createCohortsTable();
-  await createCohortSubjectsTable();
-  await createJobsTable();
+  // TODO - fix 
+  // await createSubjectsTable();
+  // await createCohortsTable();
+  // await createCohortSubjectsTable();
+  // await createJobsTable();
 }
 
 export default {

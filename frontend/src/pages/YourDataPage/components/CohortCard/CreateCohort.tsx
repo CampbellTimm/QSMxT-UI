@@ -6,7 +6,7 @@ import apiClient from '../../../../util/apiClient';
 const { Title } = Typography;
 
 const CreateCohort: React.FC = () => {
-  const {  setSelectedCohort, fetchCohortData } = useContext(context);
+  const { setSelectedCohorts, fetchCohortData } = useContext(context);
   const [creating, setCreating]: [boolean, any] = useState(false);
 
   const createCohort = async (cohortName: string, cohortDescription: string) => {
@@ -15,7 +15,7 @@ const CreateCohort: React.FC = () => {
     setCreating(false);
     if (created) {
       await fetchCohortData();
-      setSelectedCohort(cohortName);
+      setSelectedCohorts([cohortName]);
     }
   }
 

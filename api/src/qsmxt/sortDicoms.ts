@@ -1,7 +1,7 @@
 
 import { DicomSortParameters } from "../types";
 import { DICOMS_FOLDER } from "../constants";
-import logger from "../core/logger";
+import logger from "../util/logger";
 import { runQsmxtCommand } from ".";
 
 // TODO - DELETE ORIGINALS PARAMETER???

@@ -1,4 +1,4 @@
-import { QuestionCircleOutlined, UploadOutlined } from '@ant-design/icons';
+import { QuestionCircleOutlined, UploadOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Upload, Collapse, Table, Descriptions, Select, UploadProps, message, Card, Typography, Popover, Divider, Row, Col, Popconfirm } from 'antd';
 import React, { useEffect, useState } from 'react';
 import NiiVue from '../../../../components/NiiVue/NiiVue';
@@ -24,7 +24,7 @@ const explanatoryText = () => <Text>
 
 
 const SubjectCard: React.FC = () => {
-  const { selectedSubject, subjects, navigate, setSelectedCohort, setSelectedSubject, fetchSubjectData } = React.useContext(context);
+  const { selectedSubjects, subjects, navigate, setSelectedCohorts, setSelectedSubjects, fetchSubjectData } = React.useContext(context);
 
   const [openDrawer, setOpenDrawer]: [any, any] = useState(false);
 
@@ -34,20 +34,21 @@ const SubjectCard: React.FC = () => {
   const deleteSubject = (selectedSubject: string) => async () => {
     const deleted = await apiClient.deleteSubject(selectedSubject);
     if (deleted) {
-      setSelectedSubject(null);
+      // TODO - only remove the only subject
+      setSelectedSubjects([]);
       await fetchSubjectData()
     }
   }
 
   const navigateToSubjectResults = (selectedSubject: string) =>  () => {
-    setSelectedCohort(null);
-    setSelectedSubject(selectedSubject);
+    setSelectedCohorts([]);
+    setSelectedSubjects([selectedSubject]);
     navigate('/results');
   }
 
   const renderSubjectDetail = (subjects: Subject[], selectedSubject: string): JSX.Element => {
     const keys = selectedSubject.split("&");
-    const subjectName = keys[0];
+    const subjectName: string = keys[0];
     const subject = subjects.find(sub => sub.subject === subjectName) as Subject;
     const openRunDetailButtonDisabled = keys.length !== 3;
     const openRunButton = (
@@ -95,7 +96,7 @@ const SubjectCard: React.FC = () => {
             Number of Subject Sessions:  
           </Col>
           <Col>
-            {2}
+            {Object.keys(subject.dataTree.sessions).length}
           </Col>
         </Row>
         <Row>
@@ -103,15 +104,16 @@ const SubjectCard: React.FC = () => {
             Number of Runs per Session:  
           </Col>
           <Col>
-            {2}
+          {Object.keys(subject.dataTree.sessions[Object.keys(subject.dataTree.sessions)[0]].runs).length}
           </Col>
         </Row>
         <Row>
           <Col span={10} >
             Number of Echos per Run:  
           </Col>
-          <Col>
-            {2}
+          <Col> 
+          {/* TODO - FIX */}
+            {5}
           </Col>
         </Row>
         <Row>
@@ -119,7 +121,7 @@ const SubjectCard: React.FC = () => {
             Upload Type:  
           </Col>
           <Col>
-            DICOM
+            {subject.uploadFormat}
           </Col>
         </Row>
         <br />
@@ -156,13 +158,18 @@ const SubjectCard: React.FC = () => {
   return (
     <Card 
       title={
-        <div style={{ display: 'flex', flexDirection: 'row'}}>
-          <Title style={{ marginTop: 20 }} level={3}>Subject </Title>
-          <Popover title={null} content={subjectHelperText()} >
-            <div style={{ marginTop: 15}}>
-              <QuestionCircleOutlined style={{ color: '#1677ff', marginLeft: 5, fontSize: 15  }} />
-            </div>
-          </Popover>
+        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}} >
+          <div style={{ display: 'flex', flexDirection: 'row'}}>
+            <Title style={{ marginTop: 20 }} level={3}>Subject </Title>
+            <Popover title={null} content={subjectHelperText()} >
+              <div style={{ marginTop: 15}}>
+                <QuestionCircleOutlined style={{ color: '#1677ff', marginLeft: 5, fontSize: 15  }} />
+              </div>
+            </Popover>
+          </div>
+          <div style={{  marginTop: 20, }}>
+            <UserOutlined style={{ color: '#1677ff', fontSize: 28 }} />
+          </div>
         </div>
       }
       // style={{ width: '550px'  }}
@@ -170,8 +177,8 @@ const SubjectCard: React.FC = () => {
     > 
       <div style={{ marginRight: 20}}>
         {explanatoryText()}
-        {selectedSubject
-          ? renderSubjectDetail(subjects, selectedSubject)
+        {selectedSubjects.length
+          ? renderSubjectDetail(subjects, selectedSubjects[0])
           : renderNoSelectedSubjectText(subjects)
         }
       </div>

@@ -1,6 +1,6 @@
 import { runDatabaseQuery } from ".";
 import { COHORT_SUBJECTS_TABLE_NAME, COHORT_TABLE_NAME, JOBS_TABLE_NAME } from "../constants";
-import logger from "../core/logger";
+import logger from "../util/logger";
 import { Cohort, Cohorts } from "../types";
 
 const formatRowToCohort = (row: any) => {

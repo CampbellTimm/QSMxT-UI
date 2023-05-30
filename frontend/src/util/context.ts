@@ -2,36 +2,49 @@ import React from 'react';
 import { Cohorts, Job, Subject, SubjectsTree } from '../types';
 import { NavigateFunction } from 'react-router-dom';
 
+export enum Page {
+  Home = 'home',
+  YourData = 'yourData',
+  Run = 'run',
+  Results = 'results'
+}
+
 export interface SiteContext {
+  page: Page,
+
   subjects: Subject[] | null,
   cohorts: Cohorts | null,
   queue: Job[] | null,
 
-  selectedSubject: string | null,
-  selectedCohort: string,
+  selectedSubjects: string[],
+  selectedCohorts: string[],
 
-  setSelectedCohort: (cohort: string | null) => void,
-  setSelectedSubject: (subject: string | null) => void,
+  setSelectedCohorts: (cohorts: string[]) => void,
+  setSelectedSubjects: (subjects: string[]) => void,
+  fetchQueueData: () => void,
 
   fetchSubjectData: () => Promise<void>
   fetchCohortData: () => Promise<void>
   navigate: NavigateFunction
 }
 
-const defaultContext = {
+const defaultContext: SiteContext = {
+  page: Page.Home,
+
   cohorts: null,
   subjects: null,
   queue: null,
   
-  selectedSubject: null,
-  selectedCohort: null,
+  selectedSubjects: [],
+  selectedCohorts: [],
 
-  setSelectedCohort: (cohort: string | null) => {},
-  setSelectedSubject: (subject: string | null) => {},
+  setSelectedCohorts: (cohorts: string[]) => {},
+  setSelectedSubjects: (subjects: string[]) => {},
 
   fetchSubjectData: async () => {},
   fetchCohortData: async () => {},
-  navigate: (path: string) => {}
+  navigate: () => {},
+  fetchQueueData: () => {},
 
 }
 

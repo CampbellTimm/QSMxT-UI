@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import fs from "fs-extra";
-import { addJobToQueue } from "../core/jobHandler";
-import logger from "../core/logger";
+import { addJobToQueue } from "../jobHandler";
+import logger from "../util/logger";
 import { QSM_FOLDER } from "../constants";
 import path from "path";
-import { Cohort, Cohorts, DicomConvertParameters, DicomSortParameters, JobType, QsmParameters } from "../types";
+import { Cohort, Cohorts, DicomConvertParameters, DicomSortParameters, JobType, QsmParameters, SegementationParameters } from "../types";
 import database from "../database";
 
 // TODO - add back later
@@ -31,35 +31,38 @@ import database from "../database";
 
 
 // TODO - Copy to 'unsorted' before adding to queue
-
-
 const runQsmPipeline = async (request: Request, response: Response) => {
   logger.green("Received request to run QSM at " + new Date().toISOString());
-  const { cohorts, subjects, premade } = request.body;
-
+  console.log(request.body);
+  const { sessions, runs, pipelineConfig, subjects, cohorts, createSegmentation, description } = request.body;
   const subjectsFromCohort: Cohort[] = await Promise.all((cohorts || [])
     .map(database.cohorts.get.byName)
   );
-
   const subjectsToRun = [...(subjects || [])];
   (subjectsFromCohort).forEach((cohort: Cohort) => {
     subjectsToRun.push(...cohort.subjects);
   });
-  // switch to for loop
-  subjectsToRun.forEach(subject => {
-    const qsmParameters: QsmParameters = {
-      subject,
-      premade
+  const qsmParameters: QsmParameters = {
+    subjects: subjectsToRun,
+    sessions,
+    runs,
+    pipelineConfig,
+    
+  }
+  // const linkedQsmJob = "1d53d0b3-1ccd-4209-8d33-1c65a1d63174";
+  const linkedQsmJob = await addJobToQueue(JobType.QSM, qsmParameters, null, description);
+  console.log(createSegmentation);
+  if (createSegmentation) {
+
+    const segementationParameters: SegementationParameters = {
+      subjects: subjectsToRun,
+      linkedQsmJob
     }
-    // await 
-    addJobToQueue(JobType.QSM, qsmParameters);
-  })
+    addJobToQueue(JobType.SEGMENTATION, segementationParameters, linkedQsmJob);
+  }
   response.status(200).send();
 }
 
-const runSegmentation = () => {
-
-}
 
 const getQsmResults = async (request: Request, response: Response) => {
   // console.log(queueSocket);
@@ -71,8 +74,9 @@ const getQsmResults = async (request: Request, response: Response) => {
 
 
   // const qsmResultSubjects: string[] = fs.readdirSync(QSM_FOLDER);
-
-  const resultTree: any = {};
+  const results = await database.jobs.get.qsmResults();
+  // console.log(results);
+  // const resultTree: any = {};
 
   // qsmResultSubjects.forEach(subject => {
 
@@ -92,10 +96,24 @@ const getQsmResults = async (request: Request, response: Response) => {
 
   // });
 
+  const x = results.map((result: any) => {
+    const qsmImageFolder = fs.readdirSync(path.join(QSM_FOLDER, result.id, 'qsm_final'))[0];
+    let qsmImages: any = [];
 
+    if (qsmImageFolder) {
+      qsmImages = fs.readdirSync(path.join(QSM_FOLDER, result.id, 'qsm_final', qsmImageFolder)).map((fileName: string) => {
+        return `http://localhost:4000/qsm/${result.id}/qsm_final/${qsmImageFolder}/${fileName}`
+      });
+    }
 
+    return {
+      ...result,
+      analysisResults: JSON.parse(fs.readFileSync(path.join(QSM_FOLDER, result.id, 'results.json'), { encoding: 'utf-8' })),
+      qsmImages
+    }
+  });
 
-  response.status(200).send(resultTree);
+  response.status(200).send(x);
 
   // logYellow(qsmResultSubjects);
 }

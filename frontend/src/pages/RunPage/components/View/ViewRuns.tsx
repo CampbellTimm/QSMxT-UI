@@ -4,11 +4,12 @@ import { Radio, Tabs } from 'antd';
 import { context } from '../../../../util/context';
 // @ts-ignore
 import { UpOutlined, DownOutlined, DeleteOutlined } from '@ant-design/icons';
-import Queue from './Queue';
-import RunHistory from './RunHistory';
+import Queue from './Ongoing/Queue';
+import RunHistory from './History/RunHistory';
 import moment from 'moment';
 import { Job, JobStatus } from '../../../../types';
-import OngoingRunLogs from './OngoingRunLogs';
+import OngoingRunLogs from './Ongoing/OngoingRunLogs';
+import HistoryRunLogs from './History/HistoryRunLogs';
 
 const { Title, Paragraph, Text, Link } = Typography;
 
@@ -20,6 +21,7 @@ const ViewRuns = () => {
   const { queue } = React.useContext(context);
   const [view, setView]: [string, (view: string) => void] = useState(localStorage.getItem("runView") || 'queue');
   const [openOngoingLog, setOpenOngoingLog]: [any, any] = useState(false);
+
 
   const handleModeChange = (e: RadioChangeEvent) => {
     const view = e.target.value;
@@ -43,7 +45,7 @@ const ViewRuns = () => {
         <Card 
           size="small" 
           title={<div>{runningTask.type} <Spin style={{ marginLeft: 4 }} /></div>} 
-          extra={<a href="#" onClick={() => setOpenOngoingLog(true)}>View Output</a>} 
+          extra={<a href="#" onClick={() => setOpenOngoingLog(true)}>View Logs</a>} 
           style={{ width: 300 }}
           >
           {}
@@ -54,10 +56,15 @@ const ViewRuns = () => {
   
           </div> */}
         </Card>
-        <OngoingRunLogs
-          openOngoingLog={openOngoingLog}
-          setOpenOngoingLog={setOpenOngoingLog}
-        />
+        {
+          openOngoingLog && 
+            <OngoingRunLogs
+              openOngoingLog={openOngoingLog}
+              setOpenOngoingLog={setOpenOngoingLog}
+            />
+        }
+         
+        
       </div>
     )
   }

@@ -17,26 +17,23 @@ const getJobQueue = async (request: Request, response: Response) => {
   response.status(200).send(history);
 }
 
-const getQsmJobs = async (request: Request, response: Response) => {
-  const qsmJobs = await database.jobs.get.qsm();
-  console.log(qsmJobs);
+// const getQsmJobs = async (request: Request, response: Response) => {
+//   const qsmJobs = await database.jobs.get.qsm();
 
-  const withExtra = qsmJobs.map(job => {
-    const x = path.join(QSM_FOLDER, job.subject as string, job.id, 'qsm_final');
-    const folders = fs.readdirSync(x)
-    console.log(folders);
-    const folder = folders[0];
-    const images = fs.readdirSync(path.join(x, folder));
-    console.log(images);
-    return {
-      ...job,
-      images: images.map(image => path.join('qsm', job.subject as string, job.id, 'qsm_final', folder, image))
-    }
-  })
+//   const withExtra = qsmJobs.map(job => {
+//     const x = path.join(QSM_FOLDER, job.subject as string, job.id, 'qsm_final');
+//     const folders = fs.readdirSync(x)
+//     const folder = folders[0];
+//     const images = fs.readdirSync(path.join(x, folder));
+//     return {
+//       ...job,
+//       images: images.map(image => path.join('qsm', job.subject as string, job.id, 'qsm_final', folder, image))
+//     }
+//   })
 
 
-  response.status(200).send(withExtra);
-}
+//   response.status(200).send(withExtra);
+// }
 
 export default {
   history: {
@@ -45,7 +42,7 @@ export default {
   queue: {
     get: getJobQueue
   },
-  qsm: {
-    get: getQsmJobs
-  }
+  // qsm: {
+  //   get: getQsmJobs
+  // }
 }

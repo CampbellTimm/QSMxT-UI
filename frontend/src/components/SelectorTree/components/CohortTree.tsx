@@ -1,32 +1,52 @@
 import { Tree, Typography } from 'antd';
 import type { DataNode, DirectoryTreeProps } from 'antd/es/tree';
 import { Key } from 'antd/lib/table/interface';
-import React from 'react';
-import { context } from '../../../util/context';
+import React, { useContext, useEffect, useState } from 'react';
+import { Page, context } from '../../../util/context';
 import { Cohorts } from '../../../types';
+import { UserOutlined, UsergroupAddOutlined } from '@ant-design/icons';
 
 const { DirectoryTree } = Tree;
 const { Text } = Typography;
 
-interface Props {
-  // cohorts: Cohorts,
-  // setSelectedCohort: any,
-  // selectedCohort: string
-}
+const CohortTree: React.FC<{}> = () => {
+  const { cohorts, selectedCohorts, setSelectedCohorts, navigate, page } = useContext(context);
 
-const selectTreeNode = (selectedCohort: string | null, setSelectedCohort: (cohort: string | null) => void) => (keys: Key[], info: any) => {
-  if (info.node.key !== selectedCohort) {
-    setSelectedCohort(info.node.key)
-  } else {
-    setSelectedCohort(null);
+  const [expandedKeys, setExpandedKeys] = useState([]);
+
+  useEffect(() => {
+    if (page === Page.YourData || page === Page.Results || page === Page.Home) {
+      setSelectedCohorts(selectedCohorts.length ? [selectedCohorts[0]] : []);
+    }
+    if (page === Page.Run) {
+      // setExpandedKeys([])
+    }
+  }, [page]);
+
+  const selectTreeNode = (selectedCohorts: string[], setSelectedCohorts: (cohorts: string[]) => void, setExpandedKeys: (keys: any) => void, page: Page) => (keys: Key[], info: any) => {
+    const selectedKey = info.node.key;
+    const [clickedCohort, clickedSubject] = selectedKey.split("&");
+    if (page === Page.YourData || page === Page.Results || page === Page.Home){
+      if (!selectedCohorts.find(cohort => cohort === selectedKey)) {
+        setSelectedCohorts([clickedCohort]);
+        setExpandedKeys([clickedCohort]); 
+      } else {
+        setSelectedCohorts([]);
+        setExpandedKeys([]);
+      }
+    } else if (page === Page.Run) {
+      if (!selectedCohorts.find(cohort => cohort === clickedCohort)) {
+        setSelectedCohorts(selectedCohorts.concat(selectedKey));
+        setExpandedKeys(selectedCohorts.concat(selectedKey));
+      } else {
+        setSelectedCohorts(selectedCohorts.filter(selectedCohort => selectedCohort !== selectedKey));
+        setExpandedKeys(selectedCohorts.filter(selectedCohort => selectedCohort !== selectedKey));
+      }
+    }
   }
-}
-
-const CohortTree: React.FC<Props> = () => {
-  const { cohorts, selectedCohort, setSelectedCohort, navigate } = React.useContext(context);
-
-  const onSelect: DirectoryTreeProps['onSelect'] = selectTreeNode(selectedCohort, setSelectedCohort);
-  const onExpand: DirectoryTreeProps['onSelect'] = selectTreeNode(selectedCohort, setSelectedCohort);
+  
+  const onSelect: DirectoryTreeProps['onSelect'] = selectTreeNode(selectedCohorts, setSelectedCohorts, setExpandedKeys, page);
+  const onExpand: DirectoryTreeProps['onSelect'] = selectTreeNode(selectedCohorts, setSelectedCohorts, setExpandedKeys, page);
 
   if (!cohorts) {
     return <div style={{ minHeight: 250 }}/>
@@ -41,16 +61,17 @@ const CohortTree: React.FC<Props> = () => {
     </div>
   }
 
-  const treeData = Object.keys(cohorts).map(cohortName => {
+  const treeData = Object.keys(cohorts as Cohorts).map(cohortName => {
     return {
       title: cohortName,
       key: cohortName,
-      // @ts-ignore
-      children: cohorts[cohortName].subjects.map(subjectName => {
+      icon : <UsergroupAddOutlined />,
+      children: (cohorts  as Cohorts)[cohortName].subjects.map(subjectName => {
         return {
           title: subjectName,
           key: cohortName + '&' + subjectName,
-          isLeaf: true
+          isLeaf: true,
+          icon: <UserOutlined />
         }
       })
     }
@@ -60,10 +81,10 @@ const CohortTree: React.FC<Props> = () => {
     <DirectoryTree
       multiple
       onSelect={onSelect}
-      selectedKeys={selectedCohort ? [selectedCohort] : []}
-      defaultSelectedKeys={[]}
-      defaultExpandedKeys={[]}
+      selectedKeys={selectedCohorts}
+      expandedKeys={expandedKeys}
       onExpand={onExpand as any}
+    
       treeData={treeData}
       height={250}
       style={{ minHeight: 250 }}

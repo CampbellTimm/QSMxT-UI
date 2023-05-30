@@ -1,6 +1,6 @@
-import { createServer } from "./src/core/server";
+import { createRestApi } from "./src/rest";
 import database, { setupDatabase } from "./src/database";
-import logger from "./src/core/logger";
+import logger from "./src/util/logger";
 import { killChildProcess } from "./src/qsmxt";
 import { BIDS_FOLDER, DICOMS_FOLDER, QSM_FOLDER } from "./src/constants";
 import fs from "fs";
@@ -19,7 +19,7 @@ const setup = async () => {
     }
   });  
   
-  await createServer();
+  await createRestApi();
 
   logger.green("Done Setup");
 }
@@ -33,6 +33,6 @@ const cleanup = () => {
 
 setup().then();
 
-// process.on('exit', () => cleanup);
-// process.on('SIGINT', cleanup);
-// process.on('SIGUSR2', cleanup);
+process.on('exit', () => cleanup);
+process.on('SIGINT', cleanup);
+process.on('SIGUSR2', cleanup);

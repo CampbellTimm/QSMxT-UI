@@ -1,6 +1,6 @@
 import { Select, Input, Card, Typography, Divider, Button, Popconfirm, Popover, Form, Tag } from 'antd';
 import React, { ReactElement, useState } from 'react';
-import {  QuestionCircleOutlined } from '@ant-design/icons';
+import {  QuestionCircleOutlined, UsergroupAddOutlined } from '@ant-design/icons';
 import { context } from '../../../../util/context';
 import apiClient from '../../../../util/apiClient';
 import { Cohorts, Subject } from '../../../../types';
@@ -21,7 +21,7 @@ const cohortHelperText = () => <Text>
 </Text>
 
 const CohortCard: React.FC = () => {
-  const { selectedCohort, subjects, cohorts, setSelectedCohort, fetchCohortData } = React.useContext(context);
+  const { selectedCohorts, subjects, cohorts, setSelectedCohorts, fetchCohortData } = React.useContext(context);
 
   if (!subjects || !cohorts) {
     return <div /> // TODO - add loading
@@ -34,13 +34,18 @@ const CohortCard: React.FC = () => {
   return (
     <Card 
       title={
-        <div style={{ display: 'flex', flexDirection: 'row'}}>
-          <Title style={{ marginTop: 20 }} level={3}>Cohort </Title>
-          <Popover title={null} content={cohortHelperText()} >
-            <div style={{ marginTop: 15}}>
-              <QuestionCircleOutlined style={{ color: '#1677ff', marginLeft: 5, fontSize: 15  }} />
-            </div>
-          </Popover>
+        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}} >
+          <div style={{ display: 'flex', flexDirection: 'row'}}>
+            <Title style={{ marginTop: 20 }} level={3}>Cohort </Title>
+            <Popover title={null} content={cohortHelperText()} >
+              <div style={{ marginTop: 15}}>
+                <QuestionCircleOutlined style={{ color: '#1677ff', marginLeft: 5, fontSize: 15  }} />
+              </div>
+            </Popover>
+          </div>
+          <div style={{  marginTop: 20, }}>
+            <UsergroupAddOutlined style={{ color: '#1677ff', fontSize: 28 }} />
+          </div>
         </div>
       }
       style={{  }}
@@ -48,11 +53,11 @@ const CohortCard: React.FC = () => {
     > 
       <div style={{ marginRight: 20}}>
         {explanatoryText()}
-        {selectedCohort 
+        {selectedCohorts.length 
           ? <ViewCohort 
               cohorts={cohorts}
               subjects={subjects}
-              selectedCohort={selectedCohort}
+              selectedCohort={selectedCohorts[0]}
             />
           : <CreateCohort />
       }

@@ -2,7 +2,8 @@ import { Server, Socket } from "socket.io";
 import http from "http";
 import { Tail } from 'tail';
 import logger from "./logger";
-import { getJobQueue } from "./jobHandler";
+import { getJobQueue } from "../jobHandler";
+import fs from "fs";
 
 let io: Server | null = null;
 export let queueSocket: Socket| null = null;
@@ -12,29 +13,32 @@ export const getQueueSocket = (): Socket | null => {
   return queueSocket;
 }
 
+let inProgressNamespace: any = null
+
+let currentLogFile: any = null;
+
 const createInProgressSocket = (logFilePath: string) => {
-  const inProgressNamespace = (io as Server).of("/inProgress");
-  inProgressNamespace.on("connection", (socket) => {
-    inProgressSocket = socket;
-  });
-  inProgressNamespace.on("ds", (socket) => {
-    inProgressSocket = socket;
+  currentLogFile = logFilePath;
+  inProgressNamespace.on("connection", (socket: any) => {
+    logger.magenta('Connection recieved to "In Progress" Socket');
+    let interval: any = null;
+      interval = setInterval(() => {
+
+
+        // TODO - switch to watch file
+        const logData = fs.readFileSync(currentLogFile, { encoding: 'utf-8'});
+        console.log(currentLogFile);
+  
+  
+        socket.emit("data", logData);
+  
+      }, 1000);
+
+
     socket.on('disconnect', () => {
-      inProgressSocket = null;
+      logger.magenta('Disconnected rfrom "In Progress" Socket');
+      clearInterval(interval);
     });
-  });
-  const tail = new Tail(logFilePath);
-  tail.on("line", (data: any) => {
-    logger.magenta(data);
-    if (inProgressSocket) {
-      inProgressSocket.emit("data", data);
-    }
-  });
-  tail.on("error", (error: any) => {
-    logger.red('ERROR: ' +  error);
-    if (inProgressSocket) {
-      inProgressSocket.emit("data", error);
-    }
   });
 }
 
@@ -64,6 +68,8 @@ const setup = async (server: http.Server) => {
       origin: '*',
     }
   });
+  inProgressNamespace = (io as Server).of("/inProgress");
+
   setupQueueSocket();
 
 }

@@ -1,7 +1,8 @@
-import { QuestionCircleOutlined } from '@ant-design/icons';
+import { QuestionCircleOutlined, UploadOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Card, Input, Popover, Radio, Select, Steps, Typography } from 'antd';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import apiClient from '../../../../util/apiClient';
+import { Page, context } from '../../../../util/context';
 
 const { Title, Paragraph, Text, Link } = Typography;
 
@@ -43,6 +44,15 @@ const t1wHelperText = () => <Text>
   or none at all.
 </Text>
 
+const uploadingBidsHelpderText = () => <Text>
+  Click yes if the folder you are copying BIDS files from contains more than one subject.<br/>
+</Text>
+
+const copyPathHelpererText = () => <Text>
+  The folder containing your subject data must be in the "neurodesktop-storage" folder<br/>
+  on your harddrive.
+</Text>
+
 const styles = {
   smallHelpIcon: { color: '#1677ff', marginTop: 2, marginLeft: 5, fontSize: 13  },
   flexBox: { display: 'flex', flexDirection: 'row' as 'row' }
@@ -58,6 +68,8 @@ const optionPrompt = {
 
 // TODO - Make steps clickable
 const UploadDataCard: React.FC = () => {
+  const { navigate } = useContext(context);
+
   const [step, setStep] = useState(1);
   const [dataType, setDataType] = useState(SubjectDataType.DICOM);
 
@@ -66,6 +78,8 @@ const UploadDataCard: React.FC = () => {
   const [checkAllFiles, setCheckAllFiles] = useState(false);
   const [t2starwProtocolPattern, setT2starwProtocol] = useState(defaultT2ProtocolPatterns);
   const [t1wProtocolPattern, setT1wProtocolPattern] = useState(defaultT1ProtocolPatterns);
+
+  const [uploadingMultipleBIDs, setUploadingMultipleBIDs] = useState(false);
 
   const [t2Options, setT2Options]: [any, any] = useState([optionPrompt]);
   const [t1Options, setT1Options]: [any, any]  = useState([optionPrompt]);
@@ -78,9 +92,17 @@ const UploadDataCard: React.FC = () => {
   const nextStep = async () => {
     if (step === 3) {
       if (dataType === SubjectDataType.DICOM) {
-        await apiClient.copyDicoms(uploadPath, usePatientNames, useSessionDates, checkAllFiles, t2starwProtocolPattern, t1wProtocolPattern)
+        console.log(uploadPath, usePatientNames, useSessionDates, checkAllFiles, t2starwProtocolPattern, t1wProtocolPattern)
+        const success = await apiClient.copyDicoms(uploadPath, usePatientNames, useSessionDates, checkAllFiles, t2starwProtocolPattern, t1wProtocolPattern);
+        // if (success) {
+          // 
+        // }
       }
-      // other data types
+      if (dataType === SubjectDataType.BIDS) {
+        await apiClient.copyBids(uploadPath, uploadingMultipleBIDs);
+      }
+      navigate(`/${Page.Run}`);
+      // TODO - nifit data type
     } else {
       setStep(step + 1);
     }
@@ -173,7 +195,7 @@ const UploadDataCard: React.FC = () => {
       <Radio.Group onChange={(e) => setDataType(e.target.value)} value={dataType}>
         <Radio value={SubjectDataType.DICOM}>DICOM</Radio>
         <Radio value={SubjectDataType.BIDS}>BIDS</Radio>
-        <Radio value={SubjectDataType.NIFTI}>Nifti</Radio>
+        {/* <Radio value={SubjectDataType.NIFTI}>Nifti</Radio> */}
       </Radio.Group>
     </div>
   }
@@ -237,7 +259,7 @@ const UploadDataCard: React.FC = () => {
       <br />
       <div style={styles.flexBox}>
         <Text>T1-Weighted Protocol Pattern?</Text>
-        <Popover title={null} content={t2wHelperText()} >
+        <Popover title={null} content={t1wHelperText()} >
           <QuestionCircleOutlined style={styles.smallHelpIcon} />
         </Popover>
       </div>
@@ -257,7 +279,16 @@ const UploadDataCard: React.FC = () => {
 
   const renderBidsConfigureStep = () => {
     return <div>
-      TODO
+      <div style={styles.flexBox}>
+        <Text>Are you uploading multiple subjects?</Text>
+        <Popover title={null} content={uploadingBidsHelpderText()} >
+          <QuestionCircleOutlined style={styles.smallHelpIcon} />
+        </Popover>
+      </div>
+      <Radio.Group onChange={(e) => setUploadingMultipleBIDs(e.target.value)} value={uploadingMultipleBIDs}>
+        <Radio.Button value={true}>Yes</Radio.Button>
+        <Radio.Button value={false}>No</Radio.Button>
+      </Radio.Group>
     </div>
   }
 
@@ -280,14 +311,28 @@ const UploadDataCard: React.FC = () => {
     return <div />
   }
  
+  const badUploadPath = !!(uploadPath && !uploadPath.includes('neurodesktop-storage') && uploadPath.includes(':\\'));
+
   const renderUploadStep = () => {
     return (
       <div>
-        Enter a file path to copy files from
+        <div style={styles.flexBox}>
+          <Text>Enter a file path to copy files from</Text>
+          <Popover title={null} content={copyPathHelpererText()} >
+            <QuestionCircleOutlined style={styles.smallHelpIcon} />
+          </Popover>
+        </div>
         <Input
           placeholder="Enter a path..."
           onChange={(e) => setUploadPath(e.target.value)}
+          value={uploadPath}
         />
+        {badUploadPath && 
+          <div style={{ color: "red" }}>
+            Folder must be within your "neurodesktop-storage" folder 
+          </div>
+        }
+
       </div>
     )
   }
@@ -296,13 +341,18 @@ const UploadDataCard: React.FC = () => {
     <Card
       style={{ width: '100%' }}
       title={
-        <div style={{ display: 'flex', flexDirection: 'row'}}>
-          <Title style={{ marginTop: 20 }} level={3}>Upload Data</Title>
-          <Popover title={null} content={uploadHelperText()} >
-            <div style={{ marginTop: 15}}>
-              <QuestionCircleOutlined style={{ color: '#1677ff', marginLeft: 5, fontSize: 15  }} />
-            </div>
-          </Popover>
+        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}} >
+          <div style={{ display: 'flex', flexDirection: 'row'}}>
+            <Title style={{ marginTop: 20 }} level={3}>Upload Data</Title>
+            <Popover title={null} content={uploadHelperText()} >
+              <div style={{ marginTop: 15}}>
+                <QuestionCircleOutlined style={{ color: '#1677ff', marginLeft: 5, fontSize: 15  }} />
+              </div>
+            </Popover>
+          </div>
+          <div style={{  marginTop: 20, }}>
+            <UploadOutlined style={{ color: '#1677ff', fontSize: 28 }} />
+          </div>
         </div>
       }
     >
@@ -317,20 +367,18 @@ const UploadDataCard: React.FC = () => {
       {step === 3 && renderUploadStep()}
       <br />
       <Button 
-        disabled={step ===1}
+        disabled={step === 1}
         onClick={previousStep}
         style={{ marginRight: 1 }}
       >
-
         Previous
       </Button>
       <Button 
         type="primary" 
+        disabled={step === 3 && badUploadPath}
         onClick={nextStep}>
         {step !== 3 ? 'Next' : ' Finish'}
       </Button>
-      
-     
     </Card>
   )
 }

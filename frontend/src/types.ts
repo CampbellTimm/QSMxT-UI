@@ -72,7 +72,8 @@ export type Job = {
   createdAt: string,
   startedAt: string | null,
   finishedAt: string | null,
-  parameters: JobParameters
+  parameters: JobParameters,
+  error?: string
 }
 
 export type Cohorts = {[cohort: string]: {

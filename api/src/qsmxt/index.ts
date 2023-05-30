@@ -1,9 +1,12 @@
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
-import logger from "../core/logger";
+import logger from "../util/logger";
 import { QSMXT_DATE, QSMXT_VERSION } from "../constants";
 import convertDicoms from "./convertDicoms";
 import sortDicoms from "./sortDicoms";
 import runQsmPipeline from "./runQsmPipeline";
+import runSegmentation from "./runSegmentation";
+import fs from "fs";
+import copyBids from "./copyBids";
 
 let qsmxtInstance: ChildProcessWithoutNullStreams;
 
@@ -25,8 +28,6 @@ export const createQsmxtInstance = async () => {
   logger.green('Creating QSMxT instance')
   const qsmxt: any = spawn('/neurocommand/local/fetch_and_run.sh', ['qsmxt', QSMXT_VERSION, QSMXT_DATE ]);
 
-
-
   await new Promise((resolve, reject) => {
     setupListeners(qsmxt, () => {});
     // setupListeners(qsmxt, reject);
@@ -46,10 +47,8 @@ export const getQsmxtInstance = async () => {
   return qsmxtInstance
 }
 
-
-
 // TODO - add timeout paramater ??
-export const runQsmxtCommand = async (command: string, completionString: string, errorString: string = 'ERROR:') => {
+export const runQsmxtCommand = async (command: string, completionString: string, logFilePath: string | null = null, errorString: string = 'ERROR:') => {
   const qsmxt = await getQsmxtInstance();
   await new Promise((resolve, reject) => {
     setupListeners(qsmxt, reject);
@@ -58,7 +57,8 @@ export const runQsmxtCommand = async (command: string, completionString: string,
       stringData.split('\n').forEach((line: string) => {
         if (line.includes('ERROR:')) {
           logger.red(line);
-        } else {
+        } else if (logFilePath) {
+          fs.appendFileSync(logFilePath, line + '\n', { encoding: 'utf-8' })
           // logger.blue(line)
         }
         if (line.includes(completionString)) {
@@ -84,5 +84,7 @@ export const killChildProcess = () => {
 export default {
   convertDicoms,
   sortDicoms,
-  runQsmPipeline
+  runQsmPipeline,
+  runSegmentation,
+  copyBids
 }

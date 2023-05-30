@@ -1,4 +1,4 @@
-import { Layout, Menu, Image } from 'antd';
+import { Layout, Menu, Image, notification } from 'antd';
 import { Routes, Route, Navigate } from "react-router-dom";
 import Home from './pages/Home/Home'
 import YourDataPage from './pages/YourDataPage/YourDataPage'
@@ -7,33 +7,35 @@ import Results from './pages/Results/Results'
 import { useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from "react";
 import apiClient from './util/apiClient';
-import { context } from './util/context';
+import { Page, context } from './util/context';
 import SelectorTree from './components/SelectorTree/SelectorTree';
 import io from 'socket.io-client';
 import { API_URL } from './core/constants';
 import LoadingPage from './pages/LoadingPage/LoadingPage';
 import { FolderOpenOutlined, HomeOutlined, InsertRowLeftOutlined, PlaySquareOutlined } from '@ant-design/icons';
+import { Job, JobType } from './types';
 
 const { Header, Content } = Layout;
 
 const menuItems = [
+
   {
-    key: 'home',
+    key: Page.Home,
     label: 'Home',
     icon: <HomeOutlined />
   },
   {
-    key: 'yourData',
+    key: Page.YourData,
     label: 'Your Data',
     icon: <FolderOpenOutlined />
   },
   {
-    key: 'run',
+    key: Page.Run,
     label: 'Run',
     icon: <PlaySquareOutlined />
   },
   {
-    key: 'results',
+    key: Page.Results,
     label: 'Results',
     icon: <InsertRowLeftOutlined />
   },
@@ -57,18 +59,19 @@ const styles = {
   },
   flexBoxRow: {
     display: 'flex',
-    flexDirection: 'row' as 'row',
-
+    flexDirection: 'row' as 'row'
   }
 }
 
 
 const App = () => {
+
+
   const [cohorts, setCohorts]: [any, any] = useState(null);
   const [subjects, setSubjects]: [any, any] = useState(null);
-  const [selectedSubject, setSelectedSubject]: [any, any] = useState(null);
-  const [selectedCohort, setSelectedCohort]: [any, any] = useState(null);
-  const [queue, setQueue]: [any, any] = useState(null);
+  const [selectedSubjects, setSelectedSubjects]: [any, any] = useState([]);
+  const [selectedCohorts, setSelectedCohorts]: [any, any] = useState([]);
+  const [queue, setQueue]: [Job[] | null, any] = useState(null);
   const [loading, setLoading]: [boolean, any] = useState(true);
 
   const fetchSubjectData = async () => {
@@ -99,16 +102,47 @@ const App = () => {
     // });
 
   const fetchQueueData = async () => {
-    const queue = await apiClient.getJobsQueue();
-    setQueue(queue);
+    const newQueue = await apiClient.getJobsQueue();
+    const history = await apiClient.getHistory();
+    if (queue) {
+      const finishedJobs = (queue as any).filter((job: Job) => !newQueue.find(newQueueJob => newQueueJob.id === job.id));
+      finishedJobs.forEach((job: Job) => {
+        const historyJob = history.find(x => x.id === job.id);
+        if (historyJob && historyJob.error) {
+          notification.error({
+            message: `${historyJob.type} failed`,
+            description: `Error: ${historyJob.error} `,
+            placement: 'topRight',
+            duration: null
+        })
+        } else {
+          notification.success({
+            message: `${job.type} finished`,
+            description: `${job.type} finished executing successfully`,
+            placement: 'topRight',
+            duration: null
+        })
+        }
+          
+      })
+
+    }
+    setQueue(newQueue);
   }
+
 
 
   useEffect(() => {
     fetchSubjectData();
     fetchCohortData();
     fetchQueueData();
-  },[]);
+    setInterval(() => {
+      fetchSubjectData();
+      fetchCohortData();
+      fetchQueueData();
+    }, 1000)
+  
+  },[]); 
 
   const selectedKey = window.location.pathname.split('/')[window.location.pathname.split('/').length - 1] || 'home'
 
@@ -117,14 +151,16 @@ const App = () => {
   const contextValue = {
     cohorts,
     subjects,
-    selectedSubject,
-    selectedCohort,
+    selectedSubjects,
+    selectedCohorts,
     queue,
-    setSelectedCohort,
-    setSelectedSubject,
+    setSelectedCohorts,
+    setSelectedSubjects,
     fetchSubjectData,
     fetchCohortData,
-    navigate
+    navigate,
+    fetchQueueData,
+    page: selectedKey
     // setCohorts: updateCohorts
   }
 

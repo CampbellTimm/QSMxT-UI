@@ -1,12 +1,12 @@
 import { Pool } from 'pg';
 
 const pool = new Pool({
-  // user: 'user',
-  user: 'qsmxt',
+  user: 'user',
+  // user: 'qsmxt',
   password: 'password',
   host: 'localhost',
-  // database: 'user'
-  database: 'qsmxt'
+  database: 'user'
+  // database: 'qsmxt'
 });
 
 const dropTables = async () => {
@@ -65,20 +65,22 @@ const createCohortSubjectsTable = async () => {
 }
 
 
-// make subject not null
+// TODO - remove cohort
 const createJobsTable = async () => {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS jobs (
       id VARCHAR(100) PRIMARY KEY,
       subject TEXT NULL REFERENCES subjects(subject),
       cohort TEXT NULL REFERENCES cohorts(cohort),
+      description TEXT,
       type VARCHAR(100) NOT NULL,
       status VARCHAR(100) NOT NULL,
       createdAt VARCHAR(100) NOT NULL,
       startedAt VARCHAR(100),
       finishedAt VARCHAR(100),
       parameters TEXT NOT NULL,
-      error TEXT
+      error TEXT,
+      linkedQsmJob VARCHAR(100) REFERENCES jobs(id)
     )
   `)
   console.log('Created table jobs');

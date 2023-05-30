@@ -14,7 +14,7 @@ interface Props {
 }
   
 const ViewCohort: React.FC<Props> = ({ cohorts, subjects, selectedCohort }) => {
-  const {setSelectedCohort, setSelectedSubject, fetchCohortData, navigate } = React.useContext(context);
+  const { selectedCohorts, setSelectedCohorts, setSelectedSubjects, fetchCohortData, navigate } = React.useContext(context);
   const selectedCohortName = selectedCohort.split('&')[0];
   const cohort = cohorts[selectedCohortName];
   const [linkedSubjects, setLinkedSubjects]: [string[], any] = useState([]);
@@ -63,14 +63,14 @@ const ViewCohort: React.FC<Props> = ({ cohorts, subjects, selectedCohort }) => {
   const deleteCohort = (selectedCohortName: string) => async () => {
     const deleted = await apiClient.deleteCohort(selectedCohortName);
     if (deleted) {
-      setSelectedCohort(null);
+      setSelectedCohorts(selectedCohorts.filter(cohort => cohort !== selectedCohortName));
       await fetchCohortData()
     }
   }
 
   const navigateToCohortResults = () => {
-    setSelectedCohort(selectedCohortName);
-    setSelectedSubject(null);
+    setSelectedCohorts([selectedCohortName]);
+    setSelectedSubjects([]);
     navigate('/results');
   }
 

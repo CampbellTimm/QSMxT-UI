@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, RadioChangeEvent, Space, Spin, Typography } from 'antd';
 import { Radio, Tabs } from 'antd';
-import { context } from '../../../../util/context';
+import { context } from '../../../../../util/context';
 // @ts-ignore
 import { UpOutlined, DownOutlined, DeleteOutlined } from '@ant-design/icons';
 import moment from 'moment';
-import { Job } from '../../../../types';
+import { Job } from '../../../../../types';
 
 const { Title, Paragraph, Text, Link } = Typography;
 
@@ -14,9 +14,13 @@ const styles = {
 
 
 const Queue = () => {
-  const { queue } = React.useContext(context);
+  const { queue, fetchQueueData } = React.useContext(context);
 
-  console.log(queue);
+  useEffect(() => {
+    fetchQueueData();
+  }, [])
+
+  // console.log(queue);
 
   
   if (!queue) {
@@ -46,11 +50,6 @@ const Queue = () => {
               size="small" 
               title={run.type} 
               style={{ width: 300 }}
-              actions={[
-                <UpOutlined />,
-                <DownOutlined />,
-                <DeleteOutlined />
-              ]}
               >
               Created {moment(run.createdAt).fromNow()}
             </Card>

@@ -7,9 +7,11 @@ const { Title, Paragraph, Text, Link } = Typography;
 
 const RunPage = () => {
   return (
-    <div style={{ width: 'min-content'}}>
+    <div style={{
+      //  width: 'min-content', 
+    maxWidth: 1100 }}>
       <div style={{ textAlign: 'center'}}>
-        <Title level={1}>Run</Title>
+        <Title style={{ marginTop: 0 }}  level={1}>Run</Title>
       </div>
       <Divider />
       {/* <div style={{ minWidth: '100%', textAlign: 'center' }}>
@@ -19,11 +21,13 @@ const RunPage = () => {
       </div> */}
      
       <div style={{ display: 'flex', flexDirection: 'row' }}> 
-        <div style={{ width: 370, marginRight: 100 }}> 
-          <ViewRuns   />
+        <div style={{ width: 500, marginRight: 50 }}> 
+        <RunStarter />
+
         </div>
-        <div style={{ width: 600}}>
-          <RunStarter />
+        <div style={{ width: 370}}>
+          <ViewRuns   />
+
         </div>
       </div>
    </div>
