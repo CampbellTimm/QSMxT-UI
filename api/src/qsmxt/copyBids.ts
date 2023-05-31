@@ -39,6 +39,7 @@ const copyAllFilesAndFolders = async (soucePath: string, destinationPath: string
       }
     })
   })
+  copyInstance.kill();
 }
 
 const copyBids = async (sourcePath: string, uploadingMultipleBIDs: boolean) => {

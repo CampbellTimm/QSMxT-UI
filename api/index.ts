@@ -6,7 +6,7 @@ import { BIDS_FOLDER, DICOMS_FOLDER, QSM_FOLDER } from "./src/constants";
 import fs from "fs";
 
 const setup = async () => {
-  await setupDatabase();
+  // await setupDatabase();
 
   if (process.env.DEBUG === 'true') {
     logger.yellow("Debug Mode: wiping queue")

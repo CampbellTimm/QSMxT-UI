@@ -19,11 +19,9 @@ const getQsmCmdLineOptions = (subject: string, sessions: string[], runs: string[
 export const runQsmPipeline = async (id: string, subjects: string[], sessions: string[], runs: string[], pipelineConfig: string) => {
     logger.green(`Running QSM Pipeline on ${subjects.join(', ')}`);
     const resultFolder = path.join(QSM_FOLDER, `/${id}`);
-
     const logFilePath = path.join(resultFolder, `ALL.log`); 
-
     fs.writeFileSync(logFilePath, '');
-
+    console.log(subjects);
     for (let subject of subjects) {
       const qsmxtCmmand = `run_2_qsm.py ${BIDS_FOLDER} ${resultFolder} ${getQsmCmdLineOptions(subject, sessions, runs, pipelineConfig)}`;
       const completionString = 'INFO: Finished';

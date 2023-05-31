@@ -2,7 +2,7 @@ import path from "path";
 
 const projectRootPath = process.cwd();
 
-export const SERVER_PORT = 4000;
+export const SERVER_PORT = 5000;
 export const TEMP_FILE_DIRECTORY = path.join(projectRootPath, './tmp');
 export const DICOMS_FOLDER = path.join(projectRootPath, `./public/dicoms`);
 export const BIDS_FOLDER = path.join(projectRootPath, `./public/bids`);

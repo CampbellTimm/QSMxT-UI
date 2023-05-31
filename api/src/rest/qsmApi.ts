@@ -38,24 +38,27 @@ const runQsmPipeline = async (request: Request, response: Response) => {
   const subjectsFromCohort: Cohort[] = await Promise.all((cohorts || [])
     .map(database.cohorts.get.byName)
   );
-  const subjectsToRun = [...(subjects || [])];
+  const subjectsToRun = new Set([...(subjects || [])]);
   (subjectsFromCohort).forEach((cohort: Cohort) => {
-    subjectsToRun.push(...cohort.subjects);
-  });
+    cohort.subjects.forEach((subject: string) => {
+        subjectsToRun.add(subject);
+      });
+    })
+   
   const qsmParameters: QsmParameters = {
-    subjects: subjectsToRun,
+    subjects: Array.from(subjectsToRun),
     sessions,
     runs,
     pipelineConfig,
     
   }
-  // const linkedQsmJob = "1d53d0b3-1ccd-4209-8d33-1c65a1d63174";
-  const linkedQsmJob = await addJobToQueue(JobType.QSM, qsmParameters, null, description);
+  const linkedQsmJob = "335867c3-70cd-457c-9dcf-cf384e495510";
+  // const linkedQsmJob = await addJobToQueue(JobType.QSM, qsmParameters, null, description);
   console.log(createSegmentation);
   if (createSegmentation) {
 
     const segementationParameters: SegementationParameters = {
-      subjects: subjectsToRun,
+      subjects: Array.from(subjectsToRun),
       linkedQsmJob
     }
     addJobToQueue(JobType.SEGMENTATION, segementationParameters, linkedQsmJob);

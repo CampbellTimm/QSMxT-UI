@@ -8,7 +8,7 @@ import runSegmentation from "./runSegmentation";
 import fs from "fs";
 import copyBids from "./copyBids";
 
-let qsmxtInstance: ChildProcessWithoutNullStreams;
+let qsmxtInstance: ChildProcessWithoutNullStreams | null;
 
 export const setupListeners = (child: ChildProcessWithoutNullStreams, reject: (reason?: any) => void) => { 
   child.stdout.removeAllListeners();
@@ -24,10 +24,13 @@ export const setupListeners = (child: ChildProcessWithoutNullStreams, reject: (r
   });
 }
 
-export const createQsmxtInstance = async () => {
+export const createQsmxtInstance = async (): Promise<ChildProcessWithoutNullStreams> => {
   logger.green('Creating QSMxT instance')
   const qsmxt: any = spawn('/neurocommand/local/fetch_and_run.sh', ['qsmxt', QSMXT_VERSION, QSMXT_DATE ]);
 
+  console.log(`Child process PID: ${qsmxt.pid}`);
+
+  
   await new Promise((resolve, reject) => {
     setupListeners(qsmxt, () => {});
     // setupListeners(qsmxt, reject);
@@ -40,19 +43,19 @@ export const createQsmxtInstance = async () => {
   return qsmxt;
 }
 
-export const getQsmxtInstance = async () => { 
-  if (!qsmxtInstance) {
-    qsmxtInstance = await createQsmxtInstance();
-  }
-  return qsmxtInstance
-}
+// export const getQsmxtInstance = async () => { 
+//   if (!qsmxtInstance) {
+//     qsmxtInstance = await createQsmxtInstance();
+//   }
+//   return qsmxtInstance
+// }
 
 // TODO - add timeout paramater ??
 export const runQsmxtCommand = async (command: string, completionString: string, logFilePath: string | null = null, errorString: string = 'ERROR:') => {
-  const qsmxt = await getQsmxtInstance();
+  qsmxtInstance = (await createQsmxtInstance()) as any;
   await new Promise((resolve, reject) => {
-    setupListeners(qsmxt, reject);
-    qsmxt.stdout.on('data', (data) => { 
+    setupListeners(qsmxtInstance as ChildProcessWithoutNullStreams, reject);
+    (qsmxtInstance as ChildProcessWithoutNullStreams).stdout.on('data', (data) => { 
       const stringData = data.toString();
       stringData.split('\n').forEach((line: string) => {
         if (line.includes('ERROR:')) {
@@ -70,8 +73,10 @@ export const runQsmxtCommand = async (command: string, completionString: string,
       })
     });
     logger.yellow(`Running: "${command}"`);
-    qsmxt.stdin.write(command + "\n");
+    (qsmxtInstance as ChildProcessWithoutNullStreams).stdin.write(command + "\n");
   });
+  (qsmxtInstance as ChildProcessWithoutNullStreams).kill();
+  qsmxtInstance = null;
 } 
 
 export const killChildProcess = () => {
