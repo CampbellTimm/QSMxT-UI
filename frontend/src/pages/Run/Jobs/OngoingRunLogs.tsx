@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Drawer, Spin, message } from "antd"
 import io from 'socket.io-client';
+import { API_URL } from '../../../core/constants';
 
 interface Props {
   openOngoingLog: boolean,
@@ -17,7 +18,7 @@ const OngoingRunLogs = (props: Props) => {
   const endRef = useRef(null)
 
   useEffect(() => {
-    const socket = io('http://localhost:5000/inProgress');
+    const socket = io(`${API_URL}/inProgress`);
     socket.on('connect', () => {
       console.log('Connected to socket');
       setSocket(socket as any);
@@ -68,7 +69,6 @@ const OngoingRunLogs = (props: Props) => {
       size="large"
       placement="right" 
       onClose={() => {
-        // fetchHistory();
         setOpenOngoingLog(false)
       }} 
       open={openOngoingLog}

@@ -1,4 +1,4 @@
-import { Tree } from 'antd';
+import { Skeleton, Tree } from 'antd';
 import type { DirectoryTreeProps } from 'antd/es/tree';
 import React, { useContext, useEffect, useState } from 'react';
 import { Page, context } from '../../../util/context';
@@ -75,7 +75,7 @@ const SubjectTree: React.FC = () => {
   };
 
   if (!subjects) {
-      return <div style={{ minHeight: 250 }}/>
+    return <div style={{ minHeight: 250 }}><Skeleton /></div>
   }
 
   if (!(subjects as Subject[]).length) {

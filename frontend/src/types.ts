@@ -1,10 +1,3 @@
-// export type SubjectEchos = {
-//   [echoNumber: string]: {
-//     magnitude: any,
-//     phase: any,
-//   }
-// }
-
 export type SubjectRun = {
   echos: string[]
 }
@@ -22,9 +15,7 @@ export type SubjectSessions =  {
 }
 
 export type SubjectsTree = {
-  // [subject: string]: { 
-    sessions: SubjectSessions 
-  // }
+  sessions: SubjectSessions 
 }
 
 export type Subject = {
@@ -34,9 +25,10 @@ export type Subject = {
   dataTree: SubjectsTree
 }
 
-
 export enum SubjectUploadFormat {
-  DICOM = 'DICOM'
+  DICOM = 'DICOM',
+  BIDS = 'BIDS',
+  NIFTI = 'Nifti'
 }
 
 export enum JobStatus {
@@ -49,6 +41,9 @@ export enum JobStatus {
 export enum JobType {
   DICOM_SORT = 'Dicom Sort',
   DICOM_CONVERT = 'Dicom Convert',
+  QSM = 'QSM Pipeline',
+  SEGMENTATION = 'Segmentation and Analysis',
+  BIDS_COPY = 'BIDS Copy'
 }
 
 export type DicomSortParameters = {
@@ -80,3 +75,7 @@ export type Cohorts = {[cohort: string]: {
   description: string,
   subjects: string[]
 }}
+
+export type JobNotification = {
+  job: Job
+}

@@ -1,10 +1,10 @@
 import { QuestionCircleOutlined, UploadOutlined } from '@ant-design/icons';
 import { Button, Upload, Collapse, Table, Descriptions, Select, UploadProps, message, Card, Typography, Popover, Divider, Row, Col, Drawer } from 'antd';
 import React, { useEffect, useState } from 'react';
-import NiiVue from '../../../../components/NiiVue/NiiVue';
-import { context } from '../../../../util/context';
-import { Subject, SubjectsTree } from '../../../../types';
-import { API_URL } from '../../../../core/constants';
+import NiiVue from '../../../components/NiiVue/NiiVue';
+import { context } from '../../../util/context';
+import { Subject, SubjectsTree } from '../../../types';
+import { API_URL } from '../../../core/constants';
 import axios from 'axios';
 
 interface Props {
@@ -17,9 +17,7 @@ interface Props {
 
 const { Panel } = Collapse;
 
-const { Title, Paragraph, Text, Link } = Typography;
-
-
+const { Title, Paragraph, Text } = Typography;
 
 const SubjectDetailDrawer: React.FC<Props> = ({ subject, run, open, setOpen, session }) => {
 

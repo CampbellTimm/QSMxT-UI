@@ -1,4 +1,4 @@
-import { Tree, Typography } from 'antd';
+import { Skeleton, Tree, Typography } from 'antd';
 import type { DataNode, DirectoryTreeProps } from 'antd/es/tree';
 import { Key } from 'antd/lib/table/interface';
 import React, { useContext, useEffect, useState } from 'react';
@@ -49,7 +49,7 @@ const CohortTree: React.FC<{}> = () => {
   const onExpand: DirectoryTreeProps['onSelect'] = selectTreeNode(selectedCohorts, setSelectedCohorts, setExpandedKeys, page);
 
   if (!cohorts) {
-    return <div style={{ minHeight: 250 }}/>
+    return <div style={{ minHeight: 250 }}><Skeleton /></div>
   }
 
   if (!Object.keys(cohorts as Cohorts).length) {

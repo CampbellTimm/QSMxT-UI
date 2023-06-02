@@ -35,7 +35,8 @@ const updateCohort = async (cohort: string, subjects: string[]): Promise<boolean
 
 const createCohort = async (cohort: string, cohortDescription: string): Promise<boolean> => {
   let created = false;
-  const getCohortPath = API_URL + `/cohorts/${cohort}`;
+  
+  const getCohortPath = API_URL + `/cohorts/${encodeURIComponent(cohort).replace(/'/g, "%27")}`;
   try {
     const response = await axiosInstance.post(getCohortPath, {
       cohortDescription
@@ -84,7 +85,7 @@ const deleteSubject = async (subject: string): Promise<null> => {
   return null;
 }
 
-export const getJobsQueue = async (): Promise<Job[]> => {
+const getJobsQueue = async (): Promise<Job[]> => {
   const getRunsPath = API_URL + '/jobs/queue';
     try {
     const response = await axiosInstance.get(getRunsPath, {
@@ -99,7 +100,7 @@ export const getJobsQueue = async (): Promise<Job[]> => {
   }
 }
 
-export const getHistory = async (): Promise<Job[]> => {
+const getHistory = async (): Promise<Job[]> => {
   const getRunsPath = API_URL + '/jobs/history';
   try {
     const response = await axiosInstance.get(getRunsPath, {
@@ -114,7 +115,7 @@ export const getHistory = async (): Promise<Job[]> => {
   }
 }
 
-export const runQsmPipeline = async (sessions: string[], runs: string[], pipelineConfig: string, subjects: string[], cohorts: string[], createSegmentation: boolean, description: string): Promise<void> => {
+const runQsmPipeline = async (sessions: string[], runs: string[], pipelineConfig: string, subjects: string[], cohorts: string[], createSegmentation: boolean, description: string): Promise<void> => {
   const runQsmPath = API_URL + '/qsm/run';
   try {
     await axiosInstance.post(runQsmPath, {
@@ -131,7 +132,7 @@ export const runQsmPipeline = async (sessions: string[], runs: string[], pipelin
   }
 }
 
-export const getQsmResults = async () => {
+const getQsmResults = async () => {
   const getQsmResultsUrl = API_URL + '/qsm/results';
   try {
     const response = await axiosInstance.get(getQsmResultsUrl, {
@@ -145,45 +146,38 @@ export const getQsmResults = async () => {
   }
 }
 
-export const getStatus = async () => {
+const getStatus = async () => {
   const getQsmResultsUrl = API_URL + '/status';
   const response = await axiosInstance.get(getQsmResultsUrl);
   return response.data as any;
 }
 
-export const copyBids = async (copyPath: string, uploadingMultipleBIDs: boolean) => {
+const copyBids = async (copyPath: string, uploadingMultipleBIDs: boolean): Promise<boolean> => {
   const uploadDicomsUrl = API_URL + '/subjects/bids';
   try {
-    const response = await axiosInstance.post(uploadDicomsUrl, {
-      // data: {
+    await axiosInstance.post(uploadDicomsUrl, {
         copyPath,
         uploadingMultipleBIDs
-      // }
     });
-    message.success(response.statusText);
+    return true;
   } catch (err) {
     message.error((err as any).message);
+    return false;
   }
 }
 
-export const copyDicoms = async (copyPath: string, usePatientNames: boolean, useSessionDates: boolean, 
+const copyDicoms = async (copyPath: string, usePatientNames: boolean, useSessionDates: boolean, 
     checkAllFiles: boolean, t2starwProtocolPatterns: string[], t1wProtocolPatterns: string[]) => {
   const uploadDicomsUrl = API_URL + '/subjects/dicom';
   try {
-    const response = await axiosInstance.post(uploadDicomsUrl, {
-      // method: "post",
-      // url: uploadDicomsUrl,
-      // data: {
-        copyPath,
-        usePatientNames,
-        useSessionDates,
-        checkAllFiles,
-        t2starwProtocolPatterns: JSON.stringify(t2starwProtocolPatterns),
-        t1wProtocolPatterns: JSON.stringify(t1wProtocolPatterns)
-      // },
-      // headers: { "Content-Type": "multipart/form-data" },
+    await axiosInstance.post(uploadDicomsUrl, {
+      copyPath,
+      usePatientNames,
+      useSessionDates,
+      checkAllFiles,
+      t2starwProtocolPatterns: JSON.stringify(t2starwProtocolPatterns),
+      t1wProtocolPatterns: JSON.stringify(t1wProtocolPatterns)
     });
-    message.success(response.statusText);
     return true;
   } catch (err) {
     message.error((err as any).message);
@@ -193,19 +187,16 @@ export const copyDicoms = async (copyPath: string, usePatientNames: boolean, use
 
 const apiClient = {
   getStatus,
-  
   createCohort,
   updateCohort,
   getCohorts,
   deleteSubject,
-
   copyDicoms,
   deleteCohort,
-
   getSubjects,
-
   getJobsQueue,
-
+  runQsmPipeline,
+  getQsmResults,
   copyBids,
   getHistory
 }

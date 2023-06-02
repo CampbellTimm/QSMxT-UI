@@ -1,54 +1,50 @@
-import { QuestionCircleOutlined, UploadOutlined, UserOutlined } from '@ant-design/icons';
+import { QuestionCircleOutlined, UploadOutlined } from '@ant-design/icons';
 import { Button, Card, Input, Popover, Radio, Select, Steps, Typography } from 'antd';
 import React, { useContext, useState } from 'react';
-import apiClient from '../../../../util/apiClient';
-import { Page, context } from '../../../../util/context';
+import apiClient from '../../../util/apiClient';
+import { Page, context } from '../../../util/context';
+import ContentCard from '../../../containers/ContentCard';
+import { SubjectUploadFormat } from '../../../types';
 
-const { Title, Paragraph, Text, Link } = Typography;
-
-enum SubjectDataType {
-  DICOM = 'DICOM',
-  BIDS = 'BIDS',
-  NIFTI = 'Nifti'
-}
+const { Text } = Typography;
 
 const stepItems = [{ title: 'Data Type' }, { title: 'Configure' }, { title: 'Copy' }];
 
-const uploadHelperText = () => <Text>
+const uploadHelperText = <Text>
   Data for subjects can be uploaded in either the<br />
   BIDS or DICOM format. 
 </Text>
 
-const patientNamesHelperText = () => <Text>
+const patientNamesHelperText = <Text>
   Use the DICOM 'PatientName' field rather than 'PatientID' to identify subjects
 </Text>
 
-const sessionDatesHelperText = () => <Text>
+const sessionDatesHelperText = <Text>
   Use the 'StudyDate' field rather than an incrementer to identify scanning sessions
 </Text>
 
-const checkAllFilesHelperText = () => <Text>
+const checkAllFilesHelperText = <Text>
   Ignores the DICOM file extensions .dcm and .IMA and instead reads all files for valid<br/>
   DICOM headers. This is useful if some of your DICOM files have unusual file extensions<br/> 
   or none at all.
 </Text>
 
-const t2wHelperText = () => <Text>
+const t2wHelperText = <Text>
   Patterns used to identify series acquired for QSM, which must be T2*-weighted.<br/>
   These patterns will be used to match the 'ProtocolName' field.
 </Text>
 
-const t1wHelperText = () => <Text>
+const t1wHelperText = <Text>
   Ignores the DICOM file extensions .dcm and .IMA and instead reads all files for valid<br/>
   DICOM headers. This is useful if some of your DICOM files have unusual file extensions<br/> 
   or none at all.
 </Text>
 
-const uploadingBidsHelpderText = () => <Text>
+const uploadingBidsHelpderText = <Text>
   Click yes if the folder you are copying BIDS files from contains more than one subject.<br/>
 </Text>
 
-const copyPathHelpererText = () => <Text>
+const copyPathHelpererText = <Text>
   The folder containing your subject data must be in the "neurodesktop-storage" folder<br/>
   on your harddrive.
 </Text>
@@ -66,24 +62,21 @@ const optionPrompt = {
   value: 'STUB'
 }
 
-// TODO - Make steps clickable
 const UploadDataCard: React.FC = () => {
   const { navigate } = useContext(context);
-
   const [step, setStep] = useState(1);
-  const [dataType, setDataType] = useState(SubjectDataType.DICOM);
-
+  const [dataType, setDataType] = useState(SubjectUploadFormat.DICOM);
   const [usePatientNames, setUsePatientNames] = useState(false);
   const [useSessionDates, setUseSessionDates] = useState(false);
   const [checkAllFiles, setCheckAllFiles] = useState(false);
   const [t2starwProtocolPattern, setT2starwProtocol] = useState(defaultT2ProtocolPatterns);
   const [t1wProtocolPattern, setT1wProtocolPattern] = useState(defaultT1ProtocolPatterns);
-
   const [uploadingMultipleBIDs, setUploadingMultipleBIDs] = useState(false);
-
   const [t2Options, setT2Options]: [any, any] = useState([optionPrompt]);
   const [t1Options, setT1Options]: [any, any]  = useState([optionPrompt]);
-  const [uploadPath, setUploadPath]: [string, any]  = useState('');
+  const [uploadPath, setUploadPath]: [string, (uploadPath: string) => void]  = useState('');
+
+  const badUploadPath = !!(uploadPath && !uploadPath.includes('neurodesktop-storage') && uploadPath.includes(':\\'));
 
   const previousStep = () => {
     setStep(step - 1);
@@ -91,18 +84,17 @@ const UploadDataCard: React.FC = () => {
 
   const nextStep = async () => {
     if (step === 3) {
-      if (dataType === SubjectDataType.DICOM) {
-        console.log(uploadPath, usePatientNames, useSessionDates, checkAllFiles, t2starwProtocolPattern, t1wProtocolPattern)
-        const success = await apiClient.copyDicoms(uploadPath, usePatientNames, useSessionDates, checkAllFiles, t2starwProtocolPattern, t1wProtocolPattern);
-        // if (success) {
-          // 
-        // }
+      let success = false;
+      if (dataType === SubjectUploadFormat.DICOM) {
+        success = await apiClient.copyDicoms(uploadPath, usePatientNames, useSessionDates, checkAllFiles, t2starwProtocolPattern, t1wProtocolPattern);
       }
-      if (dataType === SubjectDataType.BIDS) {
-        await apiClient.copyBids(uploadPath, uploadingMultipleBIDs);
+      if (dataType === SubjectUploadFormat.BIDS) {
+        success = await apiClient.copyBids(uploadPath, uploadingMultipleBIDs);
       }
-      navigate(`/${Page.Run}`);
       // TODO - nifit data type
+      if (success) {
+        setStep(1);
+      }
     } else {
       setStep(step + 1);
     }
@@ -193,8 +185,8 @@ const UploadDataCard: React.FC = () => {
       <Text>Which type of subject data are you uploading?</Text>
       <br />
       <Radio.Group onChange={(e) => setDataType(e.target.value)} value={dataType}>
-        <Radio value={SubjectDataType.DICOM}>DICOM</Radio>
-        <Radio value={SubjectDataType.BIDS}>BIDS</Radio>
+        <Radio value={SubjectUploadFormat.DICOM}>DICOM</Radio>
+        <Radio value={SubjectUploadFormat.BIDS}>BIDS</Radio>
         {/* <Radio value={SubjectDataType.NIFTI}>Nifti</Radio> */}
       </Radio.Group>
     </div>
@@ -204,7 +196,7 @@ const UploadDataCard: React.FC = () => {
     return <div>
       <div style={styles.flexBox}>
         <Text>Use patient names?</Text>
-        <Popover title={null} content={patientNamesHelperText()} >
+        <Popover title={null} content={patientNamesHelperText} >
           <QuestionCircleOutlined style={styles.smallHelpIcon} />
         </Popover>
       </div>
@@ -216,7 +208,7 @@ const UploadDataCard: React.FC = () => {
       <br />
       <div style={styles.flexBox}>
         <Text>Use session dates?</Text>
-        <Popover title={null} content={sessionDatesHelperText()} >
+        <Popover title={null} content={sessionDatesHelperText} >
           <QuestionCircleOutlined style={styles.smallHelpIcon} />
         </Popover>
       </div>
@@ -228,7 +220,7 @@ const UploadDataCard: React.FC = () => {
       <br />
       <div style={styles.flexBox}>
         <Text>Check all files?</Text>
-        <Popover title={null} content={checkAllFilesHelperText()} >
+        <Popover title={null} content={checkAllFilesHelperText} >
           <QuestionCircleOutlined style={styles.smallHelpIcon} />
         </Popover>
       </div>
@@ -240,7 +232,7 @@ const UploadDataCard: React.FC = () => {
       <br />
       <div style={styles.flexBox}>
         <Text>T2*-Weighted Protocol Pattern?</Text>
-        <Popover title={null} content={t2wHelperText()} >
+        <Popover title={null} content={t2wHelperText} >
           <QuestionCircleOutlined style={styles.smallHelpIcon} />
         </Popover>
       </div>
@@ -259,7 +251,7 @@ const UploadDataCard: React.FC = () => {
       <br />
       <div style={styles.flexBox}>
         <Text>T1-Weighted Protocol Pattern?</Text>
-        <Popover title={null} content={t1wHelperText()} >
+        <Popover title={null} content={t1wHelperText} >
           <QuestionCircleOutlined style={styles.smallHelpIcon} />
         </Popover>
       </div>
@@ -281,7 +273,7 @@ const UploadDataCard: React.FC = () => {
     return <div>
       <div style={styles.flexBox}>
         <Text>Are you uploading multiple subjects?</Text>
-        <Popover title={null} content={uploadingBidsHelpderText()} >
+        <Popover title={null} content={uploadingBidsHelpderText} >
           <QuestionCircleOutlined style={styles.smallHelpIcon} />
         </Popover>
       </div>
@@ -299,26 +291,24 @@ const UploadDataCard: React.FC = () => {
   }
 
   const renderConfigureStep = () => {
-    if (dataType === SubjectDataType.DICOM) {
+    if (dataType === SubjectUploadFormat.DICOM) {
       return renderDicomConfigureStep();
     }
-    if (dataType === SubjectDataType.BIDS) {
+    if (dataType === SubjectUploadFormat.BIDS) {
       return renderBidsConfigureStep();
     }
-    if (dataType === SubjectDataType.NIFTI) {
+    if (dataType === SubjectUploadFormat.NIFTI) {
       return renderNiftiConfigureStep();
     }
     return <div />
   }
- 
-  const badUploadPath = !!(uploadPath && !uploadPath.includes('neurodesktop-storage') && uploadPath.includes(':\\'));
 
   const renderUploadStep = () => {
     return (
       <div>
         <div style={styles.flexBox}>
           <Text>Enter a file path to copy files from</Text>
-          <Popover title={null} content={copyPathHelpererText()} >
+          <Popover title={null} content={copyPathHelpererText} >
             <QuestionCircleOutlined style={styles.smallHelpIcon} />
           </Popover>
         </div>
@@ -332,29 +322,17 @@ const UploadDataCard: React.FC = () => {
             Folder must be within your "neurodesktop-storage" folder 
           </div>
         }
-
       </div>
     )
   }
 
   return (
-    <Card
-      style={{ width: '100%' }}
-      title={
-        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}} >
-          <div style={{ display: 'flex', flexDirection: 'row'}}>
-            <Title style={{ marginTop: 20 }} level={3}>Upload Data</Title>
-            <Popover title={null} content={uploadHelperText()} >
-              <div style={{ marginTop: 15}}>
-                <QuestionCircleOutlined style={{ color: '#1677ff', marginLeft: 5, fontSize: 15  }} />
-              </div>
-            </Popover>
-          </div>
-          <div style={{  marginTop: 20, }}>
-            <UploadOutlined style={{ color: '#1677ff', fontSize: 28 }} />
-          </div>
-        </div>
-      }
+    <ContentCard 
+      title={'Upload Data'} 
+      width={530} 
+      Icon={UploadOutlined} 
+      helperText={uploadHelperText} 
+      loading={false}
     >
       <Steps
         size="small"
@@ -379,7 +357,8 @@ const UploadDataCard: React.FC = () => {
         onClick={nextStep}>
         {step !== 3 ? 'Next' : ' Finish'}
       </Button>
-    </Card>
+    </ContentCard>
+
   )
 }
 

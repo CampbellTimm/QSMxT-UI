@@ -1,15 +1,11 @@
-import { UploadOutlined } from '@ant-design/icons';
-import { Button, Upload, Collapse, Table, Descriptions, Typography, Divider, Card, Tabs } from 'antd';
+import { Collapse, Table, Descriptions, Typography, Divider, Card, Tabs } from 'antd';
 import React, { useEffect, useState } from 'react';
 import NiiVue from '../../components/NiiVue/NiiVue';
-import { getQsmResults } from '../../util/apiClient';
-import { API_URL } from '../../core/constants';
+import apiClient from '../../util/apiClient';
 import { context } from '../../util/context';
-// @ts-ignore
-import run1 from './run1.json';
-// @ts-ignore
-import run2 from './run2.json';
 import moment from "moment";
+import PageContainer from '../../containers/PageContainer';
+import globalStyles from '../../util/globalStyles';
 
 const { Panel } = Collapse;
 const { Title } = Typography;
@@ -23,16 +19,14 @@ const styles = {
 
 const Results = () => {
   const [qsmResults, setQsmResults]: [any, any] = useState([]);
-  // const [activeTab, setQsmResults]: [any, any] = useState([]);
   const { selectedSubjects, selectedCohorts, navigate, cohorts } = React.useContext(context);
 
-
   useEffect(() => {
-    const fetchQSM = async () => {
-      const qsmResults = await getQsmResults()
+    const fetchResults = async () => {
+      const qsmResults = await apiClient.getQsmResults()
       setQsmResults(qsmResults)
     }
-    fetchQSM()
+    fetchResults()
   }, [])
 
   const allSelectedSubjects = selectedSubjects.map(x => x.split('&')[0]);
@@ -40,18 +34,15 @@ const Results = () => {
     allSelectedSubjects.push(...(cohorts || {})[cohortName].subjects)
   })
 
-
   const renderQsmResults = (qsmResult: any) => {
-    const subs: any = Object.keys(qsmResult.analysisResults).filter(subject => allSelectedSubjects.find(x => x === subject));
-
+    const subjects: any = Object.keys(qsmResult.analysisResults).filter(subject => allSelectedSubjects.find(x => x === subject));
     return (
       <Collapse defaultActiveKey={[]}>
-        { qsmResult.qsmImages.filter((image: string) => subs.find((sub: string) => image.includes(sub))).map((image: any) => {
+        { qsmResult.qsmImages.filter((image: string) => subjects.find((sub: string) => image.includes(sub))).map((image: any) => {
           console.log(image);
           const subject = image.split('/')[image.split('/').length - 1].split('_')[0]
           const session = image.split('ses-')[1].split('_')[0];
           const run = image.split('run-')[1].split('_')[0];
-
           return (
             <Panel header={<div>Subject: <i>{subject}</i>, Session: <i>{session}</i>, Run: <i>{run}</i></div>} key={image}>
               <br />
@@ -62,72 +53,48 @@ const Results = () => {
                 imageUrl={image}
               />
             </Panel>
-            
           )
         })}
       </Collapse>
     )
   }
 
-
   const renderAnlysisTable = (qsmResult: any) => {
-  
-    const subs = Object.keys(qsmResult.analysisResults).filter(subject => allSelectedSubjects.find(x => x === subject));
-    console.log(subs);
-
+    const subjects = Object.keys(qsmResult.analysisResults).filter(subject => allSelectedSubjects.find(x => x === subject));
     const panels: any = [];
 
-    subs.forEach(subject => {
+    subjects.forEach(subject => {
       Object.keys(qsmResult.analysisResults[subject].sessions).forEach(session =>{
         Object.keys(qsmResult.analysisResults[subject].sessions[session].runs).forEach(run => {
-          // tableData[`Subject: ${subject}, Session: ${session}, Run: ${run}`] = 
-
-
           panels.push(
-        <Panel header={<div>Subject: <i>{subject}</i>, Session: <i>{session}</i>, Run: <i>{run}</i></div>} key={subject + session + run}>
-          <Table
-            size="small"
-            dataSource={
-              qsmResult.analysisResults[subject].sessions[session].runs[run]
-              .filter((row: any) => Object.keys(row).length > 2)
-              .sort((a: any, b: any) => a.roi.toLowerCase() - b.roi.toLowerCase())
-            }
-            columns={['roi',	'num_voxels',	'min',	'max',	'median',	'mean',	'std'].map(x => (
-              { title: x === 'num_voxels' ? 'No. Voxels' : x,
-                dataIndex: x, 
-                key: x,
-                render: (y: any, z, x) => {
-                  console.log(z);
-                  console.log(x);
-                  // @ts-ignore
-                  if (z.roi === y) {
-                    return y;
-                  } else {
-                    return y && y.toString().slice(0, 6)
-
-                  }
+            <Panel header={<div>Subject: <i>{subject}</i>, Session: <i>{session}</i>, Run: <i>{run}</i></div>} key={subject + session + run}>
+              <Table
+                size="small"
+                dataSource={
+                  qsmResult.analysisResults[subject].sessions[session].runs[run]
+                  .filter((row: any) => Object.keys(row).length > 2)
+                  .sort((a: any, b: any) => a.roi.toLowerCase() - b.roi.toLowerCase())
                 }
-              }
-              ))}
-          />
-      
-        </Panel>
+                columns={['roi',	'num_voxels',	'min',	'max',	'median',	'mean',	'std'].map(columnName => (
+                  { title: columnName === 'num_voxels' ? 'No. Voxels' : columnName,
+                    dataIndex: columnName, 
+                    key: columnName,
+                    render: (value: any, row, x) => {
+                      // @ts-ignore
+                      if (row.roi === value) {
+                        return value;
+                      } else {
+                        return value && value.toString().slice(0, 6);
+                      }
+                    }
+                  }
+                ))}
+              />
+            </Panel>
           )
-          
         })
       })
     });
-          
-          
-      // qsmResult.analysisResults[subject].sessions[session].runs[run];
-
-            
-      // {Object.keys(tableData).forEach((name: string) => {
-      //   return 
-      // })}
-
-
- 
 
     return (
       <div>
@@ -139,20 +106,16 @@ const Results = () => {
           <Descriptions.Item label="Sessions Included">{qsmResult.parameters.sessions.length || 'All'}</Descriptions.Item>
           <Descriptions.Item label="Runs Included">{qsmResult.parameters.runs.length || 'All'}</Descriptions.Item>
           <Descriptions.Item label="QSM Config">{qsmResult.parameters.pipelineConfig}</Descriptions.Item>
-
         </Descriptions>
         <br />
         <br />
-        <Title style={{ marginTop: 0 }} level={5}>Analysis</Title>
+        <Title style={globalStyles.noTopMargin} level={5}>Analysis</Title>
         <Collapse defaultActiveKey={[]}>
           {panels}
         </Collapse>
-   
       </div>
     )
-    
   }
-
 
   const renderCards = (qsmResult: any) => {
     let content1: any = '';
@@ -163,12 +126,10 @@ const Results = () => {
     } else if (!qsmResult) {
       content1 = <i>No results for selected subjects and cohorts</i>;
       content2 = <i>No results for selected subjects and cohorts</i>;
-    
     } else {
       content1 = renderQsmResults(qsmResult);
       content2 = renderAnlysisTable(qsmResult)
     }
-
     return <div style={styles.flexBoxRow}>
       <Card style={{ minWidth: 600 }} title={<Title level={3}>Analysis Results</Title>}>
         {content2}
@@ -177,40 +138,28 @@ const Results = () => {
         {content1}
       </Card>
     </div>
-
   }
 
   const linkedQsmJobs = qsmResults.filter((qsmResult: any) => {
     return qsmResult.parameters.subjects.find((subject: string) => {
-      const a = selectedCohorts.filter(cohortName => (cohorts || {})[cohortName].subjects.find(x => x === subject )).length;
-      const b = (selectedSubjects.map(x => x.split('&')[0])).find(x => x === subject);
-      console.log(a);
-      console.log(b);
-      return a || b;
-    })
-       
+      const linkedByCohort = selectedCohorts.filter(cohortName => (cohorts || {})[cohortName].subjects.find(x => x === subject )).length;
+      const linkedBySubject = (selectedSubjects.map(x => x.split('&')[0])).find(x => x === subject);
+      return linkedByCohort || linkedBySubject;
+    })     
   });
-
-  console.log(linkedQsmJobs)
-
 
   const tabItems = linkedQsmJobs.length
     ? linkedQsmJobs.map((result: any) => ({ label: result.description, key: result.id, children: renderCards(result) }))
     : [{ label: 'No results selected', key: 'empty', children: renderCards(null) }]
 
-
   return (
-    <div style={{ width: '100%', maxWidth: 1100 }}>
-      <div style={{ textAlign: 'center'}}>
-        <Title style={{ marginTop: 0 }}  level={1}>Results</Title>
-      </div>
-      <Divider />
+    <PageContainer title={"Resuts"} gap={0}>
       <Tabs
+        style={{ minWidth: '100%'}}
         type="card"
         items={tabItems}
       />
-    </div>
-  
+    </PageContainer>
   )
 }
 export default Results;

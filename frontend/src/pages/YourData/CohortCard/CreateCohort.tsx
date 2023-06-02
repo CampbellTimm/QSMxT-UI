@@ -1,7 +1,7 @@
 import { Input, Typography, Button, Form } from 'antd';
 import React, { useContext, useState } from 'react';
-import { context } from '../../../../util/context';
-import apiClient from '../../../../util/apiClient';
+import { context } from '../../../util/context';
+import apiClient from '../../../util/apiClient';
 
 const { Title } = Typography;
 

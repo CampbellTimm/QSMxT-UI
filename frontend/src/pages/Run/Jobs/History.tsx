@@ -1,39 +1,29 @@
-import React, { useEffect, useState } from 'react';
-import { context } from '../../../../../util/context';
-import { getHistory } from '../../../../../util/apiClient';
-import { Card, Space } from 'antd';
+import React, { useContext, useEffect, useState } from 'react';
+import { context } from '../../../util/context';
+import { Card, Empty, Skeleton, Space } from 'antd';
 import moment from 'moment';
-import { Job, JobStatus } from '../../../../../types';
-import { flexBoxRowSpaceBetween } from '../../../../../util/styles';
+import { Job, JobStatus } from '../../../types';
+import globalStyles from '../../../util/globalStyles';
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
-import './styles.css';
+import './styles.css'; // TODO - remove
 import HistoryRunLogs from './HistoryRunLogs';
+import { useLocation } from 'react-router-dom';
+import queryString from 'query-string';
 
-interface Props {
-}
-const RunHistory: React.FC<Props> = (props: Props) => {
-  const [history, setHistory]: [any, any] = useState(false);
-  const {  } = React.useContext(context);
-  const [historyLogOpened, setHistoryLogOpened]: [any, any] = useState(null);
+const RunHistory: React.FC<{}> = () => {
+  const location = useLocation();
 
-  useEffect(() => {
-    const get = async () => {
-      const x = await getHistory();
-      setHistory(x);
-    }
-    // TODO - remove for notification socket
-    get();
-    setInterval(() => {
-      get();
-    }, 1000)
-  }, [historyLogOpened])
-  
+  const { openJob } = queryString.parse(location.search);
+
+  const { history } = useContext(context);
+  const [historyLogOpened, setHistoryLogOpened]: [any, any] = useState(openJob || null);
+
   if (!history) {
-    return <div></div>
+    return <Skeleton />
   }
 
   if (!history.length) {
-    return <div>No runs are in the history</div>
+    return <div><br/><Empty description="No jobs in your history" /></div>
   }
 
   return (
@@ -45,7 +35,7 @@ const RunHistory: React.FC<Props> = (props: Props) => {
           if (run.status === JobStatus.FAILED) {
             return (
               <Card 
-                style={{ width: 300 }}
+                style={{ width: '100%' }}
                 onClick={() => {
                   // console.log(run.id);
                   setHistoryLogOpened(run.id)
@@ -53,7 +43,7 @@ const RunHistory: React.FC<Props> = (props: Props) => {
                 className="historyCard"
                 size="small" 
                 title={
-                  <div style={flexBoxRowSpaceBetween}>
+                  <div style={globalStyles.flexBoxRowSpaceBetween}>
                     <div>{run.type}</div>
                     <CloseOutlined style={{ color: "red "}}/>
                   </div>
@@ -75,7 +65,7 @@ const RunHistory: React.FC<Props> = (props: Props) => {
                 className="historyCard"
                 size="small" 
                 title={
-                  <div style={flexBoxRowSpaceBetween}>
+                  <div style={globalStyles.flexBoxRowSpaceBetween}>
                     <div>{run.type}</div>
                     <CheckOutlined style={{ color: "green "}}/>
                   </div>

@@ -1,9 +1,9 @@
 import { Drawer, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
-import { API_URL } from '../../../../../core/constants';
+import { API_URL } from '../../../core/constants';
 import axios from 'axios';
 
-const { Title, Paragraph, Text, Link } = Typography;
+const { Title, Paragraph, Text } = Typography;
 
 interface Props {
   historyLogOpened: string | null,

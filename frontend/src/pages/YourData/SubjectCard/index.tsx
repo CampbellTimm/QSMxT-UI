@@ -1,35 +1,31 @@
 import { QuestionCircleOutlined, UploadOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Upload, Collapse, Table, Descriptions, Select, UploadProps, message, Card, Typography, Popover, Divider, Row, Col, Popconfirm } from 'antd';
 import React, { useEffect, useState } from 'react';
-import NiiVue from '../../../../components/NiiVue/NiiVue';
-import { context } from '../../../../util/context';
-import { Subject, SubjectsTree } from '../../../../types';
+import { context } from '../../../util/context';
+import { Subject, SubjectsTree } from '../../../types';
 import SubjectDetailDrawer from './SubjectDetailDrawer';
-import apiClient from '../../../../util/apiClient';
+import apiClient from '../../../util/apiClient';
+import ContentCard from '../../../containers/ContentCard';
 
-const { Panel } = Collapse;
+const { Title, Paragraph, Text } = Typography;
 
-const { Title, Paragraph, Text, Link } = Typography;
-
-const subjectHelperText = () => <Text>
+const subjectHelperText = <Text>
   Data for running the QSMxT pipeline on is stored in the form of subjects.<br />
   A subject refers to a patient or research subject from which the QSM data<br/>
   was sourced.
 </Text>
 
-const explanatoryText = () => <Text> 
+const explanatoryText = <Text> 
   <i>Select a Subject on the left of the screen to view images and details of the magnitude and phase data...</i>
   <Divider />
 </Text>
 
+const width = 530;
 
 const SubjectCard: React.FC = () => {
   const { selectedSubjects, subjects, navigate, setSelectedCohorts, setSelectedSubjects, fetchSubjectData } = React.useContext(context);
 
   const [openDrawer, setOpenDrawer]: [any, any] = useState(false);
-
-  if (!subjects) return <div />;
-
 
   const deleteSubject = (selectedSubject: string) => async () => {
     const deleted = await apiClient.deleteSubject(selectedSubject);
@@ -48,8 +44,9 @@ const SubjectCard: React.FC = () => {
 
   const renderSubjectDetail = (subjects: Subject[], selectedSubject: string): JSX.Element => {
     const keys = selectedSubject.split("&");
-    console.log(keys);
     const subjectName: string = keys[0];
+    const session: string = keys[1];
+    const run: string = keys[2];
     const subject = subjects.find(sub => sub.subject === subjectName) as Subject;
     const openRunDetailButtonDisabled = keys.length !== 3;
     const openRunButton = (
@@ -62,68 +59,51 @@ const SubjectCard: React.FC = () => {
         View Run Images and Associated Data
       </Button>
     )
+    const firstSessionName = Object.keys(subject.dataTree.sessions)[0];
+    const numOfSessions = Object.keys(subject.dataTree.sessions).length;
+    const firstRunName = Object.keys(subject.dataTree.sessions[firstSessionName].runs)[0];
+    const numberOfRuns = Object.keys(subject.dataTree.sessions[firstSessionName].runs).length;
+    const numberOfEchos = Object.keys(subject.dataTree.sessions[firstSessionName].runs[firstRunName].echos).length;
     return (
-      <div style={{ width: '100%'}}>
+      <div style={{ minWidth: '100%', maxWidth: '100%' }}>
         <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3}}>
-        <Title  style={{ marginTop: 0 }} level={5}>Subject Details</Title>
-        <div>
-          <Button type="link" onClick={navigateToSubjectResults(selectedSubject)}>
-            View Results
-          </Button>
-          <Popconfirm
-            title={`Delete ${subjectName}?`}
-            description={<div>This will also delete all assoicated QSM results</div>}
-            onConfirm={deleteSubject(subjectName)}
-            onCancel={() => {}}
-            okText="Yes"
-            cancelText="No" 
-            icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
-          >
-            <Button danger>Delete</Button>
-          </Popconfirm>
-        
-        </div>     
+          <Title  style={{ marginTop: 0 }} level={5}>Subject Details</Title>
+          <div>
+            <Button type="link" onClick={navigateToSubjectResults(selectedSubject)}>
+              View Results
+            </Button>
+            <Popconfirm
+              title={`Delete ${subjectName}?`}
+              description={<div>This will also delete all assoicated QSM results</div>}
+              onConfirm={deleteSubject(subjectName)}
+              onCancel={() => {}}
+              okText="Yes"
+              cancelText="No" 
+              icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
+            >
+              <Button danger>Delete</Button>
+            </Popconfirm>
+          </div>     
         </div>
         <Row>
-          <Col span={10} >
-            Selected Subject:
-          </Col>
-          <Col>
-            {subjectName}
-          </Col>
+          <Col span={10}>Selected Subject:</Col>
+          <Col>{subjectName}</Col>
         </Row>
         <Row>
-          <Col span={10} >
-            Number of Subject Sessions:  
-          </Col>
-          <Col>
-            {Object.keys(subject.dataTree.sessions).length}
-          </Col>
+          <Col span={10}>Number of Subject Sessions:</Col>
+          <Col>{numOfSessions}</Col>
         </Row>
         <Row>
-          <Col span={10} >
-            Number of Runs per Session:  
-          </Col>
-          <Col>
-          {Object.keys(subject.dataTree.sessions[Object.keys(subject.dataTree.sessions)[0]].runs).length}
-          </Col>
+          <Col span={10}>Number of Runs per Session:</Col>
+          <Col>{numberOfRuns}</Col>
         </Row>
         <Row>
-          <Col span={10} >
-            Number of Echos per Run:  
-          </Col>
-          <Col> 
-          {/* TODO - FIX */}
-            {5}
-          </Col>
+          <Col span={10}>Number of Echos per Run:</Col>         
+          <Col>{numberOfEchos}</Col>
         </Row>
         <Row>
-          <Col span={10} >
-            Upload Type:  
-          </Col>
-          <Col>
-            {subject.uploadFormat}
-          </Col>
+          <Col span={10}>Upload Type:</Col>
+          <Col>{subject.uploadFormat}</Col>
         </Row>
         <br />
         {
@@ -137,10 +117,9 @@ const SubjectCard: React.FC = () => {
           open={openDrawer}
           setOpen={setOpenDrawer}
           subject={subject}
-          run={keys[2]}
-          session={keys[1]}
+          run={run}
+          session={session}
         />
-        
       </div>
     )
   }
@@ -156,34 +135,25 @@ const SubjectCard: React.FC = () => {
     )
   }
 
+  const loading = !subjects;
   return (
-    <Card 
-      title={
-        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}} >
-          <div style={{ display: 'flex', flexDirection: 'row'}}>
-            <Title style={{ marginTop: 20 }} level={3}>Subject </Title>
-            <Popover title={null} content={subjectHelperText()} >
-              <div style={{ marginTop: 15}}>
-                <QuestionCircleOutlined style={{ color: '#1677ff', marginLeft: 5, fontSize: 15  }} />
-              </div>
-            </Popover>
-          </div>
-          <div style={{  marginTop: 20, }}>
-            <UserOutlined style={{ color: '#1677ff', fontSize: 28 }} />
-          </div>
+    <ContentCard 
+      title={'Subject'} 
+      width={width} 
+      Icon={UserOutlined} 
+      helperText={subjectHelperText} 
+      loading={loading}
+    >
+      {!loading && (
+        <div style={{ marginRight: 20}}>
+          {explanatoryText}
+          {selectedSubjects.length
+            ? renderSubjectDetail(subjects as Subject[], selectedSubjects[0])
+            : renderNoSelectedSubjectText(subjects as Subject[])
+          }
         </div>
-      }
-      // style={{ width: '550px'  }}
-      actions={[]}
-    > 
-      <div style={{ marginRight: 20}}>
-        {explanatoryText()}
-        {selectedSubjects.length
-          ? renderSubjectDetail(subjects, selectedSubjects[0])
-          : renderNoSelectedSubjectText(subjects)
-        }
-      </div>
-    </Card>
+      )}
+    </ContentCard>
   )
 }
 

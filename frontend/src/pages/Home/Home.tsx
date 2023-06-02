@@ -1,7 +1,8 @@
 import React from "react";
 import { Image, Typography, Divider } from 'antd';
+import { Link } from "react-router-dom";
 
-const { Title, Paragraph, Text, Link } = Typography;
+const { Title, Paragraph, Text } = Typography;
 
 // TODO - add loading for the image
 const Home = () => {
@@ -31,19 +32,19 @@ const Home = () => {
       </Paragraph>
       <Paragraph>
         <Text>
-          In the <Link href="/yourData">Data Page</Link>, you can upload the data for your subjects in either BIDS or DICOM format. If your data is in the DICOM format, it will automatically be sorted and converted to BIDS. You can also add your subjects to cohorts in order to sort them into workable chunks.
+          In the <Link to="/yourData">Data Page</Link>, you can upload the data for your subjects in either BIDS or DICOM format. If your data is in the DICOM format, it will automatically be sorted and converted to BIDS. You can also add your subjects to cohorts in order to sort them into workable chunks.
         </Text>
       </Paragraph>
 
       <Paragraph>
         <Text>
-          In the <Link href="/run">Run Page</Link>, you are able to run the full QSM pipeline, involving optional segmentation and analysis.
+          In the <Link to="/run">Run Page</Link>, you are able to run the full QSM pipeline, involving optional segmentation and analysis.
         </Text>
       </Paragraph>
 
       <Paragraph>
         <Text>
-          In the <Link href="/results">Results Page</Link>, view the resulting Niftii images from the QSM pipeline and view the results from the analysis.
+          In the <Link to="/results">Results Page</Link>, view the resulting Niftii images from the QSM pipeline and view the results from the analysis.
         </Text>
       </Paragraph>
     </div>

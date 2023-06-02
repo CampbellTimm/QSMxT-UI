@@ -5,7 +5,7 @@ import SubjectTree from './components/SubjectTree';
 import { context } from '../../util/context';
 import { PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 
-const { Title, Paragraph, Text, Link } = Typography;
+const { Title, Paragraph, Text } = Typography;
 
 const styles = {
   subjectSelector: { 

@@ -1,19 +1,20 @@
-import { Layout, Menu, Image, notification } from 'antd';
+import { Layout, Menu, Image } from 'antd';
 import { Routes, Route, Navigate } from "react-router-dom";
 import Home from './pages/Home/Home'
-import YourDataPage from './pages/YourDataPage/YourDataPage'
-import Run from './pages/RunPage/RunPage'
+import YourData from './pages/YourData'
+import Run from './pages/Run'
 import Results from './pages/Results/Results'
 import { useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from "react";
 import apiClient from './util/apiClient';
-import { Page, context } from './util/context';
+import { Page, SiteContext, context } from './util/context';
 import SelectorTree from './components/SelectorTree/SelectorTree';
 import io from 'socket.io-client';
 import { API_URL } from './core/constants';
-import LoadingPage from './pages/LoadingPage/LoadingPage';
+import Loading from './pages/Loading';
 import { FolderOpenOutlined, HomeOutlined, InsertRowLeftOutlined, PlaySquareOutlined } from '@ant-design/icons';
-import { Job, JobType } from './types';
+import { Cohorts, Job, JobNotification, Subject } from './types';
+import { handleJobNotification } from './util/notifications';
 
 const { Header, Content } = Layout;
 
@@ -63,16 +64,21 @@ const styles = {
   }
 }
 
-
 const App = () => {
+  const [cohorts, setCohorts] = useState<Cohorts | null>(null);
+  const [subjects, setSubjects] = useState<Subject[] | null>(null);
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
+  const [selectedCohorts, setSelectedCohorts]= useState<string[]>([]);
+  const [queue, setQueue] = useState<Job[] | null>(null);
+  const [history, setHistory] = useState<Job[] | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  
+  const navigate = useNavigate();
 
-
-  const [cohorts, setCohorts]: [any, any] = useState(null);
-  const [subjects, setSubjects]: [any, any] = useState(null);
-  const [selectedSubjects, setSelectedSubjects]: [any, any] = useState([]);
-  const [selectedCohorts, setSelectedCohorts]: [any, any] = useState([]);
-  const [queue, setQueue]: [Job[] | null, any] = useState(null);
-  const [loading, setLoading]: [boolean, any] = useState(true);
+  const fetchHistory = async () => {
+    const history = await apiClient.getHistory();
+    setHistory(history);
+  }
 
   const fetchSubjectData = async () => {
     const subjects = await apiClient.getSubjects()
@@ -84,84 +90,54 @@ const App = () => {
     setCohorts(cohorts);
   }
 
-      // const socket = io(`${API_URL}/queue`);
-    // socket.on('data', (data) => {
-    //   console.log('Received message:', data);
-    //   const newQueue = JSON.parse(data);
-
-
-    //   // queue && queue.forEach(prevRun => {
-    //   //   if (!newQueue.find(newRun => newRun.id === prevRun.id)) {
-    //   //     message.success(`${prevRun.type} completed`);
-    //   //   }
-    //   // })
-
-
-    //   setQueue(newQueue);
-
-    // });
-
   const fetchQueueData = async () => {
     const newQueue = await apiClient.getJobsQueue();
-    const history = await apiClient.getHistory();
-    if (queue) {
-      const finishedJobs = (queue as any).filter((job: Job) => !newQueue.find(newQueueJob => newQueueJob.id === job.id));
-      finishedJobs.forEach((job: Job) => {
-        const historyJob = history.find(x => x.id === job.id);
-        if (historyJob && historyJob.error) {
-          notification.error({
-            message: `${historyJob.type} failed`,
-            description: `Error: ${historyJob.error} `,
-            placement: 'topRight',
-            duration: null
-        })
-        } else {
-          notification.success({
-            message: `${job.type} finished`,
-            description: `${job.type} finished executing successfully`,
-            placement: 'topRight',
-            duration: null
-        })
-        }
-          
-      })
-
-    }
     setQueue(newQueue);
   }
 
-
-
-  useEffect(() => {
+  const fetchAllData = async () => {
     fetchSubjectData();
     fetchCohortData();
     fetchQueueData();
+    fetchHistory();
+  }
+
+  useEffect(() => {
+    fetchAllData();
     setInterval(() => {
-      fetchSubjectData();
-      fetchCohortData();
-      fetchQueueData();
-    }, 1000)
-  
+      fetchAllData();
+    }, 15 * 1000)
   },[]); 
 
-  const selectedKey = window.location.pathname.split('/')[window.location.pathname.split('/').length - 1] || 'home'
+  useEffect(() => {
+    if (!loading) {
+      const notificationSocket = io(`${API_URL}/notifications`);
+      notificationSocket.on('connect', () => {
+        notificationSocket.on('data', (data: string) => {
+          const jobNotification: JobNotification = JSON.parse(data);
+          handleJobNotification(jobNotification, navigate);
+          fetchAllData();
+        });
+      });
+    }
+  }, [loading]);
 
-  const navigate = useNavigate();
+  const selectedKey = window.location.pathname.split('/')[window.location.pathname.split('/').length - 1] || ''
 
-  const contextValue = {
+  const contextValue: SiteContext = {
     cohorts,
     subjects,
     selectedSubjects,
     selectedCohorts,
     queue,
+    history,
     setSelectedCohorts,
     setSelectedSubjects,
     fetchSubjectData,
     fetchCohortData,
     navigate,
     fetchQueueData,
-    page: selectedKey
-    // setCohorts: updateCohorts
+    page: selectedKey as Page,
   }
 
   return (
@@ -197,16 +173,16 @@ const App = () => {
         <context.Provider value={contextValue as any}>
           <div style={styles.contentBody}>
             {loading
-              ? <LoadingPage setLoading={setLoading} />
+              ? <Loading setLoading={setLoading} />
               : <>
                 <SelectorTree />
                 <div style={{ overflowY: 'scroll', width: '100%', paddingRight: 14 }}>
                   <Routes>
-                    <Route path="/home" element={<Home />} />
-                    <Route path="/run" element={<Run />} />
-                    <Route path="/yourData" element={<YourDataPage />} />
-                    <Route path="/results" element={<Results />} />
-                    <Route path="/" element={ <Navigate to="/home" /> } />
+                    <Route path={`/${Page.Home}`} element={<Home />} />
+                    <Route path={`/${Page.Run}`} element={<Run />} />
+                    <Route path={`/${Page.YourData}`} element={<YourData />} />
+                    <Route path={`/${Page.Results}`} element={<Results />} />
+                    <Route path={'*'} element={<Navigate to={`/${Page.Home}`} replace={true} />} />
                   </Routes>  
                 </div>
               </>
@@ -214,7 +190,6 @@ const App = () => {
           </div>
         </context.Provider>
       </Content>
-
     </Layout>
   )
 };

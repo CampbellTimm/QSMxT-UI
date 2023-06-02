@@ -1,9 +1,9 @@
 import { Select, Input, Card, Typography, Divider, Button, Popconfirm, Popover, Form, Tag } from 'antd';
 import React, { ReactElement, useEffect, useState } from 'react';
 import {  QuestionCircleOutlined } from '@ant-design/icons';
-import { context } from '../../../../util/context';
-import apiClient from '../../../../util/apiClient';
-import { Cohorts, Subject } from '../../../../types';
+import { context } from '../../../util/context';
+import apiClient from '../../../util/apiClient';
+import { Cohorts, Subject } from '../../../types';
 
 const { Title, Text } = Typography;
 
@@ -77,7 +77,7 @@ const ViewCohort: React.FC<Props> = ({ cohorts, subjects, selectedCohort }) => {
   return (
     <>
       <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
-        <Title style={{ marginTop: 0 }} level={5}>{selectedCohortName}</Title>
+        <Title style={{ marginTop: 0 }} level={4}>{selectedCohortName}</Title>
         <div>
           <Button type="link" onClick={navigateToCohortResults}>
             View Results
@@ -101,7 +101,8 @@ const ViewCohort: React.FC<Props> = ({ cohorts, subjects, selectedCohort }) => {
         </Text>
         <br />
         <br />
-        Linked Subjects:
+        <Title style={{ marginTop: 0 }} level={5}>Linked Subjects</Title>
+        
         <Select
           mode="multiple"
           allowClear

@@ -3,7 +3,7 @@ import { Cohorts, Job, Subject, SubjectsTree } from '../types';
 import { NavigateFunction } from 'react-router-dom';
 
 export enum Page {
-  Home = 'home',
+  Home = '',
   YourData = 'yourData',
   Run = 'run',
   Results = 'results'
@@ -15,6 +15,7 @@ export interface SiteContext {
   subjects: Subject[] | null,
   cohorts: Cohorts | null,
   queue: Job[] | null,
+  history: Job[] | null,
 
   selectedSubjects: string[],
   selectedCohorts: string[],
@@ -34,6 +35,7 @@ const defaultContext: SiteContext = {
   cohorts: null,
   subjects: null,
   queue: null,
+  history: null,
   
   selectedSubjects: [],
   selectedCohorts: [],
