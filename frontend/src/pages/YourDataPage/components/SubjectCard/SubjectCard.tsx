@@ -18,7 +18,7 @@ const subjectHelperText = () => <Text>
 </Text>
 
 const explanatoryText = () => <Text> 
-  <i>Select a Subject on the lef of the screen to view images and details of the magnitude and phase data...</i>
+  <i>Select a Subject on the left of the screen to view images and details of the magnitude and phase data...</i>
   <Divider />
 </Text>
 
@@ -48,6 +48,7 @@ const SubjectCard: React.FC = () => {
 
   const renderSubjectDetail = (subjects: Subject[], selectedSubject: string): JSX.Element => {
     const keys = selectedSubject.split("&");
+    console.log(keys);
     const subjectName: string = keys[0];
     const subject = subjects.find(sub => sub.subject === subjectName) as Subject;
     const openRunDetailButtonDisabled = keys.length !== 3;

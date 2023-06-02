@@ -17,7 +17,7 @@ const OngoingRunLogs = (props: Props) => {
   const endRef = useRef(null)
 
   useEffect(() => {
-    const socket = io('http://localhost:4000/inProgress');
+    const socket = io('http://localhost:5000/inProgress');
     socket.on('connect', () => {
       console.log('Connected to socket');
       setSocket(socket as any);
@@ -67,7 +67,10 @@ const OngoingRunLogs = (props: Props) => {
       title="Run Logs" 
       size="large"
       placement="right" 
-      onClose={() => setOpenOngoingLog(false)} 
+      onClose={() => {
+        // fetchHistory();
+        setOpenOngoingLog(false)
+      }} 
       open={openOngoingLog}
     >
       {openOngoingLog ? renderBody() : <div />}

@@ -24,77 +24,28 @@ const Home = () => {
           QSMxT is a complete and end-to-end QSM processing and analysis framework that excels at automatically reconstructing and processing QSM for large groups of participants.
         </Text>
       </Paragraph>
-
       <Paragraph>
         <Text>
-          In the <Link href="/inputData">Data Page</Link>, upload your DICOM or BIDS data to a Cohort 
+          Within this site you are able to handle the full QSM workflow after you have upload the data for your subjects. All data it handled by the site, add no external file management is required to view and manage your data once uploaded.
+        </Text>
+      </Paragraph>
+      <Paragraph>
+        <Text>
+          In the <Link href="/yourData">Data Page</Link>, you can upload the data for your subjects in either BIDS or DICOM format. If your data is in the DICOM format, it will automatically be sorted and converted to BIDS. You can also add your subjects to cohorts in order to sort them into workable chunks.
         </Text>
       </Paragraph>
 
       <Paragraph>
         <Text>
-          In the <Link href="/run">Run Page</Link>, run Segmentations of the QSM pipeline in your uploaded data
+          In the <Link href="/run">Run Page</Link>, you are able to run the full QSM pipeline, involving optional segmentation and analysis.
         </Text>
       </Paragraph>
 
       <Paragraph>
         <Text>
-          In the <Link href="/output">Results Page</Link>, view the resulting Niftii images and analysis results from the QSM pipeline
+          In the <Link href="/results">Results Page</Link>, view the resulting Niftii images from the QSM pipeline and view the results from the analysis.
         </Text>
       </Paragraph>
-
-       {/* <br />
-       A
-       <br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A<br />
-       A */}
     </div>
   )
 }

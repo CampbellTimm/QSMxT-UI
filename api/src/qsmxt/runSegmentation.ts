@@ -1,4 +1,3 @@
-import { StringLiteral } from "typescript";
 import { runQsmxtCommand } from ".";
 import { ANALYSIS_FOLDER, BIDS_FOLDER, QSM_FOLDER, SEGMENTATION_FOLDER } from "../constants";
 import logger from "../util/logger";
@@ -16,6 +15,7 @@ const runSegmentation = async (id: string, subjects: string[], linkedQsmJob: str
   // TODO - add sessions, runs and other params
   for (let subject of subjects) {
     const segmentationCommand = `run_3_segment.py ${BIDS_FOLDER} ${qsmResultFolder} --subject_pattern ${subject}`;
+    
     await runQsmxtCommand(segmentationCommand, completionString);
   }
 
@@ -29,7 +29,6 @@ const runSegmentation = async (id: string, subjects: string[], linkedQsmJob: str
 
   const results: any = {};
   await Promise.all(fs.readdirSync(qsmResultFolder).map(async (file) => {
- 
     if (file.endsWith('.csv')) {
       const sessionNumber = (new RegExp("(?<=ses-).*(?=_run)", "g").exec(file) || [])[0] as string;
       const runNumber = (new RegExp("(?<=_run-)\\d*(?=_)", "g").exec(file) || [])[0] as string;
@@ -47,9 +46,6 @@ const runSegmentation = async (id: string, subjects: string[], linkedQsmJob: str
   }));
 
   fs.writeFileSync(path.join(qsmResultFolder, 'results.json'), JSON.stringify(results, null, 2), { encoding: 'utf-8' });
-
-
-
 }
 
 export default runSegmentation;

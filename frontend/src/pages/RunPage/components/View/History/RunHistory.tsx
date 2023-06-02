@@ -16,16 +16,17 @@ const RunHistory: React.FC<Props> = (props: Props) => {
   const {  } = React.useContext(context);
   const [historyLogOpened, setHistoryLogOpened]: [any, any] = useState(null);
 
-
   useEffect(() => {
     const get = async () => {
       const x = await getHistory();
       setHistory(x);
     }
-    get()
-  }, [])
-
-
+    // TODO - remove for notification socket
+    get();
+    setInterval(() => {
+      get();
+    }, 1000)
+  }, [historyLogOpened])
   
   if (!history) {
     return <div></div>

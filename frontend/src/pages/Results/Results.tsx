@@ -89,11 +89,11 @@ const Results = () => {
             size="small"
             dataSource={
               qsmResult.analysisResults[subject].sessions[session].runs[run]
-              .filter((column: any) => Object.keys(column).length > 1)
+              .filter((row: any) => Object.keys(row).length > 2)
               .sort((a: any, b: any) => a.roi.toLowerCase() - b.roi.toLowerCase())
             }
             columns={['roi',	'num_voxels',	'min',	'max',	'median',	'mean',	'std'].map(x => (
-              { title: x,
+              { title: x === 'num_voxels' ? 'No. Voxels' : x,
                 dataIndex: x, 
                 key: x,
                 render: (y: any, z, x) => {
@@ -103,7 +103,7 @@ const Results = () => {
                   if (z.roi === y) {
                     return y;
                   } else {
-                    return y.toString().slice(0, 6)
+                    return y && y.toString().slice(0, 6)
 
                   }
                 }
@@ -161,8 +161,8 @@ const Results = () => {
       content1 = <i>Select subjects or cohorts on the left of the scren to view their QSM images </i>;
       content2 = <i>Select subjects or cohorts on the left of the scren to view their analysis results </i>;
     } else if (!qsmResult) {
-      content1 = <i>bad </i>;
-      content2 = <i>bad</i>;
+      content1 = <i>No results for selected subjects and cohorts</i>;
+      content2 = <i>No results for selected subjects and cohorts</i>;
     
     } else {
       content1 = renderQsmResults(qsmResult);

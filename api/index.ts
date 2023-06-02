@@ -21,7 +21,7 @@ const setup = async () => {
   
   await createRestApi();
 
-  logger.green("Done Setup");
+  logger.green("Completed Setup");
 }
 
 

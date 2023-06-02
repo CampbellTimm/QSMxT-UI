@@ -80,17 +80,16 @@ const QsmRunStarter = () => {
   
   return (
     <div>
-    
-
+  
       <Title style={{ marginTop: 0 }} level={5}>Subjects</Title>
       { !selectedCohorts.length && !selectedSubjects.length
-        ? <div><i>Select Subjects and Cohorts on the left of the screen</i><br /></div>
+        ? <div><i>Select Subjects and Cohorts on the left of the screen to add the QSM run</i><br /></div>
         : renderSubjectTags()
       }
       <br />  
       <Title style={{ marginTop: 0 }} level={5}>Run Description</Title>
       
-      <Input 
+      <Input
         style={{ width: '100%' }}
         value={description}
         onChange={(e) => setDescription(e.target.value)}

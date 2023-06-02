@@ -26,7 +26,7 @@ const CohortTree: React.FC<{}> = () => {
   const selectTreeNode = (selectedCohorts: string[], setSelectedCohorts: (cohorts: string[]) => void, setExpandedKeys: (keys: any) => void, page: Page) => (keys: Key[], info: any) => {
     const selectedKey = info.node.key;
     const [clickedCohort, clickedSubject] = selectedKey.split("&");
-    if (page === Page.YourData || page === Page.Results || page === Page.Home){
+    if (page === Page.YourData || page === Page.Results || page === Page.Home) {
       if (!selectedCohorts.find(cohort => cohort === selectedKey)) {
         setSelectedCohorts([clickedCohort]);
         setExpandedKeys([clickedCohort]); 

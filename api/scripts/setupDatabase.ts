@@ -1,12 +1,12 @@
 import { Pool } from 'pg';
 
 const pool = new Pool({
-  user: 'user',
-  // user: 'qsmxt',
+  // user: 'user',
+  user: 'qsmxt',
   password: 'password',
   host: 'localhost',
-  database: 'user'
-  // database: 'qsmxt'
+  // database: 'user'
+  database: 'qsmxt'
 });
 
 const dropTables = async () => {

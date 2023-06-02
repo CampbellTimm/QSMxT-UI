@@ -9,7 +9,6 @@ const { DirectoryTree } = Tree;
 
 const SubjectTree: React.FC = () => {
   const { subjects, selectedSubjects, setSelectedSubjects, navigate, page } = useContext(context);
-  
   const [expandedKeys, setExpandedKeys] = useState([]);
 
   useEffect(() => {
@@ -31,7 +30,7 @@ const SubjectTree: React.FC = () => {
       if (clickedRun) {
         // setSelectedSubjects(selectedSubjects);
         if (selectedSubjects.find(selectedSubject => selectedSubject === runKey)) {
-          setSelectedSubjects([clickedRun]);
+          setSelectedSubjects(selectedSubjects);
           setExpandedKeys([clickedRun] as any);
         } else {
           setSelectedSubjects([runKey]);

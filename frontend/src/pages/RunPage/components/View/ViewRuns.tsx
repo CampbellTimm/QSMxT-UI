@@ -19,7 +19,8 @@ const styles = {
 
 const ViewRuns = () => {
   const { queue } = React.useContext(context);
-  const [view, setView]: [string, (view: string) => void] = useState(localStorage.getItem("runView") || 'queue');
+  const [view, setView]: [string, (view: string) => void] = useState('queue'); // TODO - use query param to trigger history instead
+  // const [view, setView]: [string, (view: string) => void] = useState(localStorage.getItem("runView") || 'queue');
   const [openOngoingLog, setOpenOngoingLog]: [any, any] = useState(false);
 
 
@@ -80,6 +81,7 @@ const ViewRuns = () => {
       <Radio.Group 
         onChange={handleModeChange} 
         value={view} 
+        // defaultValue={"queue"}
         style={{marginBottom: 8 }}
         buttonStyle="solid"  
       >

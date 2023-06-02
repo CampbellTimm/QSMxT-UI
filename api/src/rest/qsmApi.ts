@@ -52,7 +52,7 @@ const runQsmPipeline = async (request: Request, response: Response) => {
     pipelineConfig,
     
   }
-  const linkedQsmJob = "335867c3-70cd-457c-9dcf-cf384e495510";
+  const linkedQsmJob = "5209b287-7f94-4287-89fa-361a9ab0b9b5";
   // const linkedQsmJob = await addJobToQueue(JobType.QSM, qsmParameters, null, description);
   console.log(createSegmentation);
   if (createSegmentation) {
@@ -105,7 +105,7 @@ const getQsmResults = async (request: Request, response: Response) => {
 
     if (qsmImageFolder) {
       qsmImages = fs.readdirSync(path.join(QSM_FOLDER, result.id, 'qsm_final', qsmImageFolder)).map((fileName: string) => {
-        return `http://localhost:4000/qsm/${result.id}/qsm_final/${qsmImageFolder}/${fileName}`
+        return `http://localhost:5000/qsm/${result.id}/qsm_final/${qsmImageFolder}/${fileName}`
       });
     }
 

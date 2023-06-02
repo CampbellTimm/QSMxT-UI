@@ -30,7 +30,6 @@ export const createQsmxtInstance = async (): Promise<ChildProcessWithoutNullStre
 
   console.log(`Child process PID: ${qsmxt.pid}`);
 
-  
   await new Promise((resolve, reject) => {
     setupListeners(qsmxt, () => {});
     // setupListeners(qsmxt, reject);
@@ -42,13 +41,6 @@ export const createQsmxtInstance = async (): Promise<ChildProcessWithoutNullStre
   })
   return qsmxt;
 }
-
-// export const getQsmxtInstance = async () => { 
-//   if (!qsmxtInstance) {
-//     qsmxtInstance = await createQsmxtInstance();
-//   }
-//   return qsmxtInstance
-// }
 
 // TODO - add timeout paramater ??
 export const runQsmxtCommand = async (command: string, completionString: string, logFilePath: string | null = null, errorString: string = 'ERROR:') => {

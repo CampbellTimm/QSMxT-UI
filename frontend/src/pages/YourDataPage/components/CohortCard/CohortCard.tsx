@@ -10,7 +10,7 @@ import CreateCohort from './CreateCohort';
 const { Title, Paragraph, Text, Link } = Typography;
 
 const explanatoryText = () => <Text> 
-  <i>Select a Cohort on the lef of the screen to view and update OR create a new Cohort...</i>
+  <i>Select a Cohort on the left of the screen to view and update OR create a new Cohort...</i>
   <Divider />
 </Text>
 

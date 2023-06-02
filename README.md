@@ -47,7 +47,7 @@ cd api/
 npm install
 ```
 
-To run: `npm run start-prod`
+To run: `cd build/ && python3 -m http.server 8080`
 
 # Frontend
 
