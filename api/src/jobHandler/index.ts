@@ -1,10 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import { BIDsCopyParameters, DicomConvertParameters, DicomSortParameters, Job, JobParameters, JobStatus, JobType, QsmParameters, SegementationParameters } from "../types";
-import { BIDS_FOLDER, DICOMS_FOLDER, LOGS_FOLDER, QSM_FOLDER, SEGMENTATION_FOLDER } from "../constants";
+import { BIDS_FOLDER, DICOMS_FOLDER, LOGS_FOLDER, QSM_FOLDER } from "../constants";
 import qsmxt from "../qsmxt";
 import path from "path";
 import fs from "fs";
-import sockets, { getQueueSocket } from "../util/sockets";
+import sockets, { getNotificationSocket } from "./sockets";
 import logger from '../util/logger';
 import database from '../database';
 
@@ -31,7 +31,7 @@ const getJobResultsFolder = (jobType: JobType, id: string, linkedQsmJob: string 
     return BIDS_FOLDER;
   }
   if (jobType === JobType.SEGMENTATION) {
-    return path.join(SEGMENTATION_FOLDER, linkedQsmJob as string);
+    return path.join(QSM_FOLDER, linkedQsmJob as string);
   }
   return '';
 }
@@ -59,10 +59,11 @@ const getJobById = async (jobId: string): Promise<Job> => {
 const updateJob = async (job: Job) => {
   await database.jobs.update(job);
   jobQueue = await database.jobs.get.incomplete();
-  const queueSocket = getQueueSocket();
-  if (queueSocket) {
-    queueSocket.emit("data", JSON.stringify(jobQueue));
-  }
+}
+
+const saveNewJob = async (job: Job) => {
+  await database.jobs.save(job);
+  jobQueue = await database.jobs.get.incomplete();
 }
 
 // TODO - SAVE LOGS
@@ -76,6 +77,7 @@ const setJobToComplete = async (jobId: string, status: JobStatus, error: string 
     job.error = error
   }
   await updateJob(job);
+  sockets.sendJobAsNotification(job);
   if ((jobQueue as Job[]).length) {
     runJob((jobQueue as Job[])[0].id);
   }
@@ -87,7 +89,7 @@ const setJobToInProgress = async (jobId: string) => {
     status: JobStatus.IN_PROGRESS,
     startedAt: new Date().toISOString()
   }
-  await updateJob(job)
+  await updateJob(job);
 }
 
 const runJob = async (jobId: string) => {
@@ -107,8 +109,8 @@ const runJob = async (jobId: string) => {
       } catch (err) {}
       jobPromise = qsmxt.runQsmPipeline(id, subjects, sessions, runs, pipelineConfig);
     } else if (type === JobType.SEGMENTATION) {
-      const { subjects, linkedQsmJob } = parameters as SegementationParameters;
-      jobPromise = qsmxt.runSegmentation(id, subjects, linkedQsmJob);
+      const { subjects, linkedQsmJob, sessions } = parameters as SegementationParameters;
+      jobPromise = qsmxt.runSegmentation( subjects, linkedQsmJob, sessions);
     } else if (type === JobType.BIDS_COPY) {
       const { copyPath, uploadingMultipleBIDs } = parameters as BIDsCopyParameters;
       jobPromise = qsmxt.copyBids(copyPath, uploadingMultipleBIDs);
@@ -117,8 +119,7 @@ const runJob = async (jobId: string) => {
     console.log(logFilePath);
     sockets.createInProgressSocket(logFilePath);
     await jobPromise;
-    setJobToComplete(id, JobStatus.COMPLETE);
-
+    await setJobToComplete(id, JobStatus.COMPLETE);
   } catch (err) {
     console.log(err);
     let errorMessage: any;
@@ -138,7 +139,6 @@ const runJob = async (jobId: string) => {
 }
 
 // TODO - FIX, doesnt work if there is jobs in queue on boot
-// TODO - add the cohort to job
 export const addJobToQueue = async (type: JobType, parameters: JobParameters, linkedQsmJob: string | null = null, description: string | null = null): Promise<string> => {
   const id = uuidv4();
   const createdAt = new Date().toISOString();
@@ -157,18 +157,11 @@ export const addJobToQueue = async (type: JobType, parameters: JobParameters, li
   if (description) {
     job.description = description;
   }
-  console.log(job);
-
   // TODO - SAVE SUBJECTS LINKED TO JOB
-
-  await database.jobs.save(job);
-  jobQueue = await database.jobs.get.incomplete();
-  const queueSocket = getQueueSocket();
-  if (queueSocket) {
-    queueSocket.emit("data", JSON.stringify(jobQueue));
-  }
-  if (jobQueue.length === 1) {
-    runJob(jobQueue[0].id);
+  await saveNewJob(job);
+  sockets.sendJobAsNotification(job);
+  if ((jobQueue as Job[]).length === 1) {
+    runJob((jobQueue as Job[])[0].id);
   }
   return id;
 }

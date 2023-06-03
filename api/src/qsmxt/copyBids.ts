@@ -3,7 +3,7 @@ import database from "../database";
 import fs from "fs";
 import { BIDS_FOLDER } from "../constants";
 import { SubjectUploadFormat } from "../types";
-import { getSessionsForSubject } from "../util/subjectData";
+import { getSessionsForSubject } from "./subjectData";
 import { Worker } from 'worker_threads';
 import { spawn } from "child_process";
 import { setupListeners } from ".";

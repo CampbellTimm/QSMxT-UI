@@ -51,7 +51,7 @@ export const handleJobNotification = (jobNotification: JobNotification, navigate
       message: `${job.type} failed`,
       description: (
         <div>
-          <a onClick={() => {navigate(`/${Page.Results}?openView=history&openJob=${job.id}`)}}>View the Logs</a> to determine the cause
+          <a onClick={() => {navigate(`/${Page.Run}?openView=history&openJob=${job.id}`)}}>View the Logs</a> to determine the cause
         </div>
       ),
       placement: 'topRight',

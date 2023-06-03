@@ -10,8 +10,9 @@ const getCohorts = async (request: Request, response: Response) => {
 
 const createCohort = async (request: Request, response: Response) => {  
   try {
-    const { cohortName } = request.params;
-    const { cohortDescription } = request.body;
+    const cohortName = decodeURIComponent(request.params.cohortName);
+    const { cohortDescription } = request.body; 
+    console.log(cohortName)
     const alreadyExists = await database.cohorts.exists(cohortName);
     if (alreadyExists) {
       response.statusMessage = "Cohort with that name already exists";
@@ -22,6 +23,7 @@ const createCohort = async (request: Request, response: Response) => {
     response.statusMessage = "Successfully created cohort";
     response.status(200).send();
   } catch (err: any) {
+    console.log(err);
     response.statusMessage = err.message;
     response.status(500).send();
   }

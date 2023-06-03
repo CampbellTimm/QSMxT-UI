@@ -49,7 +49,7 @@ export enum JobType {
   DICOM_SORT = 'Dicom Sort',
   DICOM_CONVERT = 'Dicom Convert',
   QSM = 'QSM Pipeline',
-  SEGMENTATION = 'Segmentation',
+  SEGMENTATION = 'Segmentation and Analysis',
   BIDS_COPY = 'BIDS Copy'
 }
 
@@ -77,7 +77,8 @@ export type QsmParameters = {
 
 export type SegementationParameters = {
   subjects: string[],
-  linkedQsmJob: string
+  linkedQsmJob: string,
+  sessions: string[]
 }
 
 export type BIDsCopyParameters = {
@@ -112,4 +113,16 @@ export type Cohorts = {[cohortName: string]: Cohort}
 export enum SubjectUploadFormat {
   DICOM = 'DICOM',
   BIDS = 'BIDS'
+}
+
+export type QsmResult = {
+  id: string,
+  description: string,
+  startedAt: string,
+  qsmFinishedAt?: string,
+  segmentationFinishedAt: string,
+  segmentationCreatedAt: string,
+  parameters: QsmParameters,
+  analysisResults: any,
+  qsmImages: string[]
 }

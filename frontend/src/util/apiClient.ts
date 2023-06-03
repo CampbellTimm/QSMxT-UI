@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Cohorts, Job, SubjectsTree } from "../types";
+import { Cohorts, Job, QsmResult, SubjectsTree } from "../types";
 import { message } from "antd";
 import { API_URL } from "../core/constants";
 
@@ -132,17 +132,17 @@ const runQsmPipeline = async (sessions: string[], runs: string[], pipelineConfig
   }
 }
 
-const getQsmResults = async () => {
+const getQsmResults = async (): Promise<QsmResult[]> => {
   const getQsmResultsUrl = API_URL + '/qsm/results';
   try {
     const response = await axiosInstance.get(getQsmResultsUrl, {
       headers: {
-        // "Access-Control-Request-Private-Network": "true"
       }
     });
     return response.data;
   } catch (err) {
     message.error((err as any).message);
+    return [];
   }
 }
 

@@ -15,7 +15,7 @@ const styles = {
 
 interface Props {
   title: string,
-  width: number
+  width: number | string
   children: React.ReactNode,
   Icon: any,
   helperText: React.ReactNode,

@@ -2,21 +2,30 @@ import { JOBS_TABLE_NAME } from "../constants";
 import { Job, JobStatus, JobType } from "../types"
 import { runDatabaseQuery } from ".";
 
+const lowerCaseToCamelCase: {[key: string]: string} = {
+  createdat: 'createdAt',
+  startedat: 'startedAt',
+  finishedat: 'finishedAt',
+  linkedqsmjob: 'linkedQsmJob',
+  segmentationfinishedat: 'segmentationFinishedAt',
+  segmentationcreatedat: 'segmentationCreatedAt',
+  qsmfinishedat: 'qsmFinishedAt'
+}
+
 const formatRowsToJobs = (jobs: any[]): Job[] => {
-  return jobs.map(job => ({
-    id: job.id,
-    subject: job.subject,
-    cohort: job.cohort,
-    type: job.type,
-    status: job.status,
-    createdAt: job.createdat,
-    startedAt: job.startedat,
-    finishedAt: job.finishedat,
-    parameters: JSON.parse(job.parameters),
-    error: job.error,
-    linkedQsmJob: job.linkedqsmjob,
-    description: job.description
-  })) as Job[]
+  return jobs.map(job => {
+    const formattedJob: any = {};
+    Object.keys(job).forEach(key => {
+      if (key === 'parameters') {
+        formattedJob.parameters = JSON.parse(job.parameters);
+      } else if (key in lowerCaseToCamelCase) {
+        formattedJob[lowerCaseToCamelCase[key]] = job[key];
+      } else {
+        formattedJob[key] = job[key];
+      }
+    })
+    return formattedJob as Job;
+  }) as Job[]
 }
 
 const getIncompleteJobs = async (): Promise<Job[]> => {
@@ -52,14 +61,12 @@ const updateJob = async (job: Job): Promise<void> => {
 }
 
 const saveJob = async (job: Job) => {
-  const subject = job.subject ? `'${job.subject}'` : 'NULL';
-  const cohort = job.cohort ? `'${job.cohort}'` : 'NULL';
   const linkedQsmJob = job.linkedQsmJob ? `'${job.linkedQsmJob}'` : 'NULL';
   const description = job.description ? `'${job.description}'` : 'NULL';
   const { id, type, status, createdAt, parameters } = job;
   const query = `
-    INSERT INTO ${JOBS_TABLE_NAME} (id, subject, cohort, type, status, createdAt, parameters, linkedQsmJob, description)
-    VALUES ('${id}', ${subject}, ${cohort}, '${type}', '${status}', '${createdAt}', '${JSON.stringify(parameters)}', ${linkedQsmJob}, ${description});
+    INSERT INTO ${JOBS_TABLE_NAME} (id, type, status, createdAt, parameters, linkedQsmJob, description)
+    VALUES ('${id}', '${type}', '${status}', '${createdAt}', '${JSON.stringify(parameters)}', ${linkedQsmJob}, ${description});
   `;
   await runDatabaseQuery(query);
 }
@@ -74,9 +81,10 @@ const deleteIncompleteJobs = async () => {
 
 const getCompleteQsmJobs = async () => {
   const query = `
-    SELECT A.id, A.description, A.startedAt, B.finishedAt, A.parameters
-    FROM ${JOBS_TABLE_NAME} A, ${JOBS_TABLE_NAME} B
-    WHERE A.id = B.linkedqsmjob AND A.type = '${JobType.QSM}' AND B.type = '${JobType.SEGMENTATION}' AND A.status = '${JobStatus.COMPLETE}' AND B.status = '${JobStatus.COMPLETE}'
+    SELECT A.id, A.description, A.startedAt, A.finishedAt AS qsmFinishedAt, B.finishedAt AS segmentationFinishedAt, B.createdat AS segmentationCreatedAt, A.parameters
+    FROM ${JOBS_TABLE_NAME} A
+    LEFT JOIN ${JOBS_TABLE_NAME} B ON A.id = B.linkedqsmjob AND B.type = '${JobType.SEGMENTATION}'
+    WHERE A.type = '${JobType.QSM}'
   `;
   const response = await runDatabaseQuery(query);
   return formatRowsToJobs(response.rows) as Job[];
@@ -86,7 +94,7 @@ export default {
   get: {
     incomplete: getIncompleteJobs,
     complete: getCompleteJobs,
-    qsmResults: getCompleteQsmJobs
+    qsmResults: getCompleteQsmJobs,
   },
   update: updateJob,
   save: saveJob,

@@ -5,7 +5,7 @@ import { BIDS_FOLDER, DICOMS_FOLDER } from "../constants";
 import database from "../database";
 import { DicomConvertParameters, SubjectEchos, SubjectRuns, SubjectSessions, SubjectUploadFormat } from "../types";
 import { runQsmxtCommand } from ".";
-import { getSessionsForSubject } from "../util/subjectData";
+import { getSessionsForSubject } from "./subjectData";
 
 const convertDicoms = async (parameters: DicomConvertParameters) => {
   const { t2starwProtocolPatterns, t1wProtocolPatterns } = parameters;

@@ -1,10 +1,10 @@
 import { Pool } from 'pg';
 
 const pool = new Pool({
-  user: 'user',
+  user: 'qsmxt',
   password: 'password',
   host: 'localhost',
-  database: 'user'
+  database: 'qsmxt'
 });
 
 (async () => {

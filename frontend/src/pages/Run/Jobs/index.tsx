@@ -63,10 +63,12 @@ const ViewRuns = () => {
           History
         </Radio.Button>
       </Radio.Group>
-      {view === 'queue'
-        ? <Queue />
-        : <History />
-      }
+     
+        {view === 'queue'
+          ? <Queue />
+          : <History />
+        }
+
     </ContentCard>
   )
 }

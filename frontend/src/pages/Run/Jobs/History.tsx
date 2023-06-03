@@ -10,7 +10,7 @@ import HistoryRunLogs from './HistoryRunLogs';
 import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 
-const RunHistory: React.FC<{}> = () => {
+const History: React.FC<{}> = () => {
   const location = useLocation();
 
   const { openJob } = queryString.parse(location.search);
@@ -27,7 +27,7 @@ const RunHistory: React.FC<{}> = () => {
   }
 
   return (
-    <div>
+    <div style={{ minHeight: '100%'}}>
       <Space direction="vertical" size={16}>
       
       {
@@ -93,4 +93,4 @@ const RunHistory: React.FC<{}> = () => {
   )
 }
 
-export default RunHistory;
+export default History;

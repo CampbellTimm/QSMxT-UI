@@ -32,7 +32,7 @@ const getCohortByName = async (cohortName: string): Promise<Cohort | null> => {
     SELECT A.cohort, A.description, COALESCE(string_agg(B.subject, ',' ORDER BY B.subject), '') as subjects
     FROM cohorts A
     LEFT JOIN cohortSubjects B ON A.cohort = B.cohort
-    WHERE A.cohort = '${cohortName}'
+    WHERE A.cohort = '${cohortName.replace(/'/g, "''")}'
     GROUP BY A.cohort;
   `);
   return response.rows.length
@@ -43,7 +43,7 @@ const getCohortByName = async (cohortName: string): Promise<Cohort | null> => {
 const doesCohortExist = async (cohortName: string): Promise<boolean> => {
   const response = await runDatabaseQuery(`
     SELECT * FROM cohorts 
-    WHERE cohort = '${cohortName}';
+    WHERE cohort = '${cohortName.replace(/'/g, "''")}';
   `);
   return !!response.rows.length;
 }
@@ -53,17 +53,17 @@ const doesCohortExist = async (cohortName: string): Promise<boolean> => {
 const deleteCohort = async (cohortName: string) => {
   const deleteJobsWithCohortQuery = `
     DELETE FROM ${JOBS_TABLE_NAME} 
-    WHERE cohort = '${cohortName}'
+    WHERE cohort = '${cohortName.replace(/'/g, "''")}'
   `;
   await runDatabaseQuery(deleteJobsWithCohortQuery);
   const deleteSubjectsInCohortQuery = `
     DELETE FROM ${COHORT_SUBJECTS_TABLE_NAME} 
-    WHERE cohort = '${cohortName}'
+    WHERE cohort = '${cohortName.replace(/'/g, "''")}'
   `;
   await runDatabaseQuery(deleteSubjectsInCohortQuery);
   const deleteCohortQuery = `
     DELETE FROM ${COHORT_TABLE_NAME} 
-    WHERE cohort = '${cohortName}'
+    WHERE cohort = '${cohortName.replace(/'/g, "''")}'
   `;
   await runDatabaseQuery(deleteCohortQuery);
 }
@@ -71,7 +71,7 @@ const deleteCohort = async (cohortName: string) => {
 const saveCohort = async (cohortName: string, description: string) => {
   const query = `
     INSERT INTO ${COHORT_TABLE_NAME} (cohort, description)
-    VALUES ('${cohortName}', '${description}');
+    VALUES ('${cohortName.replace(/'/g, "''")}', '${description}');
   `;
   await runDatabaseQuery(query);
 }
@@ -85,7 +85,7 @@ const removeSubjects = async (cohortName: string, subjects: string[]) => {
   })
   const removeSubjectsQuery = `
     DELETE FROM ${COHORT_SUBJECTS_TABLE_NAME} 
-    WHERE cohort = '${cohortName}' AND ${cohortConditions.join(' OR ')}
+    WHERE cohort = '${cohortName.replace(/'/g, "''")}' AND ${cohortConditions.join(' OR ')}
   `;
   await runDatabaseQuery(removeSubjectsQuery);
 }
@@ -95,7 +95,7 @@ const addSubjects = async (cohortName: string, subjects: string[]) => {
     return;
   }
   const insertValues = subjects.map(subject => {
-    return `('${cohortName}', '${subject}')`
+    return `('${cohortName.replace(/'/g, "''")}', '${subject}')`
   });
   const query = `
     INSERT INTO ${COHORT_SUBJECTS_TABLE_NAME} (cohort, subject)

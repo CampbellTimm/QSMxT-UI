@@ -1,21 +1,27 @@
 import { runQsmxtCommand } from ".";
-import { ANALYSIS_FOLDER, BIDS_FOLDER, QSM_FOLDER, SEGMENTATION_FOLDER } from "../constants";
+import { BIDS_FOLDER, QSM_FOLDER } from "../constants";
 import logger from "../util/logger";
 import path from "path";
 import csvtojson from "csvtojson";
 import fs from "fs"
 
-const runSegmentation = async (id: string, subjects: string[], linkedQsmJob: string) => {
+const getSegmentationCmdLineOptions = (subject: string, sessions: string[]) => {
+  let options =  `--subject_pattern ${subject}`;
+  if (sessions.length) {
+    options += ` --sessions ${sessions.join(',')}`
+  }
+  return options;
+}
+
+const runSegmentation = async (subjects: string[], linkedQsmJob: string, sessions: string[]) => {
   logger.green(`Running Segmentation on ${subjects.join(', ')}`);
 
   const qsmResultFolder =  path.join(QSM_FOLDER, linkedQsmJob);
 
   const completionString = 'INFO: Finished';
 
-  // TODO - add sessions, runs and other params
   for (let subject of subjects) {
-    const segmentationCommand = `run_3_segment.py ${BIDS_FOLDER} ${qsmResultFolder} --subject_pattern ${subject}`;
-    
+    const segmentationCommand = `run_3_segment.py ${BIDS_FOLDER} ${qsmResultFolder} ${getSegmentationCmdLineOptions(subject, sessions)}`;
     await runQsmxtCommand(segmentationCommand, completionString);
   }
 

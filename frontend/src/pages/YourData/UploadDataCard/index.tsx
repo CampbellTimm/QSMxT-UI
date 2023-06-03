@@ -97,6 +97,7 @@ const UploadDataCard: React.FC = () => {
       }
     } else {
       setStep(step + 1);
+      setUploadPath('');
     }
   }
 
@@ -353,7 +354,7 @@ const UploadDataCard: React.FC = () => {
       </Button>
       <Button 
         type="primary" 
-        disabled={step === 3 && badUploadPath}
+        disabled={step === 3 && (badUploadPath || !uploadPath)}
         onClick={nextStep}>
         {step !== 3 ? 'Next' : ' Finish'}
       </Button>

@@ -7,7 +7,7 @@ import database from "../database";
 import fs from "fs";
 
 const uploadSubjectDicomData = async (request: Request, response: Response) => {
-  logger.green("Received request to copy dicoms at " + new Date().toISOString());
+  logger.green("Received request to copy DICOMS at " + new Date().toISOString());
   const body = request.body;
   const { copyPath, usePatientNames, useSessionDates, checkAllFiles, t2starwProtocolPatterns, t1wProtocolPatterns } = body; 
 
@@ -37,7 +37,7 @@ const uploadSubjectDicomData = async (request: Request, response: Response) => {
 }
 
 const uploadSubjectBidsData = async (request: Request, response: Response) => {
-  logger.green("Received request to copy dicoms at " + new Date().toISOString());
+  logger.green("Received request to copy BIDS at " + new Date().toISOString());
   const { copyPath, uploadingMultipleBIDs } = request.body;
 
   // check already exists

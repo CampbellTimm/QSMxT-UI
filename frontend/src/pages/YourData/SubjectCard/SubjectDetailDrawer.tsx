@@ -72,7 +72,7 @@ const SubjectDetailDrawer: React.FC<Props> = ({ subject, run, open, setOpen, ses
       <div>
          <Title style={{ marginTop: 10 }} level={3}>NIfTI Image</Title>
          <div style={{ maxHeight: '680px' }}>
-         <NiiVue imageUrl={imageUrl} key={imageUrl} />
+         <NiiVue imageUrl={imageUrl} key={imageUrl} type={imageType}/>
 
          </div>
          <br />

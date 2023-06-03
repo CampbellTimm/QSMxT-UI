@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Home from './pages/Home/Home'
 import YourData from './pages/YourData'
 import Run from './pages/Run'
-import Results from './pages/Results/Results'
+import Results from './pages/Results'
 import { useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from "react";
 import apiClient from './util/apiClient';
@@ -13,7 +13,7 @@ import io from 'socket.io-client';
 import { API_URL } from './core/constants';
 import Loading from './pages/Loading';
 import { FolderOpenOutlined, HomeOutlined, InsertRowLeftOutlined, PlaySquareOutlined } from '@ant-design/icons';
-import { Cohorts, Job, JobNotification, Subject } from './types';
+import { Cohorts, Job, JobNotification, QsmResult, Subject } from './types';
 import { handleJobNotification } from './util/notifications';
 
 const { Header, Content } = Layout;
@@ -70,6 +70,7 @@ const App = () => {
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [selectedCohorts, setSelectedCohorts]= useState<string[]>([]);
   const [queue, setQueue] = useState<Job[] | null>(null);
+  const [qsmResults, setQsmResults] = useState<QsmResult[] | null>(null);
   const [history, setHistory] = useState<Job[] | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   
@@ -95,11 +96,17 @@ const App = () => {
     setQueue(newQueue);
   }
 
+  const fetchQsmResults = async () => {
+    const qsmResults = await apiClient.getQsmResults()
+    setQsmResults(qsmResults)
+  }
+
   const fetchAllData = async () => {
     fetchSubjectData();
     fetchCohortData();
     fetchQueueData();
     fetchHistory();
+    fetchQsmResults();
   }
 
   useEffect(() => {
@@ -131,6 +138,7 @@ const App = () => {
     selectedCohorts,
     queue,
     history,
+    qsmResults,
     setSelectedCohorts,
     setSelectedSubjects,
     fetchSubjectData,

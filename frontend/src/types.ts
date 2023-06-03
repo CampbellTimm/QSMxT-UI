@@ -58,7 +58,24 @@ export type DicomConvertParameters = {
   t1wProtocolPatterns: string[],
 }
 
-export type JobParameters = DicomSortParameters | DicomConvertParameters
+export type QsmParameters = {
+  subjects: string[],
+  sessions: string[],
+  runs: string[],
+  pipelineConfig: string,
+}
+
+export type SegementationParameters = {
+  subjects: string[],
+  linkedQsmJob: string
+}
+
+export type BIDsCopyParameters = {
+  copyPath: string,
+  uploadingMultipleBIDs: boolean
+}
+
+export type JobParameters = DicomSortParameters | DicomConvertParameters | QsmParameters | SegementationParameters | BIDsCopyParameters
 
 export type Job = {
   id: string,
@@ -78,4 +95,16 @@ export type Cohorts = {[cohort: string]: {
 
 export type JobNotification = {
   job: Job
+}
+
+export type QsmResult = {
+  id: string,
+  description: string,
+  startedAt: string,
+  qsmFinishedAt?: string,
+  segmentationFinishedAt: string,
+  segmentationCreatedAt: string,
+  parameters: QsmParameters,
+  analysisResults: any,
+  qsmImages: string[]
 }

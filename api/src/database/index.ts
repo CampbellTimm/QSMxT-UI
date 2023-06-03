@@ -16,7 +16,7 @@ const databasePool = new Pool({
 
 export const runDatabaseQuery = async (query: string) => {
   try {
-    return databasePool.query(query);
+    return await databasePool.query(query);
   } catch (err) {
     logger.red(query);
     throw err;
