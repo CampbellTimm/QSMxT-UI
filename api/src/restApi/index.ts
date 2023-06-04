@@ -10,7 +10,19 @@ import cors from "cors";
 import { BIDS_FOLDER, DICOMS_FOLDER, QSM_FOLDER, SERVER_PORT } from "../constants";
 import http from "http";
 import fs from "fs";
-import sockets from "../jobHandler/sockets";
+
+let status = 'bad';
+
+const setStatus = (newStatus: string) => {
+  status = newStatus;
+}
+
+const statusEndpoint = async (request: Request, response: Response) => {
+  const data = {
+    status
+  }
+  response.status(200).send(data);
+}
 
 const wipeLogFiles = (folder: string) => {
   const files = fs.readdirSync(folder);
@@ -21,7 +33,7 @@ const wipeLogFiles = (folder: string) => {
   })
 }
 
-export const unknownErrorHandler = (func: (request: Request, response: Response) => Promise<any>) => async (request: Request, response: Response) => {
+const unknownErrorHandler = (func: (request: Request, response: Response) => Promise<any>) => async (request: Request, response: Response) => {
   try {
     await func(request, response);
   } catch (err) {
@@ -36,29 +48,27 @@ export const unknownErrorHandler = (func: (request: Request, response: Response)
   }
 }
 
-const statusEndpoint = async (request: Request, response: Response) => {
-  const data = {
-    status: 'ok'
-  }
-  response.status(200).send(data);
-}
-
 export const setupRestApiEndpoints = (app: Express) => {
   app.get('/status', unknownErrorHandler(statusEndpoint));
+
+  app.get('/subjects', unknownErrorHandler((subjectsApi.get)));
+  app.delete('/subjects/:subjectName', unknownErrorHandler((subjectsApi.delete)));
+  app.post('/subjects/dicom', unknownErrorHandler((subjectsApi.upload.dicom)));
+  app.post('/subjects/bids', unknownErrorHandler((subjectsApi.upload.bids)));
+
   app.get('/cohorts', unknownErrorHandler(cohortsApi.get));
   app.post('/cohorts/:cohortName', unknownErrorHandler(cohortsApi.create));
   app.delete('/cohorts/:cohortName', unknownErrorHandler(cohortsApi.delete));
   app.patch('/cohorts/:cohortName', unknownErrorHandler(cohortsApi.update));
+
   app.get('/jobs/queue', unknownErrorHandler(jobsApi.queue.get));
   app.get('/jobs/history', unknownErrorHandler(jobsApi.history.get));
-  app.get('/subjects', unknownErrorHandler((subjectsApi.get)));
-  app.post('/subjects/dicom', unknownErrorHandler((subjectsApi.upload.dicom)));
-  app.post('/subjects/bids', unknownErrorHandler((subjectsApi.upload.bids)));
+
   app.post('/qsm/run', unknownErrorHandler(qsm.run));
   app.get('/qsm/results', unknownErrorHandler(qsm.get));
 }
 
-export const createRestApi = async () => {
+const createRestApi = async (): Promise<http.Server> => {
   [QSM_FOLDER, BIDS_FOLDER, DICOMS_FOLDER].forEach(wipeLogFiles);
   const app = express();
   app.use(express.json());
@@ -66,8 +76,15 @@ export const createRestApi = async () => {
   app.use(express.static(path.join(process.cwd(), 'public')));
   setupRestApiEndpoints(app);
   const server = http.createServer(app);
-  await sockets.setup(server);
   server.listen(SERVER_PORT, () => {
     logger.green(`Server started on port ${SERVER_PORT}`);
   });
+  return server;
 }
+
+const restApi = {
+  setStatus,
+  create: createRestApi
+};
+
+export default restApi;

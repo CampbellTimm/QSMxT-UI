@@ -30,7 +30,6 @@ const SubjectCard: React.FC = () => {
   const deleteSubject = (selectedSubject: string) => async () => {
     const deleted = await apiClient.deleteSubject(selectedSubject);
     if (deleted) {
-      // TODO - only remove the only subject
       setSelectedSubjects([]);
       await fetchSubjectData()
     }

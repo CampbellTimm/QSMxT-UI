@@ -57,7 +57,6 @@ const Analysis: React.FC<Props> = ({ qsmResult, allSelectedSubjects, loading }) 
     });
     return (
       <div>
-        <Title style={globalStyles.noTopMargin} level={5}>Analysis</Title>
         <Collapse defaultActiveKey={[]}>
           {panels}
         </Collapse>

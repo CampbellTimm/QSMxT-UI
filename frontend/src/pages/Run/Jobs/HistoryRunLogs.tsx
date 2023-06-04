@@ -30,8 +30,6 @@ const HistoryRunLogs: React.FC<Props> = (props: Props) => {
   }, [historyLogOpened])
 
 
-  console.log(historyLogOpened)
-
   const renderLogs = (logs: string) => {
     return (logs).split('\n').map(x => {
       return <div>
@@ -43,8 +41,17 @@ const HistoryRunLogs: React.FC<Props> = (props: Props) => {
 
 
   const renderBody = () => {
+    const error = logs.split('\n').find(line => line.includes("ERROR: "));
     return (
       <div>
+        {error && (
+          <div>
+            <Title style={{ marginTop: 0 }} level={5}>Error Occured:</Title>
+            <span style={{ color: 'red' }}>{error}</span>
+            <br />
+            <br />
+          </div>
+        )}
         <Title style={{ marginTop: 0 }} level={5}>
           Logs
         </Title>

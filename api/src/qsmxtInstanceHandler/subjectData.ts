@@ -73,7 +73,6 @@ const getRunsForSession = (subjectPath: string, subject: string, sessionNumber: 
 export const getSessionsForSubject = (subject: string): SubjectSessions => {
   const sessionsTree: SubjectSessions = {};
   const subjectPath = path.join(BIDS_FOLDER, `./${subject}`);
-  console.log(subjectPath);
   const sessionNumbers = fs.readdirSync(subjectPath);
   sessionNumbers.forEach((sessionNumber: string) => {
       sessionsTree[sessionNumber] = {

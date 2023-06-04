@@ -16,7 +16,7 @@ const formatRowToCohort = (row: any) => {
 const getAllCohorts = async (): Promise<Cohorts> => {
   const response = await runDatabaseQuery(`
     SELECT A.cohort, A.description, COALESCE(string_agg(B.subject, ',' ORDER BY B.subject), '') as subjects
-    FROM cohorts A
+    FROM ${COHORT_TABLE_NAME} A
     LEFT JOIN cohortSubjects B ON A.cohort = B.cohort
     GROUP BY A.cohort;
   `);
@@ -30,7 +30,7 @@ const getAllCohorts = async (): Promise<Cohorts> => {
 const getCohortByName = async (cohortName: string): Promise<Cohort | null> => {
   const response = await runDatabaseQuery(`
     SELECT A.cohort, A.description, COALESCE(string_agg(B.subject, ',' ORDER BY B.subject), '') as subjects
-    FROM cohorts A
+    FROM ${COHORT_TABLE_NAME} A
     LEFT JOIN cohortSubjects B ON A.cohort = B.cohort
     WHERE A.cohort = '${cohortName.replace(/'/g, "''")}'
     GROUP BY A.cohort;
@@ -42,7 +42,7 @@ const getCohortByName = async (cohortName: string): Promise<Cohort | null> => {
 
 const doesCohortExist = async (cohortName: string): Promise<boolean> => {
   const response = await runDatabaseQuery(`
-    SELECT * FROM cohorts 
+    SELECT * FROM ${COHORT_TABLE_NAME} 
     WHERE cohort = '${cohortName.replace(/'/g, "''")}';
   `);
   return !!response.rows.length;
@@ -51,11 +51,6 @@ const doesCohortExist = async (cohortName: string): Promise<boolean> => {
 // TODO - run parallel the first 2 calls
 // TODO - dont delete jobs, just set to null
 const deleteCohort = async (cohortName: string) => {
-  const deleteJobsWithCohortQuery = `
-    DELETE FROM ${JOBS_TABLE_NAME} 
-    WHERE cohort = '${cohortName.replace(/'/g, "''")}'
-  `;
-  await runDatabaseQuery(deleteJobsWithCohortQuery);
   const deleteSubjectsInCohortQuery = `
     DELETE FROM ${COHORT_SUBJECTS_TABLE_NAME} 
     WHERE cohort = '${cohortName.replace(/'/g, "''")}'

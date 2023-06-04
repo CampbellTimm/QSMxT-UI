@@ -1,15 +1,14 @@
 import { Request, Response } from "express";
 import fs from "fs-extra";
-import { addJobToQueue } from "../jobHandler";
+import jobHandler from "../jobHandler";
 import logger from "../util/logger";
 import { QSM_FOLDER } from "../constants";
 import path from "path";
 import { Cohort, JobType, QsmParameters, QsmResult, SegementationParameters } from "../types";
-import database from "../database";
+import database from "../databaseClient";
 
 const runQsmPipeline = async (request: Request, response: Response) => {
   logger.green("Received request to run QSM at " + new Date().toISOString());
-  console.log(request.body);
   const { sessions, runs, pipelineConfig, subjects, cohorts, createSegmentation, description } = request.body;
   const subjectsFromCohort: Cohort[] = await Promise.all((cohorts || [])
     .map(database.cohorts.get.byName)
@@ -25,16 +24,15 @@ const runQsmPipeline = async (request: Request, response: Response) => {
     sessions,
     runs,
     pipelineConfig,
-    
   }
-  const linkedQsmJob = await addJobToQueue(JobType.QSM, qsmParameters, null, description);
+  const linkedQsmJob = await jobHandler.addJobToQueue(JobType.QSM, qsmParameters, null, description);
   if (createSegmentation) {
     const segementationParameters: SegementationParameters = {
       subjects: Array.from(subjectsToRun),
       linkedQsmJob,
       sessions
     }
-    addJobToQueue(JobType.SEGMENTATION, segementationParameters, linkedQsmJob);
+    jobHandler.addJobToQueue(JobType.SEGMENTATION, segementationParameters, linkedQsmJob);
   }
   response.status(200).send();
 }

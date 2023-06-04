@@ -182,8 +182,8 @@ const QsmRunStarter: React.FC<{}> = () => {
           onChange={e => setCreateSegmentation(e.target.value)} 
           value={createSegmentation}
         >
-          <Radio.Button value={true}>True</Radio.Button>
-          <Radio.Button value={false}>False</Radio.Button>
+          <Radio.Button value={true}>Yes</Radio.Button>
+          <Radio.Button value={false}>No</Radio.Button>
         </Radio.Group>
         <br />
         <br />

@@ -11,7 +11,7 @@ interface Props {
 const OngoingRunLogs = (props: Props) => {
   const { openOngoingLog, setOpenOngoingLog } = props;
 
-  const [socket, setSocket]: [any, any] = useState(null);
+  // const [socket, setSocket]: [any, any] = useState(null);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
 
@@ -20,24 +20,15 @@ const OngoingRunLogs = (props: Props) => {
   useEffect(() => {
     const socket = io(`${API_URL}/inProgress`);
     socket.on('connect', () => {
-      console.log('Connected to socket');
-      setSocket(socket as any);
+      // setSocket(socket as any);
       socket.on('data', (data) => {
         setData(data);
-        // if (data.includes('Finished')) {
-          // message.success('Finished current run')
-          // setLoading(false);
-          // setOpenOngoingLog(false);
-        // }
-  
-        // setData((data || '').replace(/\\n/g, "<br />"));
       });
-
     });
     return () => {
       console.log('socket');
       if (socket) {
-        console.log('Disconnecting')
+        // console.log('Disconnecting')
         socket.disconnect();
       }
     }

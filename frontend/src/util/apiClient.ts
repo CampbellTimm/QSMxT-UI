@@ -81,8 +81,22 @@ const getSubjects = async (): Promise<any> => {
 }
 
 // TODO - add subject deletion
-const deleteSubject = async (subject: string): Promise<null> => {
-  return null;
+const deleteSubject = async (subject: string): Promise<boolean> => {
+  const deleteSubjectPath = API_URL + `/subjects/${subject}`;
+  try {
+    const response = await axiosInstance.delete(deleteSubjectPath, {
+    });
+    if (response.status === 200) {
+      message.success('Subject successfully deleted');
+      return true;
+    } else {
+      message.error(response.statusText);
+      return false;
+    }
+  } catch (err) {
+    message.error((err as any).message);
+    return false;
+  }
 }
 
 const getJobsQueue = async (): Promise<Job[]> => {

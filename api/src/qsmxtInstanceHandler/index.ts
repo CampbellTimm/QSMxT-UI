@@ -24,15 +24,11 @@ export const setupListeners = (child: ChildProcessWithoutNullStreams, reject: (r
   });
 }
 
-export const createQsmxtInstance = async (): Promise<ChildProcessWithoutNullStreams> => {
+const createQsmxtInstance = async (): Promise<ChildProcessWithoutNullStreams> => {
   logger.green('Creating QSMxT instance')
   const qsmxt: any = spawn('/neurocommand/local/fetch_and_run.sh', ['qsmxt', QSMXT_VERSION, QSMXT_DATE ]);
-
-  console.log(`Child process PID: ${qsmxt.pid}`);
-
   await new Promise((resolve, reject) => {
     setupListeners(qsmxt, () => {});
-    // setupListeners(qsmxt, reject);
     qsmxt.stdout.on('data', (data: any) => {
       if (data.includes('----------------------------------')) {
         resolve(null);
@@ -42,7 +38,6 @@ export const createQsmxtInstance = async (): Promise<ChildProcessWithoutNullStre
   return qsmxt;
 }
 
-// TODO - add timeout paramater ??
 export const runQsmxtCommand = async (command: string, completionString: string, logFilePath: string | null = null, errorString: string = 'ERROR:') => {
   qsmxtInstance = (await createQsmxtInstance()) as any;
   await new Promise((resolve, reject) => {
@@ -54,7 +49,6 @@ export const runQsmxtCommand = async (command: string, completionString: string,
           logger.red(line);
         } else if (logFilePath) {
           fs.appendFileSync(logFilePath, line + '\n', { encoding: 'utf-8' })
-          // logger.blue(line)
         }
         if (line.includes(completionString)) {
           resolve(null);
@@ -71,7 +65,7 @@ export const runQsmxtCommand = async (command: string, completionString: string,
   qsmxtInstance = null;
 } 
 
-export const killChildProcess = () => {
+const killChildProcess = () => {
   if (qsmxtInstance) {
     logger.green('Killing child');
     qsmxtInstance.kill();
@@ -83,5 +77,6 @@ export default {
   sortDicoms,
   runQsmPipeline,
   runSegmentation,
-  copyBids
+  copyBids,
+  killChildProcess
 }

@@ -71,12 +71,14 @@ const saveJob = async (job: Job) => {
   await runDatabaseQuery(query);
 }
 
-const deleteIncompleteJobs = async () => {
+const getInProgressJobs = async () => {
   const query = `
-    DELETE FROM ${JOBS_TABLE_NAME} 
-    WHERE status = '${JobStatus.IN_PROGRESS}' OR status = '${JobStatus.NOT_STARTED}'
+    SELECT *
+    FROM ${JOBS_TABLE_NAME} 
+    WHERE status = '${JobStatus.IN_PROGRESS}'
   `;
-  await runDatabaseQuery(query);
+  const response =await runDatabaseQuery(query);
+  return formatRowsToJobs(response.rows) as Job[];
 }
 
 const getCompleteQsmJobs = async () => {
@@ -94,11 +96,10 @@ export default {
   get: {
     incomplete: getIncompleteJobs,
     complete: getCompleteJobs,
+    inProgess: getInProgressJobs,
     qsmResults: getCompleteQsmJobs,
   },
   update: updateJob,
   save: saveJob,
-  delete: {
-    incomplete: deleteIncompleteJobs
-  }
+  delete: {  }
 }

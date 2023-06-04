@@ -67,7 +67,7 @@ const Results: React.FC<{}> = () => {
       ]
 
   return (
-    <PageContainer title={"Resuts"} gap={0}>
+    <PageContainer title={"Results"} gap={0}>
       <Tabs
         style={{ minWidth: '100%'}}
         type="card"

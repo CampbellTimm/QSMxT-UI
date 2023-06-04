@@ -1,10 +1,8 @@
 import { Request, Response } from "express";
-import { BIDsCopyParameters, DicomConvertParameters, DicomSortParameters, JobType, SubjectUploadFormat, } from "../types";
-import { unknownErrorHandler } from ".";
-import { addJobToQueue } from "../jobHandler";
+import { BIDsCopyParameters, DicomConvertParameters, DicomSortParameters, JobType } from "../types";
+import jobHandler from "../jobHandler";
 import logger from "../util/logger";
-import database from "../database";
-import fs from "fs";
+import database from "../databaseClient";
 
 const uploadSubjectDicomData = async (request: Request, response: Response) => {
   logger.green("Received request to copy DICOMS at " + new Date().toISOString());
@@ -21,7 +19,7 @@ const uploadSubjectDicomData = async (request: Request, response: Response) => {
     useSessionDates: useSessionDates  === 'true',
     checkAllFiles: checkAllFiles  === 'true'
   }
-  await addJobToQueue(JobType.DICOM_SORT, dicomSortParameters);
+  await jobHandler.addJobToQueue(JobType.DICOM_SORT, dicomSortParameters);
 
   const dicomConvertParameters: DicomConvertParameters = {
     t2starwProtocolPatterns: JSON.parse(t2starwProtocolPatterns),
@@ -30,7 +28,7 @@ const uploadSubjectDicomData = async (request: Request, response: Response) => {
     useSessionDates: useSessionDates  === 'true',
     checkAllFiles: checkAllFiles  === 'true'
   }
-  await addJobToQueue(JobType.DICOM_CONVERT, dicomConvertParameters);
+  await jobHandler.addJobToQueue(JobType.DICOM_CONVERT, dicomConvertParameters);
   
   response.statusMessage = "Successfully copied DICOMs. Starting sort and conversion jobs."
   response.status(200).send();
@@ -47,15 +45,26 @@ const uploadSubjectBidsData = async (request: Request, response: Response) => {
     uploadingMultipleBIDs: uploadingMultipleBIDs as boolean 
   } as BIDsCopyParameters;
 
-  await addJobToQueue(JobType.BIDS_COPY, parameters);
+  await jobHandler.addJobToQueue(JobType.BIDS_COPY, parameters);
 
   response.statusMessage = "Starting copying BIDs data."
   response.status(200).send();
 }
 
-const getSubjectsTree = async (request: Request, response: Response) => {
+const getSubjects = async (request: Request, response: Response) => {
   const subjects = await database.subjects.get.all();
-  return response.status(200).send(subjects)
+  return response.status(200).send(subjects);
+}
+
+const deletSubject = async (request: Request, response: Response) => {
+  const subjectName = decodeURIComponent(request.params.subjectName);
+  const subjectExists = await database.subjects.get.byName(subjectName);
+  if (!subjectExists) {
+    response.statusMessage = "Subject does not exist."
+    response.status(404).send();
+  }
+  await database.subjects.delete(subjectName);
+  return response.status(200).send();
 }
 
 export default {
@@ -63,5 +72,6 @@ export default {
     dicom: uploadSubjectDicomData,
     bids: uploadSubjectBidsData
   },
-  get: getSubjectsTree
+  get: getSubjects,
+  delete: deletSubject
 }

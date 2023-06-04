@@ -202,8 +202,8 @@ const UploadDataCard: React.FC = () => {
         </Popover>
       </div>
       <Radio.Group onChange={(e) => setUsePatientNames(e.target.value)} value={usePatientNames}>
-        <Radio.Button value={true}>True</Radio.Button>
-        <Radio.Button value={false}>False</Radio.Button>
+        <Radio.Button value={true}>Yes</Radio.Button>
+        <Radio.Button value={false}>No</Radio.Button>
       </Radio.Group>
       <br />
       <br />
@@ -214,8 +214,8 @@ const UploadDataCard: React.FC = () => {
         </Popover>
       </div>
       <Radio.Group onChange={(e) => setUseSessionDates(e.target.value)} value={useSessionDates}>
-        <Radio.Button value={true}>True</Radio.Button>
-        <Radio.Button value={false}>False</Radio.Button>
+        <Radio.Button value={true}>Yes</Radio.Button>
+        <Radio.Button value={false}>No</Radio.Button>
       </Radio.Group>
       <br />
       <br />
@@ -226,8 +226,8 @@ const UploadDataCard: React.FC = () => {
         </Popover>
       </div>
       <Radio.Group onChange={(e) => setCheckAllFiles(e.target.value)} value={checkAllFiles}>
-        <Radio.Button value={true}>True</Radio.Button>
-        <Radio.Button value={false}>False</Radio.Button>
+        <Radio.Button value={true}>Yes</Radio.Button>
+        <Radio.Button value={false}>No</Radio.Button>
       </Radio.Group>
       <br />
       <br />

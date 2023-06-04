@@ -1,7 +1,5 @@
-import { Express, Request, Response } from "express";
-import database from '../database';
-import logger from "../util/logger";
-import { unknownErrorHandler } from ".";
+import { Request, Response } from "express";
+import database from '../databaseClient';
 
 const getCohorts = async (request: Request, response: Response) => {
   const cohorts = await database.cohorts.get.all();
@@ -12,7 +10,6 @@ const createCohort = async (request: Request, response: Response) => {
   try {
     const cohortName = decodeURIComponent(request.params.cohortName);
     const { cohortDescription } = request.body; 
-    console.log(cohortName)
     const alreadyExists = await database.cohorts.exists(cohortName);
     if (alreadyExists) {
       response.statusMessage = "Cohort with that name already exists";
@@ -23,35 +20,30 @@ const createCohort = async (request: Request, response: Response) => {
     response.statusMessage = "Successfully created cohort";
     response.status(200).send();
   } catch (err: any) {
-    console.log(err);
     response.statusMessage = err.message;
     response.status(500).send();
   }
 }
 
-// TODO - 404
-// TODO - delete all data attached to cohort
 const deleteCohort = async (request: Request, response: Response) => {
   const { cohortName } = request.params;
-  if (!cohortName) {
-    
+  const cohortExists = await database.cohorts.exists(cohortName);
+  if (!cohortExists) {
+    response.statusMessage = "Cohort does not exist";
+    response.status(400).send();
+    return;
   }
   await database.cohorts.delete(cohortName);
-  // await database.deleteCohort(cohortName);
   response.statusMessage = "Successfully deleted cohort";
   response.status(200).send();
-
 }
 
 const updateCohort = async (request: Request, response: Response) => {
   const { cohortName } = request.params;
   const { subjects } = request.body;
-  if (!cohortName) {
-    
-  }
   const cohort = await database.cohorts.get.byName(cohortName);
   if (!cohort) {
-    response.statusMessage = "The specified cohort does not exist";
+    response.statusMessage = "Cohort does not exist";
     response.status(404).send();
     return;
   }

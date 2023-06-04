@@ -1,5 +1,5 @@
 import { runDatabaseQuery } from ".";
-import { SUBJECT_TABLE_NAME } from "../constants";
+import { COHORT_SUBJECTS_TABLE_NAME, SUBJECT_TABLE_NAME } from "../constants";
 import { DicomConvertParameters, Subject, SubjectSessions, SubjectUploadFormat, SubjectsTree } from "../types";
 
 const formatRowsToSubjects = (subjects: any[]): Subject[] => {
@@ -34,10 +34,31 @@ const saveSubject = async (subject: string, uploadFormat: SubjectUploadFormat, p
   `);
 }
 
+const getSubjectByName = async (subject: string): Promise<Subject> => {
+  const response = await runDatabaseQuery(`
+    SELECT * FROM ${SUBJECT_TABLE_NAME} 
+    WHERE subject = '${subject}';
+  `);
+  return formatRowsToSubjects(response.rows)[0] as Subject;
+}
+
+const deleteSubjectByName = async (subject: string): Promise<void> => {
+   await runDatabaseQuery(`
+    DELETE FROM ${COHORT_SUBJECTS_TABLE_NAME} 
+    WHERE subject = '${subject}';
+  `);
+  await runDatabaseQuery(`
+    DELETE FROM ${SUBJECT_TABLE_NAME} 
+    WHERE subject = '${subject}';
+  `);
+}
+
 export default {
   get: {
     all: getAllSubjects,
-    allNames: getAllSubjectsNames
+    allNames: getAllSubjectsNames,
+    byName: getSubjectByName
   },
-  save: saveSubject
+  save: saveSubject,
+  delete: deleteSubjectByName
 }

@@ -2,7 +2,7 @@ import logger from "../util/logger";
 import path from "path";
 import fs from "fs";
 import { BIDS_FOLDER, DICOMS_FOLDER } from "../constants";
-import database from "../database";
+import database from "../databaseClient";
 import { DicomConvertParameters, SubjectEchos, SubjectRuns, SubjectSessions, SubjectUploadFormat } from "../types";
 import { runQsmxtCommand } from ".";
 import { getSessionsForSubject } from "./subjectData";

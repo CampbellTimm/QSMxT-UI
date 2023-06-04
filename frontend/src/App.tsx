@@ -120,7 +120,9 @@ const App = () => {
     if (!loading) {
       const notificationSocket = io(`${API_URL}/notifications`);
       notificationSocket.on('connect', () => {
+        console.log("Connected")
         notificationSocket.on('data', (data: string) => {
+          console.log(data);
           const jobNotification: JobNotification = JSON.parse(data);
           handleJobNotification(jobNotification, navigate);
           fetchAllData();

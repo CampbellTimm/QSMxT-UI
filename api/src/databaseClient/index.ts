@@ -5,7 +5,7 @@ import jobsDto from './jobsDto';
 import cohortsDto from './cohortsDto';
 import logger from "../util/logger";
 import { spawn } from "child_process";
-import { setupListeners } from "../qsmxt";
+import { setupListeners } from "../qsmxtInstanceHandler";
 
 const databasePool = new Pool({
   user: DATABASE_USER,
@@ -24,7 +24,7 @@ export const runDatabaseQuery = async (query: string) => {
 }
 
 const createSubjectsTable = async () => {
-  await databasePool.query(`
+  await runDatabaseQuery(`
     CREATE TABLE IF NOT EXISTS subjects (
       subject TEXT PRIMARY KEY,
       dataTree TEXT NOT NULL,
@@ -32,22 +32,22 @@ const createSubjectsTable = async () => {
       parameters TEXT
     )
   `);
-  logger.green('Created table subjects');
+  console.log('Created table subjects');
 }
 
 const createCohortsTable = async () => {
-  await databasePool.query(`
+  await runDatabaseQuery(`
     CREATE TABLE IF NOT EXISTS cohorts (
       cohort TEXT,
       description TEXT,
       PRIMARY KEY (cohort)
     )
   `)
-  logger.green('Created table cohorts');
+  console.log('Created table cohorts');
 }
 
 const createCohortSubjectsTable = async () => {
-  await databasePool.query(`
+  await runDatabaseQuery(`
     CREATE TABLE IF NOT EXISTS cohortSubjects (
       cohort TEXT,
       subject TEXT,
@@ -56,25 +56,26 @@ const createCohortSubjectsTable = async () => {
       FOREIGN KEY (cohort) REFERENCES cohorts(cohort)
     )
   `)
-  logger.green('Created table cohortSubjects');
+  console.log('Created table cohortSubjects');
 }
 
+// TODO - remove cohort
 const createJobsTable = async () => {
-  await databasePool.query(`
+  await runDatabaseQuery(`
     CREATE TABLE IF NOT EXISTS jobs (
       id VARCHAR(100) PRIMARY KEY,
-      subject TEXT NULL REFERENCES subjects(subject),
-      cohort TEXT NULL REFERENCES cohorts(cohort),
+      description TEXT,
       type VARCHAR(100) NOT NULL,
       status VARCHAR(100) NOT NULL,
       createdAt VARCHAR(100) NOT NULL,
       startedAt VARCHAR(100),
       finishedAt VARCHAR(100),
       parameters TEXT NOT NULL,
-      error TEXT
+      error TEXT,
+      linkedQsmJob VARCHAR(100) REFERENCES jobs(id)
     )
   `)
-  logger.green('Created table jobs');
+  console.log('Created table jobs');
 }
 
 const startDatabase = async () => {
@@ -91,17 +92,17 @@ const startDatabase = async () => {
   logger.green('Started database');
 }
 
-export const setupDatabase = async () => {
+const setupDatabase = async () => {
   await startDatabase();
-  // TODO - fix 
-  // await createSubjectsTable();
-  // await createCohortsTable();
-  // await createCohortSubjectsTable();
-  // await createJobsTable();
+  await createSubjectsTable();
+  await createCohortsTable();
+  await createCohortSubjectsTable();
+  await createJobsTable();
 }
 
 export default {
   subjects: subjectsDto,
   jobs: jobsDto,
-  cohorts: cohortsDto
+  cohorts: cohortsDto,
+  setup: setupDatabase
 }

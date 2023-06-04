@@ -1,8 +1,6 @@
 import { Server, Socket } from "socket.io";
 import http from "http";
-import { Tail } from 'tail';
 import logger from "../util/logger";
-import { getJobQueue } from ".";
 import fs from "fs";
 import { Job } from "../types";
 
@@ -27,7 +25,6 @@ const createInProgressSocket = (logFilePath: string) => {
       interval = setInterval(() => {
         // TODO - switch to watch file
         const logData = fs.readFileSync(currentLogFile, { encoding: 'utf-8'});
-        console.log(currentLogFile);
         socket.emit("data", logData);
       }, 1000);
     socket.on('disconnect', () => {

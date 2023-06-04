@@ -1,16 +1,17 @@
 import { v4 as uuidv4 } from 'uuid';
 import { BIDsCopyParameters, DicomConvertParameters, DicomSortParameters, Job, JobParameters, JobStatus, JobType, QsmParameters, SegementationParameters } from "../types";
 import { BIDS_FOLDER, DICOMS_FOLDER, LOGS_FOLDER, QSM_FOLDER } from "../constants";
-import qsmxt from "../qsmxt";
+import http from "http";
+import qsmxt from "../qsmxtInstanceHandler";
 import path from "path";
 import fs from "fs";
-import sockets, { getNotificationSocket } from "./sockets";
+import sockets from "./sockets";
 import logger from '../util/logger';
-import database from '../database';
+import database from '../databaseClient';
 
 let jobQueue: Job[] | null;
 
-export const getJobQueue = async () => {
+const getJobQueue = async () => {
   if (!jobQueue) {
     jobQueue = await database.jobs.get.incomplete();
   }
@@ -116,12 +117,10 @@ const runJob = async (jobId: string) => {
       jobPromise = qsmxt.copyBids(copyPath, uploadingMultipleBIDs);
     }
     logFilePath = await getLogFile(type, id, linkedQsmJob);
-    console.log(logFilePath);
     sockets.createInProgressSocket(logFilePath);
     await jobPromise;
     await setJobToComplete(id, JobStatus.COMPLETE);
   } catch (err) {
-    console.log(err);
     let errorMessage: any;
     if ((err as Error).message) {
       errorMessage = (err as Error).message
@@ -138,8 +137,7 @@ const runJob = async (jobId: string) => {
 
 }
 
-// TODO - FIX, doesnt work if there is jobs in queue on boot
-export const addJobToQueue = async (type: JobType, parameters: JobParameters, linkedQsmJob: string | null = null, description: string | null = null): Promise<string> => {
+const addJobToQueue = async (type: JobType, parameters: JobParameters, linkedQsmJob: string | null = null, description: string | null = null): Promise<string> => {
   const id = uuidv4();
   const createdAt = new Date().toISOString();
   const job: Job = {
@@ -157,7 +155,6 @@ export const addJobToQueue = async (type: JobType, parameters: JobParameters, li
   if (description) {
     job.description = description;
   }
-  // TODO - SAVE SUBJECTS LINKED TO JOB
   await saveNewJob(job);
   sockets.sendJobAsNotification(job);
   if ((jobQueue as Job[]).length === 1) {
@@ -165,4 +162,15 @@ export const addJobToQueue = async (type: JobType, parameters: JobParameters, li
   }
   return id;
 }
+
+const setup = async (server: http.Server) => {
+  await sockets.setup(server);
+}
+
+const jobHandler = {
+  addJobToQueue,
+  setup
+}
+
+export default jobHandler;
 
