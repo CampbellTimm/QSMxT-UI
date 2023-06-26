@@ -52,7 +52,11 @@ To run: `cd build/ && python3 -m http.server 8080`
 
 # Writeable Folders
 ROOT_PATH/api/public/bids
+
 ROOT_PATH/api/public/dicoms
+
 ROOT_PATH/api/public/database
+
 ROOT_PATH/api/public/logs
+
 ROOT_PATH/api/public/qsm
