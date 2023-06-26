@@ -9,26 +9,18 @@ import { setupListeners } from "../qsmxtInstanceHandler";
 import * as sqlite3 from 'sqlite3';
 import path from "path";
 
-// const databasePool = new Pool({
-//   user: DATABASE_USER,
-//   password: DATABASE_PASSWORD,
-//   host: DATABASE_HOST,
-//   database: DATABASE_NAME
-// });
-
 const databasepath = path.join(process.cwd() + '/public/database/database');
 const db: sqlite3.Database = new sqlite3.Database(databasepath);
 
 export const runDatabaseQuery2 = async (query: string): Promise<any> => {
   try {
     await new Promise((resolve, reject) => {
-      db.run(query, (err: any, rows: any) => {
+      db.run(query, (err: any) => {
         if (err) {
           console.log(err);
           reject(err);
         } else {
-          // console.log(rows);
-          resolve(rows);
+          resolve(null);
         }
       });
     })
@@ -46,7 +38,6 @@ export const runDatabaseQuery = async (query: string): Promise<any> => {
           console.log(err);
           reject(err);
         } else {
-          console.log(rows);
           resolve(rows);
         }
       });

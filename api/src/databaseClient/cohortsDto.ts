@@ -26,7 +26,6 @@ const getAllCohorts = async (): Promise<Cohorts> => {
   `
   const response = await runDatabaseQuery(query);
 
-  console.log(response);
   const cohorts: Cohorts = {};
 
   await Promise.all(response.map(async (row: any) => {

@@ -33,9 +33,6 @@ const copyBids = async (sourcePath: string, uploadingMultipleBIDs: boolean) => {
   ? `/neurodesktop-storage${sourcePath.split('neurodesktop-storage')[1].replace(/\\/g, "/")}`
   : sourcePath;
 
-  console.log(sourcePath);
-  console.log(fixedCopyPath);
-
   const subjects: string[] = [];
   if (uploadingMultipleBIDs) {
     fs.appendFileSync(logFilePath, 'Copying multiple BIDs folders.\n');

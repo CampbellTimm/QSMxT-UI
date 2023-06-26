@@ -42,7 +42,6 @@ const updateCohort = async (request: Request, response: Response) => {
   const { cohortName } = request.params;
   const { subjects } = request.body;
   const cohort = await database.cohorts.get.byName(cohortName);
-  console.log(cohort);
   if (!cohort) {
     response.statusMessage = "Cohort does not exist";
     response.status(404).send();

@@ -35,7 +35,6 @@ const getIncompleteJobs = async (): Promise<Job[]> => {
     ORDER BY createdAt ASC;
   `;
   const response = await runDatabaseQuery(query);
-  console.log(response);
   return formatRowsToJobs(response) as Job[];
 }
 

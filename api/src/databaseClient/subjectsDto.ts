@@ -3,7 +3,6 @@ import { COHORT_SUBJECTS_TABLE_NAME, SUBJECT_TABLE_NAME } from "../constants";
 import { DicomConvertParameters, Subject, SubjectSessions, SubjectUploadFormat, SubjectsTree } from "../types";
 
 const formatRowsToSubjects = (subjects: any[]): Subject[] => {
-  console.log(subjects);
   return subjects.map(subject => ({
     subject: subject.subject,
     uploadFormat: subject.uploadFormat,
