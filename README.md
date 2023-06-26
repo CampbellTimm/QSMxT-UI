@@ -22,20 +22,9 @@ $ npm --version
 # Database
 ```bash
 sudo apt-get update
-sudo apt-get install postgresql postgresql-contrib -y
-sudo service postgresql start
-
-sudo -u postgres createuser --interactive
-Enter name of tole to add: qsmxt
-Shall the new role be a superuser?: y
-
-sudo -u postgres psql
-\password qsmxt
-Enter new password for user "qsmxt": password
-Enter it again: password
-exit
-
-sudo -u postgres createdb qsmxt
+sudo apt-get install libsqlite3-dev
+npm uninstall sqlite3
+npm install sqlite3 --build-from-source
 ```
 
 # API
