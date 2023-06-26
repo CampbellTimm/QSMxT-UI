@@ -11,23 +11,6 @@ import logger from "../util/logger";
 
 const logFilePath = path.join(BIDS_FOLDER, 'bidsCopy.log');
 
-// TODO - talk about in report
-
-// const copyAllFilesAndFolders = (soucePath: string, destinationPath: string) => {
-//   const subjectFiles = fs.readdirSync(soucePath, { withFileTypes: true });
-//   subjectFiles.forEach(file => {
-//     const fileSourcePath = path.join(soucePath, file.name);
-//     const fileDestPath = path.join(destinationPath, file.name);
-//     const isDirectory = file.isDirectory();
-//     if (isDirectory) {
-//       fs.mkdirSync(fileDestPath);
-//       copyAllFilesAndFolders(fileSourcePath, fileDestPath);
-//     } else {
-//       fs.copyFileSync(fileSourcePath, fileDestPath)
-//     }
-//   })
-// }
-
 const copyAllFilesAndFolders = async (soucePath: string, destinationPath: string) => {
   const copyInstance: any = spawn('cp', ['-r', soucePath, destinationPath]);
   await new Promise((resolve, reject) => {
@@ -49,6 +32,9 @@ const copyBids = async (sourcePath: string, uploadingMultipleBIDs: boolean) => {
   const fixedCopyPath = sourcePath.includes(":\\")
   ? `/neurodesktop-storage${sourcePath.split('neurodesktop-storage')[1].replace(/\\/g, "/")}`
   : sourcePath;
+
+  console.log(sourcePath);
+  console.log(fixedCopyPath);
 
   const subjects: string[] = [];
   if (uploadingMultipleBIDs) {

@@ -1,32 +1,27 @@
-import { Pool } from 'pg';
+import path from "path";
 
-const pool = new Pool({
-  user: 'qsmxt',
-  password: 'password',
-  host: 'localhost',
-  database: 'qsmxt'
+const sqlite3 = require('sqlite3').verbose();
+
+// Open a database connection
+const x = path.join(process.cwd() + '/database')
+const db = new sqlite3.Database(x);
+
+// Execute SELECT query
+db.all('SELECT * FROM subjects;', (err: any, rows: any) => {
+  if (err) {
+    console.error(err);
+  } else {
+    console.log(rows);
+  }
 });
 
-(async () => {
-  const subjects = await pool.query(`
-    SELECT * FROM subjects
-  `);
-  console.log('Subjects')
-  console.log(subjects.rows);
-  const cohorts = await pool.query(`
-    SELECT * FROM cohorts
-  `);
-  console.log('Cohorts')
-  console.log(cohorts.rows);  
-  const cohortSubjects = await pool.query(`
-    SELECT * FROM cohortSubjects
-  `);
-  console.log('Cohort subjects')
-  console.log(cohortSubjects.rows); 
-  const jobs = await pool.query(`
-    SELECT * FROM jobs
-  `);
-  console.log('Jobs');
-  console.log(jobs.rows);
-  process.exit();
-})()
+// db.all('SELECT * FROM projectDiagrams;', (err: any, rows: any) => {
+//   if (err) {
+//     console.error(err);
+//   } else {
+//     console.log(rows);
+//   }
+// });
+
+// Close the database connection
+db.close();

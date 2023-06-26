@@ -1,6 +1,6 @@
 import { JOBS_TABLE_NAME } from "../constants";
 import { Job, JobStatus, JobType } from "../types"
-import { runDatabaseQuery } from ".";
+import { runDatabaseQuery, runDatabaseQuery2 } from ".";
 
 const lowerCaseToCamelCase: {[key: string]: string} = {
   createdat: 'createdAt',
@@ -35,7 +35,8 @@ const getIncompleteJobs = async (): Promise<Job[]> => {
     ORDER BY createdAt ASC;
   `;
   const response = await runDatabaseQuery(query);
-  return formatRowsToJobs(response.rows) as Job[];
+  console.log(response);
+  return formatRowsToJobs(response) as Job[];
 }
 
 const getCompleteJobs = async (): Promise<Job[]> => {
@@ -45,7 +46,7 @@ const getCompleteJobs = async (): Promise<Job[]> => {
     ORDER BY finishedat DESC;
   `;
   const response = await runDatabaseQuery(query);
-  return formatRowsToJobs(response.rows) as Job[];
+  return formatRowsToJobs(response) as Job[];
 }
 
 const updateJob = async (job: Job): Promise<void> => {
@@ -57,7 +58,7 @@ const updateJob = async (job: Job): Promise<void> => {
     SET status = '${job.status}', startedAt = ${startedAt}, finishedAt = ${finishedAt}, error = ${error}
     WHERE id = '${job.id}'
   `;
-  await runDatabaseQuery(query);
+  await runDatabaseQuery2(query);
 }
 
 const saveJob = async (job: Job) => {
@@ -78,10 +79,10 @@ const getInProgressJobs = async () => {
     WHERE status = '${JobStatus.IN_PROGRESS}'
   `;
   const response =await runDatabaseQuery(query);
-  return formatRowsToJobs(response.rows) as Job[];
+  return formatRowsToJobs(response) as Job[];
 }
 
-const getCompleteQsmJobs = async () => {
+const getQsmResults = async () => {
   const query = `
     SELECT A.id, A.description, A.startedAt, A.finishedAt AS qsmFinishedAt, B.finishedAt AS segmentationFinishedAt, B.createdat AS segmentationCreatedAt, A.parameters
     FROM ${JOBS_TABLE_NAME} A
@@ -89,7 +90,7 @@ const getCompleteQsmJobs = async () => {
     WHERE A.type = '${JobType.QSM}'
   `;
   const response = await runDatabaseQuery(query);
-  return formatRowsToJobs(response.rows) as Job[];
+  return formatRowsToJobs(response) as Job[];
 }
 
 export default {
@@ -97,9 +98,8 @@ export default {
     incomplete: getIncompleteJobs,
     complete: getCompleteJobs,
     inProgess: getInProgressJobs,
-    qsmResults: getCompleteQsmJobs,
+    qsmResults: getQsmResults,
   },
   update: updateJob,
-  save: saveJob,
-  delete: {  }
+  save: saveJob
 }

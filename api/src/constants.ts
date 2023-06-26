@@ -8,6 +8,7 @@ export const DICOMS_FOLDER = path.join(projectRootPath, `./public/dicoms`);
 export const BIDS_FOLDER = path.join(projectRootPath, `./public/bids`);
 export const QSM_FOLDER = path.join(projectRootPath, `./public/qsm`);
 export const LOGS_FOLDER = path.join(projectRootPath, `./public/logs`);
+export const DATABASE_FOLDER = path.join(projectRootPath, `./public/database`);
 export const QSMXT_VERSION = '2.1.0';
 export const QSMXT_DATE = '20230509';
 export const DATABASE_USER = 'qsmxt';

@@ -1,4 +1,4 @@
-import { runDatabaseQuery } from ".";
+import { runDatabaseQuery, runDatabaseQuery2 } from ".";
 import { COHORT_SUBJECTS_TABLE_NAME, COHORT_TABLE_NAME, JOBS_TABLE_NAME } from "../constants";
 import logger from "../util/logger";
 import { Cohort, Cohorts } from "../types";
@@ -14,29 +14,54 @@ const formatRowToCohort = (row: any) => {
 }
 
 const getAllCohorts = async (): Promise<Cohorts> => {
-  const response = await runDatabaseQuery(`
-    SELECT A.cohort, A.description, COALESCE(string_agg(B.subject, ',' ORDER BY B.subject), '') as subjects
-    FROM ${COHORT_TABLE_NAME} A
-    LEFT JOIN cohortSubjects B ON A.cohort = B.cohort
-    GROUP BY A.cohort;
-  `);
+  // const query = `
+  //   SELECT A.cohort, A.description, COALESCE(string_agg(B.subject, ',' ORDER BY B.subject), '') as subjects
+  //   FROM ${COHORT_TABLE_NAME} A
+  //   LEFT JOIN cohortSubjects B ON A.cohort = B.cohort
+  //   GROUP BY A.cohort;
+  // `;
+  const query = `
+    SELECT *
+    FROM ${COHORT_TABLE_NAME};
+  `
+  const response = await runDatabaseQuery(query);
+
+  console.log(response);
   const cohorts: Cohorts = {};
-  response.rows.forEach(row => {
-    cohorts[row.cohort] = formatRowToCohort(row)
-  })
+
+  await Promise.all(response.map(async (row: any) => {
+    const query = `
+      SELECT * 
+      FROM cohortSubjects
+      WHERE cohort = '${row.cohort}'
+    `
+    const response = await runDatabaseQuery(query);
+    const subjects = response.map((x: any) => x.subject)
+    cohorts[row.cohort] = {
+      subjects,
+      description: row.description
+    }
+  }))
+
+    // @ts-ignore
+  // response.forEach(row => {
+  //   cohorts[row.cohort] = formatRowToCohort(row)
+  // })
   return cohorts;
 }
 
 const getCohortByName = async (cohortName: string): Promise<Cohort | null> => {
-  const response = await runDatabaseQuery(`
-    SELECT A.cohort, A.description, COALESCE(string_agg(B.subject, ',' ORDER BY B.subject), '') as subjects
-    FROM ${COHORT_TABLE_NAME} A
-    LEFT JOIN cohortSubjects B ON A.cohort = B.cohort
-    WHERE A.cohort = '${cohortName.replace(/'/g, "''")}'
-    GROUP BY A.cohort;
-  `);
-  return response.rows.length
-    ? formatRowToCohort(response.rows[0])
+  // const response = await runDatabaseQuery(`
+  //   SELECT A.cohort, A.description, COALESCE(string_agg(B.subject, ',' ORDER BY B.subject), '') as subjects
+  //   FROM ${COHORT_TABLE_NAME} A
+  //   LEFT JOIN cohortSubjects B ON A.cohort = B.cohort
+  //   WHERE A.cohort = '${cohortName.replace(/'/g, "''")}'
+  //   GROUP BY A.cohort;
+  // `);
+  const cohorts: any = await getAllCohorts();
+  const cohort = cohorts[cohortName];
+  return cohort
+    ? cohort
     : null;
 }
 
@@ -45,22 +70,20 @@ const doesCohortExist = async (cohortName: string): Promise<boolean> => {
     SELECT * FROM ${COHORT_TABLE_NAME} 
     WHERE cohort = '${cohortName.replace(/'/g, "''")}';
   `);
-  return !!response.rows.length;
+  return !!response.length;
 }
 
-// TODO - run parallel the first 2 calls
-// TODO - dont delete jobs, just set to null
 const deleteCohort = async (cohortName: string) => {
   const deleteSubjectsInCohortQuery = `
     DELETE FROM ${COHORT_SUBJECTS_TABLE_NAME} 
     WHERE cohort = '${cohortName.replace(/'/g, "''")}'
   `;
-  await runDatabaseQuery(deleteSubjectsInCohortQuery);
+  await runDatabaseQuery2(deleteSubjectsInCohortQuery);
   const deleteCohortQuery = `
     DELETE FROM ${COHORT_TABLE_NAME} 
     WHERE cohort = '${cohortName.replace(/'/g, "''")}'
   `;
-  await runDatabaseQuery(deleteCohortQuery);
+  await runDatabaseQuery2(deleteCohortQuery);
 }
 
 const saveCohort = async (cohortName: string, description: string) => {
@@ -68,7 +91,7 @@ const saveCohort = async (cohortName: string, description: string) => {
     INSERT INTO ${COHORT_TABLE_NAME} (cohort, description)
     VALUES ('${cohortName.replace(/'/g, "''")}', '${description}');
   `;
-  await runDatabaseQuery(query);
+  await runDatabaseQuery2(query);
 }
 
 const removeSubjects = async (cohortName: string, subjects: string[]) => {
@@ -82,7 +105,7 @@ const removeSubjects = async (cohortName: string, subjects: string[]) => {
     DELETE FROM ${COHORT_SUBJECTS_TABLE_NAME} 
     WHERE cohort = '${cohortName.replace(/'/g, "''")}' AND ${cohortConditions.join(' OR ')}
   `;
-  await runDatabaseQuery(removeSubjectsQuery);
+  await runDatabaseQuery2(removeSubjectsQuery);
 }
 
 const addSubjects = async (cohortName: string, subjects: string[]) => {
@@ -96,7 +119,7 @@ const addSubjects = async (cohortName: string, subjects: string[]) => {
     INSERT INTO ${COHORT_SUBJECTS_TABLE_NAME} (cohort, subject)
     VALUES ${insertValues.join(', ')};
   `;
-  await runDatabaseQuery(query);
+  await runDatabaseQuery2(query);
 }
 
 export default {

@@ -67,7 +67,6 @@ const saveNewJob = async (job: Job) => {
   jobQueue = await database.jobs.get.incomplete();
 }
 
-// TODO - SAVE LOGS
 const setJobToComplete = async (jobId: string, status: JobStatus, error: string | null = null) => {
   const job: Job = {
     ...(await getJobById(jobId)),

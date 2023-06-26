@@ -6,17 +6,50 @@ import cohortsDto from './cohortsDto';
 import logger from "../util/logger";
 import { spawn } from "child_process";
 import { setupListeners } from "../qsmxtInstanceHandler";
+import * as sqlite3 from 'sqlite3';
+import path from "path";
 
-const databasePool = new Pool({
-  user: DATABASE_USER,
-  password: DATABASE_PASSWORD,
-  host: DATABASE_HOST,
-  database: DATABASE_NAME
-});
+// const databasePool = new Pool({
+//   user: DATABASE_USER,
+//   password: DATABASE_PASSWORD,
+//   host: DATABASE_HOST,
+//   database: DATABASE_NAME
+// });
 
-export const runDatabaseQuery = async (query: string) => {
+const db: sqlite3.Database = new sqlite3.Database(path.join(process.cwd() + 'public/database/database'));
+
+export const runDatabaseQuery2 = async (query: string): Promise<any> => {
   try {
-    return await databasePool.query(query);
+    await new Promise((resolve, reject) => {
+      db.run(query, (err: any, rows: any) => {
+        if (err) {
+          console.log(err);
+          reject(err);
+        } else {
+          // console.log(rows);
+          resolve(rows);
+        }
+      });
+    })
+  } catch (err) {
+    logger.red(query);
+    throw err;
+  }
+}
+
+export const runDatabaseQuery = async (query: string): Promise<any> => {
+  try {
+    return await new Promise((resolve, reject) => {
+      db.all(query, (err: any, rows: any) => {
+        if (err) {
+          console.log(err);
+          reject(err);
+        } else {
+          console.log(rows);
+          resolve(rows);
+        }
+      });
+    })
   } catch (err) {
     logger.red(query);
     throw err;
@@ -24,7 +57,7 @@ export const runDatabaseQuery = async (query: string) => {
 }
 
 const createSubjectsTable = async () => {
-  await runDatabaseQuery(`
+  await runDatabaseQuery2(`
     CREATE TABLE IF NOT EXISTS subjects (
       subject TEXT PRIMARY KEY,
       dataTree TEXT NOT NULL,
@@ -36,7 +69,7 @@ const createSubjectsTable = async () => {
 }
 
 const createCohortsTable = async () => {
-  await runDatabaseQuery(`
+  await runDatabaseQuery2(`
     CREATE TABLE IF NOT EXISTS cohorts (
       cohort TEXT,
       description TEXT,
@@ -47,7 +80,7 @@ const createCohortsTable = async () => {
 }
 
 const createCohortSubjectsTable = async () => {
-  await runDatabaseQuery(`
+  await runDatabaseQuery2(`
     CREATE TABLE IF NOT EXISTS cohortSubjects (
       cohort TEXT,
       subject TEXT,
@@ -58,10 +91,8 @@ const createCohortSubjectsTable = async () => {
   `)
   console.log('Created table cohortSubjects');
 }
-
-// TODO - remove cohort
 const createJobsTable = async () => {
-  await runDatabaseQuery(`
+  await runDatabaseQuery2(`
     CREATE TABLE IF NOT EXISTS jobs (
       id VARCHAR(100) PRIMARY KEY,
       description TEXT,
@@ -78,22 +109,22 @@ const createJobsTable = async () => {
   console.log('Created table jobs');
 }
 
-const startDatabase = async () => {
-  const databaseInitiator: any = spawn('sudo', ['service',  'postgresql', 'start']);
-  await new Promise((resolve, reject) => {
-    setupListeners(databaseInitiator,reject);
-    databaseInitiator.stdout.on('data', (data: any) => {
-      if (data.toString().includes('done')) {
-        resolve(null);
-      }
-    });
-  })
-  databaseInitiator.kill();
-  logger.green('Started database');
-}
+// const startDatabase = async () => {
+//   const databaseInitiator: any = spawn('sudo', ['service',  'postgresql', 'start']);
+//   await new Promise((resolve, reject) => {
+//     setupListeners(databaseInitiator,reject);
+//     databaseInitiator.stdout.on('data', (data: any) => {
+//       if (data.toString().includes('done')) {
+//         resolve(null);
+//       }
+//     });
+//   })
+//   databaseInitiator.kill();
+//   logger.green('Started database');
+// }
 
 const setupDatabase = async () => {
-  await startDatabase();
+  // await startDatabase();
   await createSubjectsTable();
   await createCohortsTable();
   await createCohortSubjectsTable();

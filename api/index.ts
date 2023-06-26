@@ -2,7 +2,7 @@ import restApi from "./src/restApi";
 import databaseClient from "./src/databaseClient";
 import logger from "./src/util/logger";
 import qsmxtInstanceHandler from "./src/qsmxtInstanceHandler";
-import { BIDS_FOLDER, DICOMS_FOLDER, LOGS_FOLDER, QSM_FOLDER } from "./src/constants";
+import { BIDS_FOLDER, DATABASE_FOLDER, DICOMS_FOLDER, LOGS_FOLDER, QSM_FOLDER } from "./src/constants";
 import fs from "fs";
 import { JobStatus } from "./src/types";
 import jobHandler from "./src/jobHandler";
@@ -25,7 +25,7 @@ const setup = async () => {
   try {
     const serverPromise = restApi.create();
     const databaseSetupPromise = databaseClient.setup();
-    [DICOMS_FOLDER, BIDS_FOLDER, QSM_FOLDER, LOGS_FOLDER].forEach((folder: string) => {
+    [DATABASE_FOLDER, DICOMS_FOLDER, BIDS_FOLDER, QSM_FOLDER, LOGS_FOLDER].forEach((folder: string) => {
       if (!fs.existsSync(folder)) {
         fs.mkdirSync(folder);
       }

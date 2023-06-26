@@ -4,7 +4,6 @@ import { DICOMS_FOLDER } from "../constants";
 import logger from "../util/logger";
 import { runQsmxtCommand } from ".";
 
-// TODO - DELETE ORIGINALS PARAMETER???
 const sortDicoms = async (params: DicomSortParameters) => {
   const { copyPath, usePatientNames, useSessionDates, checkAllFiles } = params
   logger.green("Starting dicom sort");

@@ -20,6 +20,7 @@ const convertDicoms = async (parameters: DicomConvertParameters) => {
     return !fileName.includes('.') && !fileName.includes('README') 
   });
   const newSubjects = subjectFolders.filter(folderName => {
+    // @ts-ignore
     return !allSavedSubjectsNames.find(subject => subject === folderName);
   });
   await Promise.all(newSubjects.map(async (subject) => {
