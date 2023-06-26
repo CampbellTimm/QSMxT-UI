@@ -16,7 +16,8 @@ import path from "path";
 //   database: DATABASE_NAME
 // });
 
-const db: sqlite3.Database = new sqlite3.Database(path.join(process.cwd() + 'public/database/database'));
+const databasepath = path.join(process.cwd() + '/public/database/database');
+const db: sqlite3.Database = new sqlite3.Database(databasepath);
 
 export const runDatabaseQuery2 = async (query: string): Promise<any> => {
   try {

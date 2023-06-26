@@ -89,6 +89,7 @@ dist
 /api/public/dicoms/*
 /api/public/qsm/*
 /api/public/logs/*
+/api/public/database/*
 
 # Gatsby files
 .cache/
