@@ -21,9 +21,9 @@ $ npm --version
 
 # Database
 ```bash
+cd api/
 sudo apt-get update
 sudo apt-get install libsqlite3-dev
-npm uninstall sqlite3
 npm install sqlite3 --build-from-source
 ```
 
