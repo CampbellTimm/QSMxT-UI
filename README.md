@@ -34,9 +34,10 @@ Attach visual studio to docker instance and forward port 4000 to the instance
 ```bash
 cd api/
 npm install
+npm install -g ts-node
 ```
 
-To run: `cd build/ && python3 -m http.server 8080`
+To run: `ts-node index.ts`
 
 # Frontend
 
@@ -47,5 +48,5 @@ cd frontend
 npm install
 ```
 
-To run: `npm start`
+To run: `cd build/ && python3 -m http.server 8080`
 

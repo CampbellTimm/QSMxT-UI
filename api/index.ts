@@ -6,6 +6,7 @@ import { BIDS_FOLDER, DATABASE_FOLDER, DICOMS_FOLDER, LOGS_FOLDER, QSM_FOLDER } 
 import fs from "fs";
 import { JobStatus } from "./src/types";
 import jobHandler from "./src/jobHandler";
+import open from 'open';
 
 const delteInProgessJobs = async () => {
   const inProgessJobs = await databaseClient.jobs.get.incomplete();
@@ -35,6 +36,7 @@ const setup = async () => {
     await Promise.all([jobHandler.setup(server), delteInProgessJobs()])
     restApi.setStatus('ok');
     logger.green("Completed Setup");
+    open('http://localhost:8080');
   } catch (err) {
     console.log(err);
   }
