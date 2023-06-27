@@ -2,6 +2,10 @@
 
 echo "[DEBUG] In setup.bash"
 
+echo "[DEBUG] Checking versions..."
+echo "npm version: `npm --version`"
+echo "node version: `node --version`"
+
 echo "[DEBUG] FRONTEND SETUP"
 cd frontend
 
@@ -9,7 +13,7 @@ echo "[DEBUG] Running 'npm install' in `pwd`:"
 npm install
 
 echo "[DEBUG] Running 'npm build' in `pwd`:"
-npm build
+npm run build
 
 echo "[DEBUG] API SETUP"
 cd ../api
