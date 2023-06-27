@@ -6,6 +6,9 @@ echo "[DEBUG] Checking versions..."
 echo "npm version: `npm --version`"
 echo "node version: `node --version`"
 
+echo "[DEBUG] npm i --lockfile-version 3"
+npm i --lockfile-version 3
+
 echo "[DEBUG] FRONTEND SETUP"
 cd frontend
 
