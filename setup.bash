@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e # exit on error
 
 echo "[DEBUG] In setup.bash"
 
