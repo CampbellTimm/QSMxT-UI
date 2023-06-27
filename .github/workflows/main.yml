@@ -1,4 +1,4 @@
-name: qsm pipeline test
+name: Test setup.bash
 on:
   workflow_dispatch:
   repository_dispatch:
